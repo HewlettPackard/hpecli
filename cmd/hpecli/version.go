@@ -3,9 +3,9 @@
 package main
 
 import (
+	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/version"
 	"github.com/spf13/cobra"
-	"github.hpe.com/blaine-southam/hpecli/pkg/logger"
-	"github.hpe.com/blaine-southam/hpecli/pkg/version"
 )
 
 var verbose bool

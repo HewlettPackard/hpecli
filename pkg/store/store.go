@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.hpe.com/blaine-southam/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/logger"
 )
 
 // StorageEngine defines the backend storage engine to be used

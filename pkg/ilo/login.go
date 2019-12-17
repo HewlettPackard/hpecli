@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/store"
 	"github.com/spf13/cobra"
-	"github.hpe.com/blaine-southam/hpecli/pkg/logger"
-	"github.hpe.com/blaine-southam/hpecli/pkg/store"
 )
 
 var (

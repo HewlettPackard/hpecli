@@ -1,6 +1,6 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-module github.hpe.com/blaine-southam/hpecli
+module github.com/HewlettPackard/hpecli
 
 go 1.13
 
