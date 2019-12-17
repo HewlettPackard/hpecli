@@ -11,5 +11,4 @@ require (
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/rapidloop/skv v0.0.0-20180909015525-9def2caac4cc
 	github.com/spf13/cobra v0.0.5
-	github.com/stmcginnis/gofish v0.2.0
 )
