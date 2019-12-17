@@ -1,4 +1,4 @@
-![CircleCI](https://img.shields.io/circleci/build/github/HewlettPackard/hpecli?style=flat-square)
+[![Build Status](https://img.shields.io/circleci/build/github/HewlettPackard/hpecli?style=flat-square)](https://circleci.com/gh/HewlettPackard/hpecli)
 
 # hpecli
 
