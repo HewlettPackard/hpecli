@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/HewlettPackard/hpecli/pkg/ilo"
+	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/spf13/cobra"
-	"github.hpe.com/blaine-southam/hpecli/pkg/ilo"
-	"github.hpe.com/blaine-southam/hpecli/pkg/logger"
 )
 
 func main() {
