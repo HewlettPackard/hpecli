@@ -1,4 +1,9 @@
 [![Build Status](https://img.shields.io/circleci/build/github/HewlettPackard/hpecli?style=flat-square)](https://circleci.com/gh/HewlettPackard/hpecli)
+[![Quality Gate Status](https://img.shields.io/sonar/quality_gate/HewlettPackard_hpecli?server=https%3A%2F%2Fsonarcloud.io&style=flat-square)](https://sonarcloud.io/dashboard?id=HewlettPackard_hpecli)
+[![Bug Status](https://img.shields.io/sonar/bugs/HewlettPackard_hpecli?server=https%3A%2F%2Fsonarcloud.io&style=flat-square)](https://sonarcloud.io/dashboard?id=HewlettPackard_hpecli)
+[![Code Smells](https://img.shields.io/sonar/code_smells/HewlettPackard_hpecli?server=https%3A%2F%2Fsonarcloud.io&style=flat-square)](https://sonarcloud.io/dashboard?id=HewlettPackard_hpecli)
+[![Vulnerabilities](https://img.shields.io/sonar/vulnerabilities/HewlettPackard_hpecli?server=https%3A%2F%2Fsonarcloud.io&style=flat-square)](https://sonarcloud.io/dashboard?id=HewlettPackard_hpecli)
+
 
 # hpecli
 
