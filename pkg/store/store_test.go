@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+const aValue = "this.is.a.value"
+
 func TestKeystoreLocation(t *testing.T) {
 	if keystore != "" {
 		t.Fatal("keystore shouldn't have a value until Open as been called")
@@ -187,15 +189,11 @@ func TestGoroutines(t *testing.T) {
 }
 
 func BenchmarkPut(b *testing.B) {
-	os.Remove("skv-bench.db")
-	db, err := NewStore(SKV)
-	if err != nil {
-		b.Fatal(err)
-	}
+	db := openForBenchmark(b)
 	defer db.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := db.Put(fmt.Sprintf("key%d", i), "this.is.a.value"); err != nil {
+		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -203,15 +201,11 @@ func BenchmarkPut(b *testing.B) {
 }
 
 func BenchmarkPutGet(b *testing.B) {
-	os.Remove("skv-bench.db")
-	db, err := NewStore(SKV)
-	if err != nil {
-		b.Fatal(err)
-	}
+	db := openForBenchmark(b)
 	defer db.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := db.Put(fmt.Sprintf("key%d", i), "this.is.a.value"); err != nil {
+		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -225,15 +219,11 @@ func BenchmarkPutGet(b *testing.B) {
 }
 
 func BenchmarkPutDelete(b *testing.B) {
-	os.Remove("skv-bench.db")
-	db, err := NewStore(SKV)
-	if err != nil {
-		b.Fatal(err)
-	}
+	db := openForBenchmark(b)
 	defer db.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := db.Put(fmt.Sprintf("key%d", i), "this.is.a.value"); err != nil {
+		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -250,6 +240,15 @@ func openForTest(t *testing.T) Store {
 	db, err := NewStore(SKV)
 	if err != nil {
 		t.Fatal(err)
+	}
+	return db
+}
+
+func openForBenchmark(b *testing.B) Store {
+	os.Remove("skv-bench.db")
+	db, err := NewStore(SKV)
+	if err != nil {
+		b.Fatal(err)
 	}
 	return db
 }

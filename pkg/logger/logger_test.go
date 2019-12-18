@@ -24,9 +24,11 @@ import (
 )
 
 const (
-	format          = "%v, %v, %v, all eyes on me!"
-	formatExp       = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.* \[(critical|warning|info|debug)\]\s* \d, \d, \d, all eyes on me!`
-	formatWOTimeExp = `\d, \d, \d, all eyes on me!`
+	format             = "%v, %v, %v, all eyes on me!"
+	formatExp          = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.* \[(critical|warning|info|debug)\]\s* \d, \d, \d, all eyes on me!`
+	formatWOTimeExp    = `\d, \d, \d, all eyes on me!`
+	errorFailedCompile = "Failed to compile regexp '%v': %v"
+	errorInfoPattern   = "Info should produce a pattern '%v' but produces: %v"
 )
 
 var (
@@ -39,7 +41,7 @@ func TestAlways(t *testing.T) {
 	g := captureLoggerOutput(Always, format, a)
 
 	if err != nil {
-		t.Fatalf("Failed to compile regexp '%v': %v", e.String(), err)
+		t.Fatalf(errorFailedCompile, e.String(), err)
 	}
 
 	if !e.MatchString(g) {
@@ -55,7 +57,7 @@ func TestCritical(t *testing.T) {
 	g := captureLoggerOutput(Critical, format, a)
 
 	if err != nil {
-		t.Fatalf("Failed to compile regexp '%v': %v", e.String(), err)
+		t.Fatalf(errorFailedCompile, e.String(), err)
 	}
 
 	if !e.MatchString(g) {
@@ -71,11 +73,11 @@ func TestWarning(t *testing.T) {
 	g := captureLoggerOutput(Warning, format, a)
 
 	if err != nil {
-		t.Fatalf("Failed to compile regexp '%v': %v", e.String(), err)
+		t.Fatalf(errorFailedCompile, e.String(), err)
 	}
 
 	if !e.MatchString(g) {
-		t.Fatalf("Info should produce a pattern '%v' but produces: %v", e.String(), g)
+		t.Fatalf(errorInfoPattern, e.String(), g)
 	}
 }
 
@@ -87,11 +89,11 @@ func TestInfo(t *testing.T) {
 	g := captureLoggerOutput(Info, format, a)
 
 	if err != nil {
-		t.Fatalf("Failed to compile regexp '%v': %v", e.String(), err)
+		t.Fatalf(errorFailedCompile, e.String(), err)
 	}
 
 	if !e.MatchString(g) {
-		t.Fatalf("Info should produce a pattern '%v' but produces: %v", e.String(), g)
+		t.Fatalf(errorInfoPattern, e.String(), g)
 	}
 }
 
@@ -103,11 +105,11 @@ func TestDebug(t *testing.T) {
 	g := captureLoggerOutput(Debug, format, a)
 
 	if err != nil {
-		t.Fatalf("Failed to compile regexp '%v': %v", e.String(), err)
+		t.Fatalf(errorFailedCompile, e.String(), err)
 	}
 
 	if !e.MatchString(g) {
-		t.Fatalf("Info should produce a pattern '%v' but produces: %v", e.String(), g)
+		t.Fatalf(errorInfoPattern, e.String(), g)
 	}
 }
 
