@@ -1,6 +1,6 @@
 // This is a modified copy of the skv test file.
 // Original file is copyright (c) 2016 RapidLoop and
-// released under the  MIT licensed at avaiable at:
+// released under the  MIT licensed at available at:
 // https://github.com/rapidloop/skv/blob/master/skv_test.go
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
