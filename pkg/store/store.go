@@ -78,7 +78,7 @@ var (
 	keystore = ""
 )
 
-// Open is what should generaly be used to get access to the
+// Open is what should generally be used to get access to the
 // store.  There is currently a single backend - so no need to specify
 func Open() (Store, error) {
 	return NewStore(SKV)
