@@ -8,6 +8,7 @@ import (
 
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/update"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,9 @@ func main() {
 	cobra.OnInitialize(func() {
 		logger.Color = true
 		logger.SetLogLevel(*logLevel)
+		if update.IsUpdateAvailable() {
+			logger.Always("  An updated version of the CLI is available")
+		}
 	})
 
 	if err := rootCmd.Execute(); err != nil {
