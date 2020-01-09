@@ -8,7 +8,7 @@ import (
 
 func init() {
 	Cmd.AddCommand(cmdCloudVolumesLogin)
-	//Cmd.AddCommand(cmdCloudVolumesGet)
+	Cmd.AddCommand(cmdCloudVolumesGet)
 }
 
 // Cmd represents the cloud volumes command

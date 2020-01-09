@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	cmdCloudVolumesLogin.Flags().StringVar(&host, "host", "", "ilo ip address")
+	cmdCloudVolumesLogin.Flags().StringVar(&host, "host", "", "Cloud Volumes portal")
 	cmdCloudVolumesLogin.Flags().StringVarP(&username, "username", "u", "", "ilo username")
 	cmdCloudVolumesLogin.Flags().StringVarP(&password, "password", "p", "", "ilo passowrd")
 }
@@ -31,7 +31,7 @@ func init() {
 // getCmd represents the get command
 var cmdCloudVolumesLogin = &cobra.Command{
 	Use:   "login",
-	Short: "Login to Cloud Volumes: hpecli ilo login",
+	Short: "Login to Cloud Volumes: hpecli cloudvolumes login",
 	RunE:  runLogin,
 }
 
@@ -62,8 +62,8 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		password = string(pass)
 	}
 	
-	fmt.Println("username", username)
-	fmt.Println("password", password)
+	//fmt.Println("username", username)
+	//fmt.Println("password", password)
 
 	fmt.Println(fmt.Sprintf("Attempting login with user: %v, at: %v", username, host))
 
@@ -83,8 +83,6 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	client := &http.Client{Transport: tr}
 	// println("ready to call")
 	response, err := client.Do(request)
-	println("called")
-	println("response", response.StatusCode)
 	if err != nil {
 		logger.Debug("unable to login %v", err)
 		return fmt.Errorf("%v", err)
@@ -101,7 +99,6 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		json.Unmarshal(body, &result)
 		token = string(result["token"])
 
-		// fmt.Println(token, location)
 		fmt.Println("Logged in", token)
 	}
 
