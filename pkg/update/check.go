@@ -17,8 +17,17 @@ const versionPath = "/HewlettPackard/hpecli/master/site/release-version.json"
 
 var versionURL = fmt.Sprintf("https://%s%s", versionHost, versionPath)
 
+// cache retrieved response request
+var response *latest.CheckResponse
+
 // IsUpdateAvailable checks if a later version is avaialbe of the CLI binary
 func IsUpdateAvailable() bool {
+	// Since the CLI is a short-lived process.. only retrieve it once per instance.
+	// If we haven't retrieved it, then go get it.  Once we get a copy, we then
+	// store a cached copy and never get it again for the life of the CLI instance.
+	if response != nil {
+		return response.Outdated
+	}
 	json := &latest.JSON{
 		URL: versionURL,
 	}
@@ -41,6 +50,8 @@ func IsUpdateAvailable() bool {
 	logger.Debug(fmt.Sprintf("outdate=%v", res.Outdated))
 	logger.Debug(fmt.Sprintf("latest=%v", res.Latest))
 	logger.Debug(fmt.Sprintf("new=%v", res.New))
+	// cache a copy
+	response = res
 	return res.Outdated
 }
 

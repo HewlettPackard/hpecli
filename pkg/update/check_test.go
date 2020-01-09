@@ -11,9 +11,7 @@ import (
 	"github.com/tcnksm/go-latest"
 )
 
-const v1 = "v0.0.1"
-
-func TestIsUpdateAvailable(t *testing.T) {
+func TestCheckUpdate(t *testing.T) {
 
 	cases := []struct {
 		name      string
@@ -47,17 +45,13 @@ func TestIsUpdateAvailable(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mux := http.NewServeMux()
-			server := httptest.NewServer(mux)
-			defer server.Close()
-
-			versionURL = fmt.Sprintf("%s%s", server.URL, versionPath)
-
-			mux.HandleFunc(versionPath, func(w http.ResponseWriter, r *http.Request) {
+			response = nil
+			server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 				fmt.Fprintf(w, c.remoteVer)
 			})
+			defer server.Close()
 
 			json := &latest.JSON{
 				URL: versionURL,
@@ -70,6 +64,62 @@ func TestIsUpdateAvailable(t *testing.T) {
 			validate(t, got, c.want)
 		})
 	}
+}
+
+func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
+	response = nil
+	cc := 0
+
+	server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"version":"0.0.1"}`)
+		cc++
+		if cc > 1 {
+			t.Fatal("Expected to only recieve a single http request, but recieved 2")
+		}
+	})
+	defer server.Close()
+
+	// verify respnose is nil before initial get
+	if response != nil {
+		t.Fatal("response to be unititialed before request")
+	}
+
+	got := IsUpdateAvailable()
+	if got != true {
+		t.Fatal("expected to see update available, but reported as not available")
+	}
+	// make sure response got populated
+	if response == nil {
+		t.Fatal("response to be ititialed after request")
+	}
+	// save to check later
+	r := response
+
+	got = IsUpdateAvailable()
+
+	// see if it is the same cached copy
+	if r != response {
+		t.Fatal("Expected to get the same copy on the second get request but didn't")
+	}
+}
+
+func TestErrorReturnsFalse(t *testing.T) {
+	response = nil
+	server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, `{"version":"0.0.1"}`)
+	})
+
+	got := IsUpdateAvailable()
+	// server responding with 404 should reply "false" - in that it can't
+	// detect an updated version
+	if got != false {
+		t.Fatal("Request error should have returned update not available")
+	}
+	server.Close()
 }
 
 func validate(t *testing.T, got *latest.CheckResponse, want *latest.CheckResponse) {
@@ -85,4 +135,12 @@ func validate(t *testing.T, got *latest.CheckResponse, want *latest.CheckRespons
 	if got.New != want.New {
 		t.Fatal(fmt.Sprintf("got: %v, wanted: %v", got.New, want.New))
 	}
+}
+
+func newTestServer(h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+	versionURL = fmt.Sprintf("%s%s", server.URL, versionPath)
+	mux.HandleFunc(versionPath, h)
+	return server
 }
