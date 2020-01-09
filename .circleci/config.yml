@@ -9,8 +9,6 @@ jobs:
       - image: circleci/golang:1.13.5
 
     working_directory: /go/src/github.com/HewlettPackard/hpecli
-    environment:
-      TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
       - run: mkdir -p $TEST_RESULTS
@@ -19,7 +17,7 @@ jobs:
       - run: |
           go test .\... -v -coverprofile=cp.out
           go tool cover -html=cp.out -o coverage.html
-          mv coverage.html $TEST_RESULTS
+          mv coverage.html /tmp/test-results
       - run: ./build.sh
       - store_test_results:
-          path: $TEST_RESULTS
+          path: /tmp/test-results
