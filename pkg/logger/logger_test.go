@@ -113,6 +113,120 @@ func TestDebug(t *testing.T) {
 	}
 }
 
+func TestLogLevelToStrings(t *testing.T) {
+	cases := []struct {
+		name string
+		t    LogLevel
+	}{
+		{
+			name: "debug",
+			t:    DebugLevel,
+		},
+		{
+			name: "info",
+			t:    InfoLevel,
+		},
+		{
+			name: "warning",
+			t:    WarningLevel,
+		},
+		{
+			name: "critical",
+			t:    CriticalLevel,
+		},
+		{
+			name: "always",
+			t:    AlwaysLevel,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := c.t.String()
+			want := c.name
+			if got != want {
+				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", got, want)
+			}
+		})
+	}
+}
+
+func TestSetLogLevel(t *testing.T) {
+	cases := []struct {
+		name string
+		t    LogLevel
+	}{
+		{
+			name: "debug",
+			t:    DebugLevel,
+		},
+		{
+			name: "info",
+			t:    InfoLevel,
+		},
+		{
+			name: "warning",
+			t:    WarningLevel,
+		},
+		{
+			name: "critical",
+			t:    CriticalLevel,
+		},
+		{
+			name: "always",
+			t:    AlwaysLevel,
+		},
+		{
+			// defaults to warning
+			name: "unknown",
+			t:    WarningLevel,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			SetLogLevel(c.name)
+			got := Level
+			want := c.t
+			if got != want {
+				t.Fatalf("Didn't set the expected result.  got=%s, want=%s", got, want)
+			}
+		})
+	}
+
+}
+
+func TestCriticalRedString(t *testing.T) {
+	Level = CriticalLevel
+	TestMode = true
+
+	e, err := regexp.Compile(formatWOTimeExp)
+	g := captureLoggerOutput(Critical, format, a)
+
+	if err != nil {
+		t.Fatalf(errorFailedCompile, e.String(), err)
+	}
+
+	if !e.MatchString(g) {
+		t.Fatalf("Critical should produce a pattern '%v' but produces: %v", e.String(), g)
+	}
+}
+
+func TestColorWritesStdOut(t *testing.T) {
+	Level = CriticalLevel
+	TestMode = false
+
+	e, err := regexp.Compile(formatWOTimeExp)
+	g := captureLoggerOutput(Critical, format, a)
+
+	if err != nil {
+		t.Fatalf(errorFailedCompile, e.String(), err)
+	}
+	if g != "" {
+		t.Fatal("output should not be capture.  output should be written to stdout")
+	}
+}
+
 func captureLoggerOutput(l Logger, format string, a []interface{}) string {
 	b := new(bytes.Buffer)
 	l(format, append(a, b)...)
