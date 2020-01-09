@@ -15,7 +15,7 @@ jobs:
       - run: go get -v -t -d ./...
 
       - run: |
-          go test .\... -coverprofile=cp.out
+          go test ./... -coverprofile=cp.out
           go tool cover -html=cp.out -o coverage.html
           mv coverage.html /tmp/test-results/
       - run: ./build.sh
