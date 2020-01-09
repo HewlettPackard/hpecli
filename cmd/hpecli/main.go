@@ -9,6 +9,8 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/HewlettPackard/hpecli/pkg/update"
+	"github.com/HewlettPackard/hpecli/pkg/cloudvolumes"
+	
 	"github.com/spf13/cobra"
 )
 
@@ -36,5 +38,6 @@ func main() {
 
 func addCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(ilo.Cmd)
+	rootCmd.AddCommand(cloudvolumes.Cmd)
 	rootCmd.AddCommand(versionCmd)
 }

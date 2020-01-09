@@ -10,6 +10,7 @@ require (
 	github.com/google/go-github v17.0.0+incompatible // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.2.0 // indirect
+	github.com/howeyc/gopass v0.0.0-20190910152052-7cb4b85ec19c
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/rapidloop/skv v0.0.0-20180909015525-9def2caac4cc
