@@ -11,7 +11,7 @@ jobs:
     working_directory: /go/src/github.com/HewlettPackard/hpecli
     steps:
       - checkout
-      - run: mkdir -p $TEST_RESULTS
+      - run: mkdir -p /tmp/test-results
       - run: go get -v -t -d ./...
 
       - run: |
