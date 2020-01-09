@@ -11,13 +11,13 @@ jobs:
     working_directory: /go/src/github.com/HewlettPackard/hpecli
     steps:
       - checkout
-      - run: mkdir -p /tmp/test-results
+      - run: mkdir -p /tmp/test-results/
       - run: go get -v -t -d ./...
 
       - run: |
-          go test .\... -v -coverprofile=cp.out
+          go test .\... -coverprofile=cp.out
           go tool cover -html=cp.out -o coverage.html
-          mv coverage.html /tmp/test-results
+          mv coverage.html /tmp/test-results/
       - run: ./build.sh
       - store_test_results:
-          path: /tmp/test-results
+          path: /tmp/test-results/
