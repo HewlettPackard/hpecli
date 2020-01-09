@@ -15,10 +15,11 @@ jobs:
       - checkout
       - run: mkdir -p $TEST_RESULTS
       - run: go get -v -t -d ./...
+
       - run: |
           go test .\... -v -coverprofile=cp.out
           go tool cover -html=cp.out -o coverage.html
           mv coverage.html $TEST_RESULTS
       - run: ./build.sh
-      - store_artifacts:
-        path: $TEST_RESULTS
+      - store_test_results:
+          path: $TEST_RESULTS
