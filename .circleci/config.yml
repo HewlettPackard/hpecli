@@ -19,5 +19,5 @@ jobs:
           go tool cover -html=cp.out -o coverage.html
           mv coverage.html /tmp/test-results/
       - run: ./build.sh
-      - store_test_results:
+      - store_artifacts:
           path: /tmp/test-results/
