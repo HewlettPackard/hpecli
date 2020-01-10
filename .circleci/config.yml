@@ -27,6 +27,12 @@ jobs:
       - run: go test ./... -short -coverprofile=coverage/go/coverage.out
       - run: ./build.sh
       - run: |
+          ls -la
+          ls cmd/hpecli
+          ls pkg
+          ls /go/src/github.com/HewlettPackard/hpecli/pkg/version/version.go
+      - run: |
           export SONAR_SCANNER_VERSION=4.2.0.1873
           export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-          $SONAR_SCANNER_HOME/bin/sonar-scanner
+
+          $SONAR_SCANNER_HOME/bin/sonar-scanner -X
