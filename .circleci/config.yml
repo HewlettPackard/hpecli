@@ -22,7 +22,7 @@ jobs:
             export PATH=$SONAR_SCANNER_HOME/bin:$PATH
             export SONAR_SCANNER_OPTS="-server"
       - checkout
-      - run: mkdir -p coverage/go/coverage.out
+      - run: mkdir -p coverage/go/
       - run: go get -v -t -d ./...
       - run: go test ./... -short -coverprofile=coverage/go/coverage.out
       - run: ./build.sh
@@ -33,3 +33,4 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=1625ff6e233cd521f29d008e995bbbe432c4b0bf
+            -Dsonar.go.coverage.reportPaths=coverage/go/coverage.out
