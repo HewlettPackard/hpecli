@@ -12,7 +12,7 @@ jobs:
     steps:
       - checkout
 
-      # specify any bash command here prefixed with `run: `
+      - run: mkdir -p bin
       - run: go get -v -t -d ./...
       - run: go test ./... -short -coverprofile=bin/cov.out
       - run: ./build.sh
