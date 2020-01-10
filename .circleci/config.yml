@@ -27,7 +27,7 @@ jobs:
       - run: go get -v -t -d ./...
       - run: go test ./... -short -coverprofile=coverage/go/coverage.out
       - run: ./build.sh
-      - run: docker -e SONAR_HOST_URL=http://sonarcloud.io --user="$(id -u):$(id -g)" -it -v "$(PWD):/usr/src" sonarsource/sonar-scanner-cli 
+      - run: docker run -e SONAR_HOST_URL=http://sonarcloud.io --user="$(id -u):$(id -g)" -it -v "$(PWD):/usr/src" sonarsource/sonar-scanner-cli 
 #      - run: |
 #          export SONAR_SCANNER_VERSION=4.2.0.1873
 #          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
