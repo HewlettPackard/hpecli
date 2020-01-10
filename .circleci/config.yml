@@ -29,10 +29,4 @@ jobs:
       - run: |
           export SONAR_SCANNER_VERSION=4.2.0.1873
           export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-          $SONAR_SCANNER_HOME/bin/sonar-scanner \
-            -Dsonar.projectKey=HewlettPackard_hpecli \
-            -Dsonar.organization=hewlettpackard \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=1625ff6e233cd521f29d008e995bbbe432c4b0bf
-            -Dsonar.go.coverage.reportPaths=coverage/go/coverage.out
+          $SONAR_SCANNER_HOME/bin/sonar-scanner
