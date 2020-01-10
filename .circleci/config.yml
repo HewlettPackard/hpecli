@@ -9,25 +9,25 @@ jobs:
       - image: circleci/golang:1.13.5
     working_directory: /go/src/github.com/HewlettPackard/hpecli    
     steps:
-      - run:
-          name: Install SonarScanner
-          command: |
-            export SONAR_SCANNER_VERSION=4.2.0.1873
-            export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-            rm -rf $SONAR_SCANNER_HOME
-            mkdir -p $SONAR_SCANNER_HOME
-            curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
-            unzip $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-            rm $HOME/.sonar/sonar-scanner.zip
-            export PATH=$SONAR_SCANNER_HOME/bin:$PATH
-            export SONAR_SCANNER_OPTS="-server"
+#      - run:
+#          name: Install SonarScanner
+#          command: |
+#            export SONAR_SCANNER_VERSION=4.2.0.1873
+#            export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+#            rm -rf $SONAR_SCANNER_HOME
+#            mkdir -p $SONAR_SCANNER_HOME
+#            curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+#            unzip $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+#            rm $HOME/.sonar/sonar-scanner.zip
+#            export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+#            export SONAR_SCANNER_OPTS="-server"
       - checkout
       - run: mkdir -p coverage/go/
       - run: go get -v -t -d ./...
       - run: go test ./... -short -coverprofile=coverage/go/coverage.out
       - run: ./build.sh
-      - run: |
-          export SONAR_SCANNER_VERSION=4.2.0.1873
-          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-
-          $SONAR_SCANNER_HOME/bin/sonar-scanner
+      - run: docker run sonarsource/sonar-scanner-cli 
+#      - run: |
+#          export SONAR_SCANNER_VERSION=4.2.0.1873
+#          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+#          $SONAR_SCANNER_HOME/bin/sonar-scanner
