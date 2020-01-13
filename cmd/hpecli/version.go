@@ -14,15 +14,25 @@ var verbose bool
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Displays version of hpecli",
-	Run: func(_ *cobra.Command, _ []string) {
-		if verbose || logger.Level >= logger.DebugLevel {
-			logger.Always(version.GetFull())
-		} else {
-			logger.Always(version.Get())
-		}
-	},
+	Run:   run,
 }
 
 func init() {
 	versionCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose version")
+}
+
+func run(_ *cobra.Command, _ []string) {
+	v := versionOutput()
+	logger.Always(v)
+}
+
+func versionOutput() string {
+	if isFullVersion() {
+		return version.GetFull()
+	}
+	return version.Get()
+}
+
+func isFullVersion() bool {
+	return verbose || logger.Level >= logger.DebugLevel
 }
