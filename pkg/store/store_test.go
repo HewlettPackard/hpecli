@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"reflect"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -20,14 +22,13 @@ import (
 const aValue = "this.is.a.value"
 
 func TestKeystoreLocation(t *testing.T) {
-	if keystore != "" {
-		t.Fatal("keystore shouldn't have a value until Open as been called")
-	}
+	// ensure keystore is empty for this test
+	keystore = ""
 	db, err := NewStore(SKV)
+	defer cleanupStore(db, keystore)
 	if err != nil {
 		t.Fatal(err)
 	}
-	db.Close()
 	if keystore == "" {
 		t.Fatal("keystore should have a value after Open as been called")
 	}
@@ -35,7 +36,7 @@ func TestKeystoreLocation(t *testing.T) {
 
 func TestBasic(t *testing.T) {
 	db := openForTest(t)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	// put a key
 	if err := db.Put("key1", "value1"); err != nil {
 		t.Fatal(err)
@@ -77,7 +78,7 @@ func TestBasic(t *testing.T) {
 
 func TestMoreNotFoundCases(t *testing.T) {
 	db := openForTest(t)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	var val string
 	if err := db.Get("key1", &val); err != ErrNotFound {
 		t.Fatal(err)
@@ -121,7 +122,7 @@ func TestRichTypes(t *testing.T) {
 
 func testGetPut(t *testing.T, inval interface{}, outval interface{}) {
 	db := openForTest(t)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	input, err := json.Marshal(inval)
 	if err != nil {
 		t.Fatal(err)
@@ -146,7 +147,7 @@ func testGetPut(t *testing.T, inval interface{}, outval interface{}) {
 
 func TestNil(t *testing.T) {
 	db := openForTest(t)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	if err := db.Put("key1", nil); err != ErrBadValue {
 		t.Fatalf("got %v, expected ErrBadValue", err)
 	}
@@ -161,7 +162,7 @@ func TestNil(t *testing.T) {
 
 func TestGoroutines(t *testing.T) {
 	db := openForTest(t)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	rand.Seed(time.Now().UnixNano())
 	var wg sync.WaitGroup
 	for i := 0; i < 1000; i++ {
@@ -188,9 +189,60 @@ func TestGoroutines(t *testing.T) {
 	wg.Wait()
 }
 
+func TestNewStore(t *testing.T) {
+	db, err := Open()
+	defer cleanupStore(db, keystore)
+	if err != nil {
+		t.Fatal("No error expected when opeing default store")
+	}
+	// ensure not nil
+	if db == nil {
+		t.Fatal("returned store was nil and shouldn't be")
+	}
+
+	// check defaults to skvstore type
+	got := reflect.TypeOf(db).String()
+	want := reflect.TypeOf(&skvstore{}).String()
+	if got != want {
+		t.Fatal("wrong type returned from Open()")
+	}
+}
+
+func TestUnkownStoreType(t *testing.T) {
+	_, err := NewStore(-1)
+	if err == nil {
+		t.Fatal("exception expected with unknown storeengine type")
+	}
+}
+
+func TestFailedHomeDir(t *testing.T) {
+	keystore = ""
+	envKey := getHomeDirEnvVar()
+	save := os.Getenv(envKey)
+	os.Setenv(envKey, "")
+	db, err := NewStore(SKV)
+	defer cleanupStore(db, filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(filename)
+	if keystore != s {
+		t.Fatal("when the homedir is not found, the keystore should just be the filename")
+	}
+	os.Setenv(envKey, save)
+}
+
+func getHomeDirEnvVar() string {
+	env := "HOME"
+	if runtime.GOOS == "windows" {
+		env = "USERPROFILE"
+	}
+	return env
+}
+
 func BenchmarkPut(b *testing.B) {
 	db := openForBenchmark(b)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
@@ -202,7 +254,7 @@ func BenchmarkPut(b *testing.B) {
 
 func BenchmarkPutGet(b *testing.B) {
 	db := openForBenchmark(b)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
@@ -220,7 +272,7 @@ func BenchmarkPutGet(b *testing.B) {
 
 func BenchmarkPutDelete(b *testing.B) {
 	db := openForBenchmark(b)
-	defer db.Close()
+	defer cleanupStore(db, keystore)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
@@ -236,7 +288,6 @@ func BenchmarkPutDelete(b *testing.B) {
 }
 
 func openForTest(t *testing.T) Store {
-	os.Remove("skv-bench.db")
 	db, err := NewStore(SKV)
 	if err != nil {
 		t.Fatal(err)
@@ -245,10 +296,16 @@ func openForTest(t *testing.T) Store {
 }
 
 func openForBenchmark(b *testing.B) Store {
-	os.Remove("skv-bench.db")
 	db, err := NewStore(SKV)
 	if err != nil {
 		b.Fatal(err)
 	}
 	return db
+}
+
+func cleanupStore(db Store, f string) {
+	if db != nil {
+		db.Close()
+	}
+	os.Remove(f)
 }

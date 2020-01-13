@@ -51,7 +51,7 @@ const (
 	DebugLevel
 )
 
-// Convert the Level to a string. E.g. PanicLevel becomes "panic".
+// Convert the Level to a string. E.g. AlwaysLevel becomes "always".
 func (level LogLevel) String() string {
 	switch level {
 	case DebugLevel:
@@ -133,15 +133,17 @@ func write(lvl LogLevel, format string, a ...interface{}) {
 		}
 		s := fmt.Sprintf(format, a...)
 
-		if !TestMode && Color {
-			w = color.Output
+		if Color {
 			if CriticalLevel == lvl {
 				s = color.RedString(s)
 			} else {
 				s = color.WhiteString(s)
 			}
-		}
+			if !TestMode {
+				w = color.Output
+			}
 
+		}
 		fmt.Fprintf(w, s)
 	}
 }
