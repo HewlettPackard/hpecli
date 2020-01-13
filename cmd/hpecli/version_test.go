@@ -83,3 +83,7 @@ func TestVersionOutput(t *testing.T) {
 		t.Fatalf(expectedError, got, want)
 	}
 }
+
+func TestRun(t *testing.T) {
+	run(nil, nil)
+}
