@@ -196,22 +196,6 @@ func TestSetLogLevel(t *testing.T) {
 
 }
 
-func TestCriticalRedString(t *testing.T) {
-	Level = CriticalLevel
-	TestMode = true
-
-	e, err := regexp.Compile(formatWOTimeExp)
-	g := captureLoggerOutput(Critical, format, a)
-
-	if err != nil {
-		t.Fatalf(errorFailedCompile, e.String(), err)
-	}
-
-	if !e.MatchString(g) {
-		t.Fatalf("Critical should produce a pattern '%v' but produces: %v", e.String(), g)
-	}
-}
-
 func TestColorWritesStdOut(t *testing.T) {
 	Level = CriticalLevel
 	TestMode = false
