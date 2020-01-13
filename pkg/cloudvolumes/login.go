@@ -3,16 +3,18 @@
 package cloudvolumes
 
 import (
+	"bytes"
+	"crypto/tls"
+	"encoding/json"
 	"fmt"
-	"github.com/howeyc/gopass"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/HewlettPackard/hpecli/pkg/store"
 	"github.com/spf13/cobra"
-	"encoding/json"
-	"net/http"
-	"io/ioutil"
-	"bytes"
-	"crypto/tls"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -36,7 +38,7 @@ var cmdCloudVolumesLogin = &cobra.Command{
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
-	fmt.Println("cloudvolumes/login called")
+	logger.Info("cloudvolumes/login called")
 
 	if host == "" {
 		return fmt.Errorf("must provide --host or -h")
@@ -57,19 +59,19 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		// this really isn't secure to provide on the command line
 		// need to provide a way to read from stdin
 		//return fmt.Errorf("must provide --password or -p")
+
 		fmt.Print("password: ")
-		pass, _ := gopass.GetPasswd()
-		password = string(pass)
+		bytePassword, err := terminal.ReadPassword(0)
+		if err == nil {
+			logger.Debug(fmt.Sprintf("\nPassword typed: %v", string(bytePassword)))
+		}
+		password = string(bytePassword)
 	}
 	
-	//fmt.Println("username", username)
-	//fmt.Println("password", password)
-
-	fmt.Println(fmt.Sprintf("Attempting login with user: %v, at: %v", username, host))
+	logger.Debug(fmt.Sprintf("Attempting login with user: %v, at: %v", username, host))
 
 	url := "https://" + host + "/auth/login"
 
-	println("url:", url)
 	jsonData := map[string]string{"email": username, 
 								  "password": password}
 	jsonValue, _ := json.Marshal(jsonData)
@@ -81,7 +83,6 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	// println("ready to call")
 	response, err := client.Do(request)
 	if err != nil {
 		logger.Debug("unable to login %v", err)
@@ -99,25 +100,23 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		json.Unmarshal(body, &result)
 		token = string(result["token"])
 
-		fmt.Println("Logged in", token)
-	}
-
+		logger.Info(fmt.Sprintf("Logged in %v", token))
 	
-	db, err := store.Open()
-	if err != nil {
-		logger.Debug("unable to open keystore: %v", err)
-		return fmt.Errorf("%v", err)
+		// store toekn in keystore
+		db, err := store.Open()
+		if err != nil {
+			logger.Debug("unable to open keystore: %v", err)
+			return fmt.Errorf("%v", err)
+		}
+		defer db.Close()
+		if err := db.Put(key(), &token); err != nil {
+			return fmt.Errorf("%v", err)
+		}
+		db.Close()
+	} else {
+		//  Failed to login
+		return fmt.Errorf("Failed to login, status=%v", response.StatusCode)
 	}
-	defer db.Close()
-	if err := db.Put(key(), &token); err != nil {
-		return fmt.Errorf("%v", err)
-	}
-	db.Close()
-
-	// if err != nil {
-	// 	logger.Debug("Unable to login must provide --password or -p because of: %v", err)
-	// 	return fmt.Errorf("Unable to loginmust provide --password or -p")
-	// }
 
 	return nil
 

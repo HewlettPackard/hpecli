@@ -3,16 +3,16 @@
 package cloudvolumes
 
 import (
+	"encoding/base64"
 	"fmt"
-	"github.com/HewlettPackard/hpecli/pkg/logger"
-	"github.com/HewlettPackard/hpecli/pkg/store"
-	"github.com/spf13/cobra"
-
 	"net/http"
 	"io/ioutil"
-
 	"crypto/tls"
-	"encoding/base64"
+
+	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/store"
+
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -36,7 +36,7 @@ var cmdCloudVolumesGet= &cobra.Command{
 }
 
 func runGet(cmd *cobra.Command, args []string) error {
-	fmt.Println("cloudvolumes/get called")
+	logger.Info("cloudvolumes/get called")
 
 	if host == "" {
 		return fmt.Errorf("must provide --host or -h")
@@ -49,7 +49,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 		logger.Debug("unable to open keystore: %v", err)
 		return fmt.Errorf("%v", err)
 	}
-	defer db.Close()
+
 	var token string
 	if err := db.Get(key(), &token); err == store.ErrNotFound {
 	// key not found
@@ -61,7 +61,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 	} 
 	db.Close()
 
-	//fmt.Println(fmt.Sprintf("Attempting login with user: %v, at: %v", username, host))
+	logger.Info(fmt.Sprintf("Attempting login with user: %v, at: %v", username, host))
 
 	switch path {
 	case "volumes":
@@ -82,7 +82,8 @@ func runGet(cmd *cobra.Command, args []string) error {
 			logger.Debug("unable to get volumes %v", err)
 			return fmt.Errorf("%v", err)
 		}
-		fmt.Println(response.StatusCode)
+
+		logger.Info(fmt.Sprintf("Status Code = %v", response.StatusCode))
 
 		if response.StatusCode == 401 {
 			logger.Debug("Stored token has expired")
