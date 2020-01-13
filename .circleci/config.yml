@@ -31,6 +31,13 @@ jobs:
       - run: 
           name: Scan code
           command: |
+            pr_num=${CIRCLE_PULL_REQUEST##*/}
+            pr_repo=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+            pr_branch_args="-Dsonar.pullrequest.base=master \
+              -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
+              -Dsonar.pullrequest.key=$pr_num \
+              -Dsonar.pullrequest.provider=GitHub \
+              -Dsonar.pullrequest.github.repository=$pr_repo"            
             export SONAR_SCANNER_VERSION=4.2.0.1873
             export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-            $SONAR_SCANNER_HOME/bin/sonar-scanner
+            $SONAR_SCANNER_HOME/bin/sonar-scanner $pr_branch_args "$@"
