@@ -64,9 +64,8 @@ func (level LogLevel) String() string {
 		return "critical"
 	case AlwaysLevel:
 		return "always"
-	default:
-		return "unknown"
 	}
+	return "unknown"
 }
 
 var (
