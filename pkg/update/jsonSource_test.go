@@ -186,7 +186,21 @@ func TestMapResult(t *testing.T) {
 				// got an error and expected to get one
 				return
 			}
-			verifyMapResponse(t, got, c)
+			if !got.version.Equal(c.version) {
+				t.Fatal(fmt.Sprintf("Version doesn't match.  got=%v, want=%v", got.version, c.version))
+			}
+			if got.message != c.message {
+				t.Fatal(fmt.Sprintf("Message doesn't match.  got=%v, want=%v", got.message, c.message))
+			}
+			if got.updateURL != c.updateURL {
+				t.Fatal(fmt.Sprintf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL))
+			}
+			if bytes.Compare(got.publicKey, c.publicKey) != 0 {
+				t.Fatal(fmt.Sprintf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey))
+			}
+			if got.checkSum != c.checkSum {
+				t.Fatal(fmt.Sprintf("checkSum doesn't match.  got=%v, want=%v", got.checkSum, c.checkSum))
+			}
 
 		})
 	}
@@ -195,31 +209,4 @@ func TestMapResult(t *testing.T) {
 func ver(v string) *version.Version {
 	r, _ := version.NewVersion(v)
 	return r
-}
-
-func verifyMapResponse(t *testing.T, got *remoteResponse, c struct {
-	name        string
-	json        *jsonResponse
-	version     *version.Version
-	message     string
-	updateURL   string
-	publicKey   []byte
-	checkSum    string
-	errExpected bool
-}) {
-	if !got.version.Equal(c.version) {
-		t.Fatal(fmt.Sprintf("Version doesn't match.  got=%v, want=%v", got.version, c.version))
-	}
-	if got.message != c.message {
-		t.Fatal(fmt.Sprintf("Message doesn't match.  got=%v, want=%v", got.message, c.message))
-	}
-	if got.updateURL != c.updateURL {
-		t.Fatal(fmt.Sprintf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL))
-	}
-	if bytes.Compare(got.publicKey, c.publicKey) != 0 {
-		t.Fatal(fmt.Sprintf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey))
-	}
-	if got.checkSum != c.checkSum {
-		t.Fatal(fmt.Sprintf("checkSum doesn't match.  got=%v, want=%v", got.checkSum, c.checkSum))
-	}
 }

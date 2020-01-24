@@ -64,7 +64,7 @@ func IsUpdateAvailable() bool {
 	if cliVer == "" {
 		cliVer = "0.0.0"
 	}
-	logger.Debug("Current version is: " + cliVer)
+	logger.Debug("Local version is: " + cliVer)
 	logger.Debug("Checking for a newer version at: " + versionURL)
 
 	res, err := checkUpdate(&jsonSource{url: versionURL}, cliVer)
