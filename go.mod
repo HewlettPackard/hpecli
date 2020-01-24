@@ -5,10 +5,7 @@ module github.com/HewlettPackard/hpecli
 go 1.13
 
 require (
-	github.com/HewlettPackard/oneview-golang v1.2.0
-	github.com/aws/aws-sdk-go v1.28.5
 	github.com/boltdb/bolt v1.3.1 // indirect
-	github.com/docker/machine v0.16.2
 	github.com/fatih/color v1.7.0
 	github.com/google/go-github v17.0.0+incompatible // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
