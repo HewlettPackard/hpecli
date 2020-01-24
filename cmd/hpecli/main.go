@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/HewlettPackard/hpecli/pkg/greenlake"
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/HewlettPackard/hpecli/pkg/update"
@@ -37,4 +38,5 @@ func main() {
 func addCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(ilo.Cmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(greenlake.Cmd)
 }

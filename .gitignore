@@ -10,3 +10,7 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Mac meta files, Desktop Services Store
+.DS_Store
+pkg/.DS_Store
