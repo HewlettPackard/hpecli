@@ -49,7 +49,7 @@ func TestValidate(t *testing.T) {
 }
 
 func TestGetMalformedURL(t *testing.T) {
-	s := &jsonSource{url: "://foo.bar"}
+	s := &jsonSource{url: "://bad.url"}
 	_, err := s.get()
 	if err == nil {
 		t.Fatal("expected err with bad url")
@@ -92,7 +92,7 @@ func TestGetDecodeErrorWithMalformedJSON(t *testing.T) {
 
 func TestGetWithoutVersionInResponse(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, `{"message":"Some Message","url":"http://foo.bar","publickey":"00:11:22:33","checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
+		fmt.Fprintln(w, `{"message":"Some Message","url":"http://some.url","publickey":"00:11:22:33","checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
 	}))
 	defer ts.Close()
 
@@ -105,7 +105,7 @@ func TestGetWithoutVersionInResponse(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, `{"version":"0.1.1","message":"Some Message","url":"http://foo.bar","publickey":"00:11:22:33","checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
+		fmt.Fprintln(w, `{"version":"0.1.1","message":"Some Message","url":"http://another.url","publickey":"00:11:22:33","checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
 	}))
 	defer ts.Close()
 
@@ -119,7 +119,7 @@ func TestGet(t *testing.T) {
 	if resp.version.String() != "0.1.1" {
 		t.Fatal("version didn't decode as expected")
 	}
-	if resp.updateURL != "http://foo.bar" {
+	if resp.updateURL != "http://another.url" {
 		t.Fatal("updateURL didn't decode as expected")
 	}
 }
@@ -163,10 +163,10 @@ func TestMapResult(t *testing.T) {
 		},
 		{
 			name:        "fields match",
-			json:        &jsonResponse{Version: "0.1.1", Message: "Some Message", UpdateURL: "http://foo.bar", PublicKey: "00:11:22:33", CheckSum: "120EA8A25E5D487BF68B5F7096440019"},
+			json:        &jsonResponse{Version: "0.1.1", Message: "Some Message", UpdateURL: "http://github.com/update", PublicKey: "00:11:22:33", CheckSum: "120EA8A25E5D487BF68B5F7096440019"},
 			version:     ver("0.1.1"),
 			message:     "Some Message",
-			updateURL:   "http://foo.bar",
+			updateURL:   "http://github.com/update",
 			publicKey:   []byte("00:11:22:33"),
 			checkSum:    "120EA8A25E5D487BF68B5F7096440019",
 			errExpected: false,
@@ -186,21 +186,7 @@ func TestMapResult(t *testing.T) {
 				// got an error and expected to get one
 				return
 			}
-			if !got.version.Equal(c.version) {
-				t.Fatal(fmt.Sprintf("Version doesn't match.  got=%v, want=%v", got.version, c.version))
-			}
-			if got.message != c.message {
-				t.Fatal(fmt.Sprintf("Message doesn't match.  got=%v, want=%v", got.message, c.message))
-			}
-			if got.updateURL != c.updateURL {
-				t.Fatal(fmt.Sprintf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL))
-			}
-			if bytes.Compare(got.publicKey, c.publicKey) != 0 {
-				t.Fatal(fmt.Sprintf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey))
-			}
-			if got.checkSum != c.checkSum {
-				t.Fatal(fmt.Sprintf("checkSum doesn't match.  got=%v, want=%v", got.checkSum, c.checkSum))
-			}
+			verifyMapResponse(t, got, c)
 
 		})
 	}
@@ -209,4 +195,31 @@ func TestMapResult(t *testing.T) {
 func ver(v string) *version.Version {
 	r, _ := version.NewVersion(v)
 	return r
+}
+
+func verifyMapResponse(t *testing.T, got *remoteResponse, c struct {
+	name        string
+	json        *jsonResponse
+	version     *version.Version
+	message     string
+	updateURL   string
+	publicKey   []byte
+	checkSum    string
+	errExpected bool
+}) {
+	if !got.version.Equal(c.version) {
+		t.Fatal(fmt.Sprintf("Version doesn't match.  got=%v, want=%v", got.version, c.version))
+	}
+	if got.message != c.message {
+		t.Fatal(fmt.Sprintf("Message doesn't match.  got=%v, want=%v", got.message, c.message))
+	}
+	if got.updateURL != c.updateURL {
+		t.Fatal(fmt.Sprintf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL))
+	}
+	if bytes.Compare(got.publicKey, c.publicKey) != 0 {
+		t.Fatal(fmt.Sprintf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey))
+	}
+	if got.checkSum != c.checkSum {
+		t.Fatal(fmt.Sprintf("checkSum doesn't match.  got=%v, want=%v", got.checkSum, c.checkSum))
+	}
 }

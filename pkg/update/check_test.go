@@ -70,8 +70,7 @@ func TestCheckSkippedWithEnvSet(t *testing.T) {
 
 	//should return empty response because we skip everyting
 	//when the env var is set
-
-	validate(t, got, want)
+	verifyCheckResponse(t, got, want)
 }
 
 func TestCheckUpdate(t *testing.T) {
@@ -149,12 +148,12 @@ func TestCheckUpdate(t *testing.T) {
 				// got an error but didn't expect it
 				t.Fatal(err)
 			}
-			validate(t, got, c.want)
+			verifyCheckResponse(t, got, c.want)
 		})
 	}
 }
 
-func validate(t *testing.T, got *CheckResponse, want *CheckResponse) {
+func verifyCheckResponse(t *testing.T, got *CheckResponse, want *CheckResponse) {
 	const tmpl = "got: %v, wanted: %v"
 	if got.UpdateAvailable != want.UpdateAvailable {
 		t.Fatal(fmt.Sprintf(tmpl, got.UpdateAvailable, want.UpdateAvailable))
