@@ -11,6 +11,11 @@ import (
 	"github.com/tcnksm/go-latest"
 )
 
+const (
+	contentType = "Content-Type"
+	jsonType    = "application/json"
+)
+
 func TestCheckUpdate(t *testing.T) {
 
 	cases := []struct {
@@ -47,7 +52,7 @@ func TestCheckUpdate(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			response = nil
 			server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set(contentType, jsonType)
 				w.WriteHeader(http.StatusOK)
 				fmt.Fprintf(w, c.remoteVer)
 			})
@@ -71,7 +76,7 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 	cc := 0
 
 	server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(contentType, jsonType)
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"version":"0.0.1"}`)
 		cc++
@@ -108,7 +113,7 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 func TestErrorReturnsFalse(t *testing.T) {
 	response = nil
 	server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(contentType, jsonType)
 		w.WriteHeader(http.StatusForbidden)
 		fmt.Fprintf(w, `{"version":"0.0.1"}`)
 	})
@@ -123,17 +128,18 @@ func TestErrorReturnsFalse(t *testing.T) {
 }
 
 func validate(t *testing.T, got *latest.CheckResponse, want *latest.CheckResponse) {
+	const tmpl = "got: %v, wanted: %v"
 	if got.Current != want.Current {
-		t.Fatal(fmt.Sprintf("got: %v, wanted: %v", got.Current, want.Current))
+		t.Fatal(fmt.Sprintf(tmpl, got.Current, want.Current))
 	}
 	if got.Outdated != want.Outdated {
-		t.Fatal(fmt.Sprintf("got: %v, wanted: %v", got.Outdated, want.Outdated))
+		t.Fatal(fmt.Sprintf(tmpl, got.Outdated, want.Outdated))
 	}
 	if got.Latest != want.Latest {
-		t.Fatal(fmt.Sprintf("got: %v, wanted: %v", got.Latest, want.Latest))
+		t.Fatal(fmt.Sprintf(tmpl, got.Latest, want.Latest))
 	}
 	if got.New != want.New {
-		t.Fatal(fmt.Sprintf("got: %v, wanted: %v", got.New, want.New))
+		t.Fatal(fmt.Sprintf(tmpl, got.New, want.New))
 	}
 }
 
