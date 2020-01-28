@@ -124,27 +124,6 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestClient(t *testing.T) {
-	c := client()
-	if c == nil {
-		t.Fatal("client should not be null")
-	}
-
-	if c.Timeout == 0 {
-		t.Fatal("timeout value was not set on client")
-	}
-}
-
-func TestRequestHasAccept(t *testing.T) {
-	r, err := request("")
-	if err != nil {
-		t.Fatal("unexpect error creating request")
-	}
-	if r.Header["Accept"] == nil {
-		t.Fatal("missing accept header for json")
-	}
-}
-
 func TestMapResult(t *testing.T) {
 	cases := []struct {
 		name        string
@@ -153,7 +132,7 @@ func TestMapResult(t *testing.T) {
 		message     string
 		updateURL   string
 		publicKey   []byte
-		checkSum    string
+		checkSum    []byte
 		errExpected bool
 	}{
 		{
@@ -163,12 +142,12 @@ func TestMapResult(t *testing.T) {
 		},
 		{
 			name:        "fields match",
-			json:        &jsonResponse{Version: "0.1.1", Message: "Some Message", UpdateURL: "http://github.com/update", PublicKey: "00:11:22:33", CheckSum: "120EA8A25E5D487BF68B5F7096440019"},
+			json:        &jsonResponse{Version: "0.1.1", Message: "Some Message", UpdateURL: "http://github.com/update", PublicKey: "00112233", CheckSum: "120E0A8A25E5"},
 			version:     ver("0.1.1"),
 			message:     "Some Message",
 			updateURL:   "http://github.com/update",
-			publicKey:   []byte("00:11:22:33"),
-			checkSum:    "120EA8A25E5D487BF68B5F7096440019",
+			publicKey:   []byte{0x00, 0x11, 0x22, 0x33},
+			checkSum:    []byte{0x12, 0x0E, 0x0A, 0x8A, 0x25, 0xE5},
 			errExpected: false,
 		},
 	}
@@ -187,19 +166,19 @@ func TestMapResult(t *testing.T) {
 				return
 			}
 			if !got.version.Equal(c.version) {
-				t.Fatal(fmt.Sprintf("Version doesn't match.  got=%v, want=%v", got.version, c.version))
+				t.Fatalf("Version doesn't match.  got=%v, want=%v", got.version, c.version)
 			}
 			if got.message != c.message {
-				t.Fatal(fmt.Sprintf("Message doesn't match.  got=%v, want=%v", got.message, c.message))
+				t.Fatalf("Message doesn't match.  got=%v, want=%v", got.message, c.message)
 			}
 			if got.updateURL != c.updateURL {
-				t.Fatal(fmt.Sprintf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL))
+				t.Fatalf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL)
 			}
 			if bytes.Compare(got.publicKey, c.publicKey) != 0 {
-				t.Fatal(fmt.Sprintf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey))
+				t.Fatalf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey)
 			}
-			if got.checkSum != c.checkSum {
-				t.Fatal(fmt.Sprintf("checkSum doesn't match.  got=%v, want=%v", got.checkSum, c.checkSum))
+			if !bytes.Equal(got.checkSum, c.checkSum) {
+				t.Fatalf("checkSum doesn't match.  got=%v, want=%v", got.checkSum, c.checkSum)
 			}
 
 		})

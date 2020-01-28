@@ -58,10 +58,9 @@ func TestIsFullVersion(t *testing.T) {
 }
 
 func TestFullVersionOutput(t *testing.T) {
-	//This is hacky... because values aren't
-	//injected, then we just end up with
-	//colon seperators
-	want := "::"
+	//if values aren't injected at compile time
+	//then everything just defaults to 0
+	want := "0.0.0:0:0"
 	verbose = true
 
 	got := versionOutput()
@@ -71,10 +70,9 @@ func TestFullVersionOutput(t *testing.T) {
 }
 
 func TestVersionOutput(t *testing.T) {
-	//This is hacky... because values aren't
-	//injected, then we just end up with
-	//empty return
-	want := ""
+	//if values aren't injected at compile time
+	//then everything just defaults to 0
+	want := "0.0.0"
 	verbose = false
 	logger.Level = logger.InfoLevel
 

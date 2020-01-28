@@ -31,7 +31,7 @@ type CheckResponse struct {
 
 	// SHA265 Has of the download that can be used to validate
 	// the integrity of the file after it was downloaded
-	CheckSum string
+	CheckSum []byte
 }
 
 type remoteResponse struct {
@@ -39,7 +39,7 @@ type remoteResponse struct {
 	message   string
 	updateURL string
 	publicKey []byte
-	checkSum  string
+	checkSum  []byte
 }
 
 type source interface {
@@ -58,12 +58,11 @@ const versionPath = "/HewlettPackard/hpecli/master/site/published-version.json"
 
 var versionURL = fmt.Sprintf("https://%s%s", versionHost, versionPath)
 
+var cacheResponse *CheckResponse
+
 // IsUpdateAvailable checks if a later version is avaialbe of the CLI binary
 func IsUpdateAvailable() bool {
 	cliVer := version.Get()
-	if cliVer == "" {
-		cliVer = "0.0.0"
-	}
 	logger.Debug("Local version is: " + cliVer)
 	logger.Debug("Checking for a newer version at: " + versionURL)
 
@@ -73,12 +72,12 @@ func IsUpdateAvailable() bool {
 		logger.Debug("Error: %v", err)
 		return false
 	}
-	logger.Debug(fmt.Sprintf("UpdateAvailable = %v", res.UpdateAvailable))
-	logger.Debug(fmt.Sprintf("RemoteVersion   = %v", res.RemoteVersion))
-	logger.Debug(fmt.Sprintf("Message         = %v", res.Message))
-	logger.Debug(fmt.Sprintf("URL             = %v", res.URL))
-	logger.Debug(fmt.Sprintf("PublicKey       = %v", res.PublicKey))
-	logger.Debug(fmt.Sprintf("CheckSum        = %v", res.CheckSum))
+	logger.Debug("json.UpdateAvailable = %v", res.UpdateAvailable)
+	logger.Debug("json.RemoteVersion   = %v", res.RemoteVersion)
+	logger.Debug("json.Message         = %v", res.Message)
+	logger.Debug("json.URL             = %v", res.URL)
+	logger.Debug("json.PublicKey       = %v", res.PublicKey)
+	logger.Debug("json.CheckSum        = %v", res.CheckSum)
 
 	// cache a copy
 	//response = res
@@ -88,9 +87,18 @@ func IsUpdateAvailable() bool {
 // Check fetches last version information from its source
 // and compares with target and return result (CheckResponse).
 func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
-
+	// don't check if env var is setup to skip
 	if os.Getenv(EnvDisableUpdateCheck) != "" {
+		logger.Debug("%s set.  Not performing remote check", EnvDisableUpdateCheck)
 		return &CheckResponse{}, nil
+	}
+
+	//Since the CLI is a short-lived process cache a copy and
+	//return the cached copy if we have already retrieved the
+	//results this session.
+	if nil != cacheResponse {
+		logger.Debug("cacheResponse present.  Not making additional remote check")
+		return cacheResponse, nil
 	}
 
 	localVersion, err := gover.NewVersion(lVersion)
@@ -110,12 +118,14 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 		new = true
 	}
 
-	return &CheckResponse{
+	cacheResponse = &CheckResponse{
 		UpdateAvailable: new,
 		RemoteVersion:   resp.version.String(),
 		Message:         resp.message,
 		URL:             resp.updateURL,
 		PublicKey:       resp.publicKey,
 		CheckSum:        resp.checkSum,
-	}, nil
+	}
+
+	return cacheResponse, nil
 }

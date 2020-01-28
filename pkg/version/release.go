@@ -3,6 +3,6 @@
 package version
 
 // values are injected by the linker at build time via ldflags
-var builtAt = ""
-var gitCommit = ""
-var version = ""
+var builtAt = "0"
+var gitCommit = "0"
+var version = "0.0.0"
