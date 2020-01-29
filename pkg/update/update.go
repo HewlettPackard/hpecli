@@ -21,6 +21,7 @@ var Cmd = &cobra.Command{
 
 func runUpdate(cmd *cobra.Command, args []string) error {
 	localVer := version.Get()
+
 	resp, err := checkUpdate(&jsonSource{url: versionURL}, localVer)
 	if err != nil {
 		return err
@@ -30,6 +31,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		logger.Always("No update available.  No action taken")
 		return nil
 	}
+
 	if err = downloadUpdate(resp); err != nil {
 		return err
 	}
@@ -50,6 +52,7 @@ func downloadUpdate(cr *CheckResponse) error {
 		logger.Warning("Unable to update to new version of the application: %v", err)
 		return err
 	}
+
 	return nil
 }
 
@@ -65,5 +68,6 @@ func getResponseBody(url string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Body, nil
 }

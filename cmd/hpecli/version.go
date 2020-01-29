@@ -30,6 +30,7 @@ func versionOutput() string {
 	if isFullVersion() {
 		return version.GetFull()
 	}
+
 	return version.Get()
 }
 

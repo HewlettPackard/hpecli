@@ -47,6 +47,7 @@ func TestIsUpdateAvailableEmptyLocalVersion(t *testing.T) {
 				fmt.Fprintf(w, c.remoteJSON)
 			})
 			defer server.Close()
+
 			got := IsUpdateAvailable()
 			if got != c.update {
 				t.Fatal("didn't get expected response")
@@ -59,6 +60,7 @@ func TestIsUpdateAvailablInvalidURLErrors(t *testing.T) {
 	// erase cache for each test run
 	cacheResponse = nil
 	versionURL = "://badScheme"
+
 	got := IsUpdateAvailable()
 	if got != false {
 		t.Fatal("error in checkUpdate should generate false response")
@@ -68,19 +70,20 @@ func TestIsUpdateAvailablInvalidURLErrors(t *testing.T) {
 func TestCheckSkippedWithEnvSet(t *testing.T) {
 	// erase cache for each test run
 	cacheResponse = nil
+
 	os.Setenv(EnvDisableUpdateCheck, "true")
+
 	defer os.Unsetenv(EnvDisableUpdateCheck)
 
 	got, _ := checkUpdate(&jsonSource{url: ""}, "")
 	want := &CheckResponse{}
 
-	//should return empty response because we skip everyting
+	//should return empty response because we skip everything
 	//when the env var is set
 	verifyCheckResponse(t, got, want)
 }
 
 func TestCheckUpdate(t *testing.T) {
-
 	cases := []struct {
 		name        string
 		localVer    string
@@ -172,7 +175,7 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 		fmt.Fprintf(w, `{"version":"0.0.1"}`)
 		cc++
 		if cc > 1 {
-			t.Fatal("Expected to only recieve a single http request, but recieved 2")
+			t.Fatal("Expected to only receive a single http request, but received 2")
 		}
 	})
 	defer server.Close()
@@ -194,6 +197,10 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 	r := cacheResponse
 
 	got = IsUpdateAvailable()
+	// just make sure it is still true
+	if got != true {
+		t.Fatal("expected to see update available, but reported as not available")
+	}
 
 	// see if it is the same cached copy
 	if r != cacheResponse {
@@ -203,25 +210,30 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 
 func verifyCheckResponse(t *testing.T, got *CheckResponse, want *CheckResponse) {
 	const tmpl = "got: %v, wanted: %v"
+
 	if got.UpdateAvailable != want.UpdateAvailable {
 		t.Fatalf(tmpl, got.UpdateAvailable, want.UpdateAvailable)
 	}
+
 	if got.RemoteVersion != want.RemoteVersion {
 		t.Fatalf(tmpl, got.RemoteVersion, want.RemoteVersion)
 	}
+
 	if got.Message != want.Message {
 		t.Fatalf(tmpl, got.Message, want.Message)
 	}
+
 	if got.URL != want.URL {
 		t.Fatalf(tmpl, got.URL, want.URL)
 	}
-	if bytes.Compare(got.PublicKey, want.PublicKey) != 0 {
+
+	if !bytes.Equal(got.PublicKey, want.PublicKey) {
 		t.Fatalf(tmpl, got.PublicKey, want.PublicKey)
 	}
+
 	if !bytes.Equal(got.CheckSum, want.CheckSum) {
 		t.Fatalf(tmpl, got.CheckSum, want.CheckSum)
 	}
-
 }
 
 func newTestServer(h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
@@ -229,5 +241,6 @@ func newTestServer(h func(w http.ResponseWriter, r *http.Request)) *httptest.Ser
 	server := httptest.NewServer(mux)
 	versionURL = fmt.Sprintf("%s%s", server.URL, versionPath)
 	mux.HandleFunc(versionPath, h)
+
 	return server
 }

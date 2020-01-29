@@ -17,6 +17,7 @@ func TestUpdateWithNoUpdateAvailable(t *testing.T) {
 	mux.HandleFunc("/json", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, fmt.Sprintf(`{"version":"0.0.0","url":"%s/download"}`, ts.URL))
 	})
+
 	defer ts.Close()
 
 	versionURL = fmt.Sprintf("%s%s", ts.URL, "/json")
@@ -33,6 +34,7 @@ func TestUpdateWithErrorInCheckUpdate(t *testing.T) {
 	mux.HandleFunc("/json", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, fmt.Sprintf(`{"version":"0.0.0","url":"%s/download"}`, ts.URL))
 	})
+
 	defer ts.Close()
 
 	versionURL = ""
@@ -79,6 +81,7 @@ func TestDownloadUpdate(t *testing.T) {
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, c.want)
 			}))
+
 			defer ts.Close()
 
 			if c.param.URL == "test-server" {
@@ -127,6 +130,7 @@ func TestGetResponseBody(t *testing.T) {
 				fmt.Fprint(w, c.want)
 			}))
 			defer ts.Close()
+
 			if c.url == "test-server" {
 				c.url = ts.URL
 			}
@@ -147,7 +151,6 @@ func TestGetResponseBody(t *testing.T) {
 			if got != c.want {
 				t.Fatalf("Didn't get expected response.  got=%v, want=%v", got, c.want)
 			}
-
 		})
 	}
 }
