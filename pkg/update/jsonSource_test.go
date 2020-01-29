@@ -181,7 +181,7 @@ func TestMapResult(t *testing.T) {
 			if got.updateURL != c.updateURL {
 				t.Fatalf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL)
 			}
-			if bytes.Equal(got.publicKey, c.publicKey) {
+			if !bytes.Equal(got.publicKey, c.publicKey) {
 				t.Fatalf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey)
 			}
 			if !bytes.Equal(got.checkSum, c.checkSum) {

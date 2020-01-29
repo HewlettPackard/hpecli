@@ -227,7 +227,7 @@ func verifyCheckResponse(t *testing.T, got *CheckResponse, want *CheckResponse) 
 		t.Fatalf(tmpl, got.URL, want.URL)
 	}
 
-	if bytes.Equal(got.PublicKey, want.PublicKey) {
+	if !bytes.Equal(got.PublicKey, want.PublicKey) {
 		t.Fatalf(tmpl, got.PublicKey, want.PublicKey)
 	}
 
