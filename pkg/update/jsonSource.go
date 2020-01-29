@@ -3,13 +3,14 @@
 package update
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"time"
 
+	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/hashicorp/go-version"
 )
 
@@ -36,12 +37,13 @@ func (j *jsonSource) validate() error {
 }
 
 func (j *jsonSource) get() (*remoteResponse, error) {
-	client := client()
-
-	req, err := request(j.url)
+	client := &http.Client{}
+	// Create a new GET request
+	req, err := http.NewRequest("GET", j.url, nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("Accept", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -65,29 +67,6 @@ func (j *jsonSource) get() (*remoteResponse, error) {
 	return result, nil
 }
 
-func client() *http.Client {
-	const defaultTimeout = 15 * time.Second
-	// Create client that will use env proxy settings
-	// and ha a 15 second timeout
-	client := &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-		},
-		Timeout: defaultTimeout,
-	}
-	return client
-}
-
-func request(url string) (*http.Request, error) {
-	// Create a new GET request
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Accept", "application/json")
-	return req, nil
-}
-
 func decodeResponse(r io.Reader) (*jsonResponse, error) {
 	result := &jsonResponse{}
 	dec := json.NewDecoder(r)
@@ -102,11 +81,29 @@ func mapResult(j *jsonResponse) (*remoteResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Didn't get a remote version. %v", err)
 	}
+	downloadedPublicKey := decodeField("PublicKey", j.PublicKey)
+	downloadedCheckSum := decodeField("CheckSum", j.CheckSum)
+
 	return &remoteResponse{
 		version:   v,
 		message:   j.Message,
 		updateURL: j.UpdateURL,
-		publicKey: []byte(j.PublicKey),
-		checkSum:  j.CheckSum,
+		publicKey: downloadedPublicKey,
+		checkSum:  downloadedCheckSum,
 	}, nil
+}
+
+// we need a nil value rather than an empty byte array.  the file download verification
+// treats non-nil values as values to compare against.
+func decodeField(name, value string) []byte {
+	if value == "" {
+		return nil
+	}
+	result, err := hex.DecodeString(value)
+	if err != nil {
+		logger.Warning("Unable to decode remote %s field.  It will be ignored and not used to verify the remote content", name)
+		logger.Debug("Problem Field: %s=%v", name, value)
+		result = nil
+	}
+	return result
 }

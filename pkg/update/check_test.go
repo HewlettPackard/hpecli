@@ -25,7 +25,7 @@ func TestIsUpdateAvailableEmptyLocalVersion(t *testing.T) {
 	}{
 		{
 			name:       "no local version",
-			localVer:   "",
+			localVer:   "0.0.0",
 			remoteJSON: `{"version":"0.0.0"}`,
 			update:     false,
 		},
@@ -39,6 +39,8 @@ func TestIsUpdateAvailableEmptyLocalVersion(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			// erase cache for each test run
+			cacheResponse = nil
 			server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set(contentType, jsonType)
 				w.WriteHeader(http.StatusOK)
@@ -54,6 +56,8 @@ func TestIsUpdateAvailableEmptyLocalVersion(t *testing.T) {
 }
 
 func TestIsUpdateAvailablInvalidURLErrors(t *testing.T) {
+	// erase cache for each test run
+	cacheResponse = nil
 	versionURL = "://badScheme"
 	got := IsUpdateAvailable()
 	if got != false {
@@ -62,6 +66,8 @@ func TestIsUpdateAvailablInvalidURLErrors(t *testing.T) {
 }
 
 func TestCheckSkippedWithEnvSet(t *testing.T) {
+	// erase cache for each test run
+	cacheResponse = nil
 	os.Setenv(EnvDisableUpdateCheck, "true")
 	defer os.Unsetenv(EnvDisableUpdateCheck)
 
@@ -103,14 +109,14 @@ func TestCheckUpdate(t *testing.T) {
 		{
 			name:       "check all fields",
 			localVer:   "0.1.2",
-			remoteJSON: `{"version":"0.1.1","message":"update available","url":"https://foo.bar/update","publickey":"00001111","checksum":"120EA8A25E5D487BF68B5F7096440019"}`,
+			remoteJSON: `{"version":"0.1.1","message":"update available","url":"https://foo.bar/update","publickey":"00001111","checksum":"120E0A"}`,
 			want: &CheckResponse{
 				UpdateAvailable: false,
 				RemoteVersion:   "0.1.1",
 				Message:         "update available",
 				URL:             "https://foo.bar/update",
-				PublicKey:       []byte("00001111"),
-				CheckSum:        "120EA8A25E5D487BF68B5F7096440019",
+				PublicKey:       []byte{0x00, 0x00, 0x11, 0x11},
+				CheckSum:        []byte{0x12, 0x0E, 0x0A},
 			},
 		},
 		{
@@ -128,6 +134,8 @@ func TestCheckUpdate(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			// erase cache for each test run
+			cacheResponse = nil
 			server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set(contentType, jsonType)
 				w.WriteHeader(http.StatusOK)
@@ -153,25 +161,65 @@ func TestCheckUpdate(t *testing.T) {
 	}
 }
 
+func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
+	// erase cache for each test run
+	cacheResponse = nil
+	cc := 0
+
+	server := newTestServer(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"version":"0.0.1"}`)
+		cc++
+		if cc > 1 {
+			t.Fatal("Expected to only recieve a single http request, but recieved 2")
+		}
+	})
+	defer server.Close()
+
+	// verify respnose is nil before initial get
+	if cacheResponse != nil {
+		t.Fatal("response to be unititialed before request")
+	}
+
+	got := IsUpdateAvailable()
+	if got != true {
+		t.Fatal("expected to see update available, but reported as not available")
+	}
+	// make sure response got populated
+	if cacheResponse == nil {
+		t.Fatal("response to be ititialed after request")
+	}
+	// save to check later
+	r := cacheResponse
+
+	got = IsUpdateAvailable()
+
+	// see if it is the same cached copy
+	if r != cacheResponse {
+		t.Fatal("Expected to get the same copy on the second get request but didn't")
+	}
+}
+
 func verifyCheckResponse(t *testing.T, got *CheckResponse, want *CheckResponse) {
 	const tmpl = "got: %v, wanted: %v"
 	if got.UpdateAvailable != want.UpdateAvailable {
-		t.Fatal(fmt.Sprintf(tmpl, got.UpdateAvailable, want.UpdateAvailable))
+		t.Fatalf(tmpl, got.UpdateAvailable, want.UpdateAvailable)
 	}
 	if got.RemoteVersion != want.RemoteVersion {
-		t.Fatal(fmt.Sprintf(tmpl, got.RemoteVersion, want.RemoteVersion))
+		t.Fatalf(tmpl, got.RemoteVersion, want.RemoteVersion)
 	}
 	if got.Message != want.Message {
-		t.Fatal(fmt.Sprintf(tmpl, got.Message, want.Message))
+		t.Fatalf(tmpl, got.Message, want.Message)
 	}
 	if got.URL != want.URL {
-		t.Fatal(fmt.Sprintf(tmpl, got.URL, want.URL))
+		t.Fatalf(tmpl, got.URL, want.URL)
 	}
 	if bytes.Compare(got.PublicKey, want.PublicKey) != 0 {
-		t.Fatal(fmt.Sprintf(tmpl, got.PublicKey, want.PublicKey))
+		t.Fatalf(tmpl, got.PublicKey, want.PublicKey)
 	}
-	if got.CheckSum != want.CheckSum {
-		t.Fatal(fmt.Sprintf(tmpl, got.CheckSum, want.CheckSum))
+	if !bytes.Equal(got.CheckSum, want.CheckSum) {
+		t.Fatalf(tmpl, got.CheckSum, want.CheckSum)
 	}
 
 }

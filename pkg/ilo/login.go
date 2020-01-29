@@ -49,7 +49,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("must provide --password or -p")
 	}
 
-	fmt.Println(fmt.Sprintf("Attempting login with user: %v, at: %v", username, host))
+	logger.Debug("Attempting login with user: %v, at: %v", username, host)
 
 	db, err := store.Open()
 	if err != nil {

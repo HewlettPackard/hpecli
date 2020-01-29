@@ -245,7 +245,7 @@ func BenchmarkPut(b *testing.B) {
 	defer cleanupStore(db, keystore)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
+		if err := db.Put(key(i), aValue); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -257,13 +257,13 @@ func BenchmarkPutGet(b *testing.B) {
 	defer cleanupStore(db, keystore)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
+		if err := db.Put(key(i), aValue); err != nil {
 			b.Fatal(err)
 		}
 	}
 	for i := 0; i < b.N; i++ {
 		var val string
-		if err := db.Get(fmt.Sprintf("key%d", i), &val); err != nil {
+		if err := db.Get(key(i), &val); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -275,12 +275,12 @@ func BenchmarkPutDelete(b *testing.B) {
 	defer cleanupStore(db, keystore)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := db.Put(fmt.Sprintf("key%d", i), aValue); err != nil {
+		if err := db.Put(key(i), aValue); err != nil {
 			b.Fatal(err)
 		}
 	}
 	for i := 0; i < b.N; i++ {
-		if err := db.Delete(fmt.Sprintf("key%d", i)); err != nil {
+		if err := db.Delete(key(i)); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -308,4 +308,8 @@ func cleanupStore(db Store, f string) {
 		db.Close()
 	}
 	os.Remove(f)
+}
+
+func key(i int) string {
+	return fmt.Sprintf("key%d", i)
 }
