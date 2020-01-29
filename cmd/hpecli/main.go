@@ -17,9 +17,12 @@ func main() {
 		Use:   "hpecli",
 		Short: "hpe cli for accessing various services",
 	}
+
 	addCommands(rootCmd)
 
-	logLevel := rootCmd.PersistentFlags().StringP("loglevel", "l", "warning", "set log level.  Possible values are: debug, info, warning, critical")
+	logLevel := rootCmd.PersistentFlags().StringP("loglevel", "l", "warning",
+		"set log level.  Possible values are: debug, info, warning, critical")
+
 	cobra.OnInitialize(func() {
 		logger.Color = true
 		logger.SetLogLevel(*logLevel)

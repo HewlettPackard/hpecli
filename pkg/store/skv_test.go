@@ -1,7 +1,10 @@
 package store
 
-import "testing"
-import "os"
+import (
+	"io"
+	"os"
+	"testing"
+)
 
 const fname = "TEST_FILE"
 
@@ -15,9 +18,11 @@ func TestOpenMissingFile(t *testing.T) {
 func TestOpenSKV(t *testing.T) {
 	db, err := openSKV(fname)
 	defer cleanupSKV(db, fname)
+
 	if err != nil {
 		t.Fatal("expected to be able to open, but failed")
 	}
+
 	if db == nil {
 		t.Fatal("db was opened but is nil")
 	}
@@ -38,9 +43,10 @@ func TestBadGet(t *testing.T) {
 	}
 }
 
-func cleanupSKV(db Store, f string) {
+func cleanupSKV(db io.Closer, f string) {
 	if db != nil {
 		db.Close()
 	}
+
 	os.Remove(f)
 }
