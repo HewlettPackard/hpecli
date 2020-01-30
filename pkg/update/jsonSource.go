@@ -28,11 +28,13 @@ type jsonResponse struct {
 
 func (j *jsonSource) validate() error {
 	if j.url == "" {
-		return fmt.Errorf("Remote URL must be set")
+		return fmt.Errorf("remote URL must be set")
 	}
+
 	if _, err := url.Parse(j.url); err != nil {
 		return fmt.Errorf("%s is invalid URL: %s", j.url, err.Error())
 	}
+
 	return nil
 }
 
@@ -43,12 +45,14 @@ func (j *jsonSource) get() (*remoteResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	req.Header.Add("Accept", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
@@ -59,6 +63,7 @@ func (j *jsonSource) get() (*remoteResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode json response: %v", err)
 	}
+
 	result, err := mapResult(jsonResponse)
 	if err != nil {
 		return nil, fmt.Errorf("unable to map json to remoteResponse: %v", err)
@@ -70,17 +75,20 @@ func (j *jsonSource) get() (*remoteResponse, error) {
 func decodeResponse(r io.Reader) (*jsonResponse, error) {
 	result := &jsonResponse{}
 	dec := json.NewDecoder(r)
+
 	if err := dec.Decode(&result); err != nil {
 		return nil, err
 	}
+
 	return result, nil
 }
 
 func mapResult(j *jsonResponse) (*remoteResponse, error) {
 	v, err := version.NewVersion(j.Version)
 	if err != nil {
-		return nil, fmt.Errorf("Didn't get a remote version. %v", err)
+		return nil, fmt.Errorf("did not get a remote version. %v", err)
 	}
+
 	downloadedPublicKey := decodeField("PublicKey", j.PublicKey)
 	downloadedCheckSum := decodeField("CheckSum", j.CheckSum)
 
@@ -99,11 +107,14 @@ func decodeField(name, value string) []byte {
 	if value == "" {
 		return nil
 	}
+
 	result, err := hex.DecodeString(value)
 	if err != nil {
 		logger.Warning("Unable to decode remote %s field.  It will be ignored and not used to verify the remote content", name)
 		logger.Debug("Problem Field: %s=%v", name, value)
-		result = nil
+
+		return nil
 	}
+
 	return result
 }

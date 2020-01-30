@@ -9,14 +9,11 @@ type skvstore struct {
 }
 
 func openSKV(filename string) (Store, error) {
-	var (
-		db  *skv.KVStore
-		err error
-	)
-	db, err = skv.Open(filename)
+	db, err := skv.Open(filename)
 	if err != nil {
 		return nil, err
 	}
+
 	return &skvstore{db: db}, nil
 }
 
@@ -26,6 +23,7 @@ func (s skvstore) Get(key string, value interface{}) error {
 	} else if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -33,6 +31,7 @@ func (s skvstore) Put(key string, value interface{}) error {
 	if value == nil {
 		return ErrBadValue
 	}
+
 	return s.db.Put(key, value)
 }
 
@@ -41,6 +40,7 @@ func (s skvstore) Delete(key string) error {
 	if err == skv.ErrNotFound {
 		return ErrNotFound
 	}
+
 	return err
 }
 

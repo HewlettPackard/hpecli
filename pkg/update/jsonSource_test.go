@@ -50,6 +50,7 @@ func TestValidate(t *testing.T) {
 
 func TestGetMalformedURL(t *testing.T) {
 	s := &jsonSource{url: "://bad.url"}
+
 	_, err := s.get()
 	if err == nil {
 		t.Fatal("expected err with bad url")
@@ -58,6 +59,7 @@ func TestGetMalformedURL(t *testing.T) {
 
 func TestGetNildURL(t *testing.T) {
 	s := &jsonSource{}
+
 	_, err := s.get()
 	if err == nil {
 		t.Fatal("expected err with bad url")
@@ -71,6 +73,7 @@ func TestGetStatusNotOK(t *testing.T) {
 	defer ts.Close()
 
 	s := &jsonSource{url: ts.URL}
+
 	_, err := s.get()
 	if err == nil {
 		t.Fatal("error expected, but didn't get one")
@@ -84,6 +87,7 @@ func TestGetDecodeErrorWithMalformedJSON(t *testing.T) {
 	defer ts.Close()
 
 	s := &jsonSource{url: ts.URL}
+
 	_, err := s.get()
 	if err == nil {
 		t.Fatal("expected err with bad json response")
@@ -97,6 +101,7 @@ func TestGetWithoutVersionInResponse(t *testing.T) {
 	defer ts.Close()
 
 	s := &jsonSource{url: ts.URL}
+
 	_, err := s.get()
 	if err == nil {
 		t.Fatal("expected err with missing version")
@@ -110,6 +115,7 @@ func TestGet(t *testing.T) {
 	defer ts.Close()
 
 	s := &jsonSource{url: ts.URL}
+
 	resp, err := s.get()
 	if err != nil {
 		t.Fatal("error not expected")
@@ -119,6 +125,7 @@ func TestGet(t *testing.T) {
 	if resp.version.String() != "0.1.1" {
 		t.Fatal("version didn't decode as expected")
 	}
+
 	if resp.updateURL != "http://another.url" {
 		t.Fatal("updateURL didn't decode as expected")
 	}
@@ -174,13 +181,12 @@ func TestMapResult(t *testing.T) {
 			if got.updateURL != c.updateURL {
 				t.Fatalf("updateURL doesn't match.  got=%v, want=%v", got.updateURL, c.updateURL)
 			}
-			if bytes.Compare(got.publicKey, c.publicKey) != 0 {
+			if !bytes.Equal(got.publicKey, c.publicKey) {
 				t.Fatalf("publicKey doesn't match.  got=%v, want=%v", got.publicKey, c.publicKey)
 			}
 			if !bytes.Equal(got.checkSum, c.checkSum) {
 				t.Fatalf("checkSum doesn't match.  got=%v, want=%v", got.checkSum, c.checkSum)
 			}
-
 		})
 	}
 }

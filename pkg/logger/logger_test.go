@@ -193,7 +193,6 @@ func TestSetLogLevel(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestColorWritesStdOut(t *testing.T) {
@@ -206,6 +205,7 @@ func TestColorWritesStdOut(t *testing.T) {
 	if err != nil {
 		t.Fatalf(errorFailedCompile, e.String(), err)
 	}
+
 	if g != "" {
 		t.Fatal("output should not be capture.  output should be written to stdout")
 	}
@@ -214,5 +214,6 @@ func TestColorWritesStdOut(t *testing.T) {
 func captureLoggerOutput(l Logger, format string, a []interface{}) string {
 	b := new(bytes.Buffer)
 	l(format, append(a, b)...)
+
 	return b.String()
 }

@@ -31,10 +31,10 @@ var cmdIloLogin = &cobra.Command{
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
-
 	if host == "" {
 		return fmt.Errorf("must provide --host or -h")
 	}
+
 	if !strings.HasPrefix(host, "http") {
 		host = fmt.Sprintf("http://%s", host)
 	}
@@ -57,10 +57,12 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("%v", err)
 	}
 	defer db.Close()
+
 	var val string
 	if err := db.Get(key(), &val); err != nil {
 		return fmt.Errorf("%v", err)
 	}
+
 	db.Close()
 
 	// if err != nil {
@@ -69,7 +71,6 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	// }
 
 	return nil
-
 }
 
 func key() string {

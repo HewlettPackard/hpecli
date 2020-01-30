@@ -17,7 +17,6 @@ func TestCmdCreated(t *testing.T) {
 }
 
 func TestIsFullVersion(t *testing.T) {
-
 	cases := []struct {
 		name     string
 		verbose  bool
@@ -54,7 +53,6 @@ func TestIsFullVersion(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestFullVersionOutput(t *testing.T) {

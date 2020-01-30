@@ -70,8 +70,10 @@ func IsUpdateAvailable() bool {
 	if err != nil {
 		logger.Debug("Unable to determine if a new version of the CLI is available")
 		logger.Debug("Error: %v", err)
+
 		return false
 	}
+
 	logger.Debug("json.UpdateAvailable = %v", res.UpdateAvailable)
 	logger.Debug("json.RemoteVersion   = %v", res.RemoteVersion)
 	logger.Debug("json.Message         = %v", res.Message)
@@ -106,7 +108,10 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 		return nil, fmt.Errorf("failed to parse %s, %s", lVersion, err.Error())
 	}
 
-	s.validate()
+	if err = s.validate(); err != nil {
+		return nil, err
+	}
+
 	resp, err := s.get()
 	if err != nil {
 		return nil, err

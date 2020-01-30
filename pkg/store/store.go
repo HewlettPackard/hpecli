@@ -86,14 +86,15 @@ func Open() (Store, error) {
 
 // NewStore returns a handle to a store.  Currently there is a single
 // backend - so you can use DefautlStore instead of this method
-func NewStore(st StorageEngine) (Store, error) {
+func NewStore(se StorageEngine) (Store, error) {
 	if keystore == "" {
 		keystore = keystoreLocation()
 	}
-	switch st {
-	case SKV:
+
+	if se == SKV {
 		return openSKV(keystore)
 	}
+
 	return nil, errors.New("unknown StorageEngine type specified")
 }
 
@@ -104,5 +105,6 @@ func keystoreLocation() string {
 	} else {
 		return path.Join(dir, filename)
 	}
+
 	return filename
 }
