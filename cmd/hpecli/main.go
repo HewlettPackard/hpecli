@@ -8,6 +8,7 @@ import (
 
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/oneview"
 	"github.com/HewlettPackard/hpecli/pkg/update"
 	"github.com/spf13/cobra"
 )
@@ -39,6 +40,7 @@ func main() {
 
 func addCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(ilo.Cmd)
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(oneview.Cmd)
 	rootCmd.AddCommand(update.Cmd)
+	rootCmd.AddCommand(versionCmd)
 }

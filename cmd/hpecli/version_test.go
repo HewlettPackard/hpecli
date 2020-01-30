@@ -18,10 +18,10 @@ func TestCmdCreated(t *testing.T) {
 
 func TestIsFullVersion(t *testing.T) {
 	cases := []struct {
-		name     string
 		verbose  bool
-		logLevel logger.LogLevel
 		want     bool
+		logLevel logger.LogLevel
+		name     string
 	}{
 		{
 			name:     "Default short",
@@ -80,6 +80,6 @@ func TestVersionOutput(t *testing.T) {
 	}
 }
 
-func TestRun(t *testing.T) {
+func TestRun(_ *testing.T) {
 	run(nil, nil)
 }
