@@ -19,7 +19,7 @@ var Cmd = &cobra.Command{
 	RunE:  runUpdate,
 }
 
-func runUpdate(cmd *cobra.Command, args []string) error {
+func runUpdate(_ *cobra.Command, _ []string) error {
 	localVer := version.Get()
 
 	resp, err := checkUpdate(&jsonSource{url: versionURL}, localVer)

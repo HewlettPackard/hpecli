@@ -1,17 +1,13 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-package ilo
+package oneview
 
 import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	Cmd.AddCommand(cmdILOLogin)
-}
-
 // Cmd represents the ilo command
-var Cmd = &cobra.Command{
-	Use:   "ilo",
-	Short: "Access to HPE iLO commands",
+var ovGetCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Get data from HPE OneView",
 }

@@ -10,13 +10,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"os"
 	"reflect"
 	"runtime"
-	"sync"
 	"testing"
-	"time"
 )
 
 const aValue = "this.is.a.value"
@@ -188,40 +185,6 @@ func TestNil(t *testing.T) {
 	if err := db.Get("key1", nil); err != nil {
 		t.Fatal(err)
 	}
-}
-
-func TestGoroutines(t *testing.T) {
-	db := openForTest(t)
-	defer cleanupStore(db, keystore)
-
-	rand.Seed(time.Now().UnixNano())
-
-	var wg sync.WaitGroup
-
-	for i := 0; i < 1000; i++ {
-		wg.Add(1)
-
-		go func() {
-			switch rand.Intn(3) {
-			case 0:
-				if err := db.Put("key1", "value1"); err != nil {
-					t.Fatal(err)
-				}
-			case 1:
-				var val string
-				if err := db.Get("key1", &val); err != nil && err != ErrNotFound {
-					t.Fatal(err)
-				}
-			case 2:
-				if err := db.Delete("key1"); err != nil && err != ErrNotFound {
-					t.Fatal(err)
-				}
-			}
-
-			wg.Done()
-		}()
-	}
-	wg.Wait()
 }
 
 func TestNewStore(t *testing.T) {
