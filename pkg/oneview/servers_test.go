@@ -32,6 +32,7 @@ func TestAPIKeyPutInRequest(t *testing.T) {
 
 func TestClientRequestFails(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
+
 	server := newTestServer(shURL, func(w http.ResponseWriter, r *http.Request) {
 		// cause the request to fail
 		w.WriteHeader(http.StatusBadRequest)
@@ -50,6 +51,7 @@ func TestClientRequestFails(t *testing.T) {
 
 func TestJSONMarshallFails(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
+
 	server := newTestServer(shURL, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		// malformed json will cause the request to fail

@@ -169,6 +169,7 @@ func TestCheckUpdate(t *testing.T) {
 }
 
 func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
+	const secondCall = 2
 	// erase cache for each test run
 	cacheResponse = nil
 	cc := 0
@@ -178,7 +179,7 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"version":"0.0.1"}`)
 		cc++
-		if cc > 1 {
+		if cc >= secondCall {
 			t.Fatal("Expected to only receive a single http request, but received 2")
 		}
 	})
