@@ -7,9 +7,11 @@ import (
 	"github.com/HewlettPackard/oneview-golang/rest"
 )
 
+const apiDefault = 800
+
 // NewOVClient creates a new OneView Client from username/password
 // Creating our own constructor method that defaults
-func NewOVClient(host string, username string, password string) *ov.OVClient {
+func NewOVClient(host, username, password string) *ov.OVClient {
 	return &ov.OVClient{
 		Client: rest.Client{
 			//Method:     rest.GET,
@@ -17,7 +19,7 @@ func NewOVClient(host string, username string, password string) *ov.OVClient {
 			Password:   password,
 			Domain:     "LOCAL",
 			APIKey:     "",
-			APIVersion: 800,
+			APIVersion: apiDefault,
 			SSLVerify:  true,
 			Endpoint:   host,
 			IfMatch:    "",
@@ -35,7 +37,7 @@ func NewOVClientFromAPIKey(host, apikey string) *ov.OVClient {
 			Password:   "",
 			Domain:     "LOCAL",
 			APIKey:     apikey,
-			APIVersion: 800,
+			APIVersion: apiDefault,
 			SSLVerify:  true,
 			Endpoint:   host,
 			IfMatch:    "",
