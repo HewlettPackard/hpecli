@@ -102,7 +102,7 @@ func TestDownloadUpdate(t *testing.T) {
 	}
 }
 
-//NOSONAR
+//nolint:gocritic NOSONAR // complex test method
 func TestGetResponseBody(t *testing.T) {
 	cases := []struct {
 		name        string
