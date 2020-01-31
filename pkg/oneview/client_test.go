@@ -15,7 +15,7 @@ func TestUserPassConstructor(t *testing.T) {
 	}
 
 	if ovc.Client.Endpoint != testHost {
-		t.Fatal("user wasn't populated in constructor")
+		t.Fatal("host wasn't populated in constructor")
 	}
 
 	if ovc.Client.User != testUser {
@@ -23,7 +23,7 @@ func TestUserPassConstructor(t *testing.T) {
 	}
 
 	if ovc.Client.Password != testPass {
-		t.Fatal("user wasn't populated in constructor")
+		t.Fatal("password wasn't populated in constructor")
 	}
 }
 
