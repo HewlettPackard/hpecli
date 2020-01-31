@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const testServerURL = "test-server"
+
 func TestUpdateWithNoUpdateAvailable(t *testing.T) {
 	cacheResponse = nil
 	mux := http.NewServeMux()
@@ -54,7 +56,7 @@ func TestDownloadUpdate(t *testing.T) {
 		{
 			name: "download works",
 			param: &CheckResponse{
-				URL: "test-server",
+				URL: testServerURL,
 			},
 			want:        "value doesn't matter as long as it matches",
 			errExpected: false,
@@ -69,7 +71,7 @@ func TestDownloadUpdate(t *testing.T) {
 		{
 			name: "expected error in incorrect checksum",
 			param: &CheckResponse{
-				URL:      "test-server",
+				URL:      testServerURL,
 				CheckSum: []byte{0x00},
 			},
 			errExpected: true,
@@ -85,7 +87,7 @@ func TestDownloadUpdate(t *testing.T) {
 
 			defer ts.Close()
 
-			if c.param.URL == "test-server" {
+			if c.param.URL == testServerURL {
 				c.param.URL = ts.URL
 			}
 
@@ -100,6 +102,7 @@ func TestDownloadUpdate(t *testing.T) {
 	}
 }
 
+//NOSONAR
 func TestGetResponseBody(t *testing.T) {
 	cases := []struct {
 		name        string
@@ -109,7 +112,7 @@ func TestGetResponseBody(t *testing.T) {
 	}{
 		{
 			name:        "read body works",
-			url:         "test-server",
+			url:         testServerURL,
 			want:        "value doesn't matter as long as it matches",
 			errExpected: false,
 		},
@@ -133,7 +136,7 @@ func TestGetResponseBody(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			if c.url == "test-server" {
+			if c.url == testServerURL {
 				c.url = ts.URL
 			}
 
