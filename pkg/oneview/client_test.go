@@ -6,10 +6,10 @@ import (
 
 const testHost = "host1"
 const testUser = "someUser"
-const testPassword = "somePassword"
+const testPass = "somePass"
 
 func TestUserPassConstructor(t *testing.T) {
-	ovc := NewOVClient(testHost, testUser, testPassword)
+	ovc := NewOVClient(testHost, testUser, testPass)
 	if ovc == nil {
 		t.Fatal("constructor returned nil")
 	}
@@ -22,7 +22,7 @@ func TestUserPassConstructor(t *testing.T) {
 		t.Fatal("user wasn't populated in constructor")
 	}
 
-	if ovc.Client.Password != testPassword {
+	if ovc.Client.Password != testPass {
 		t.Fatal("user wasn't populated in constructor")
 	}
 }
