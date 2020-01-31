@@ -9,6 +9,7 @@ import (
 )
 
 const errTempl = "got: %s, wanted: %s"
+const errMsg = "default values should be empty"
 
 func TestMakeAPIKey(t *testing.T) {
 	got := makeAPIKey("")
@@ -80,7 +81,7 @@ func TestGetAPIKeyFailDBOpenReturnsEmptyDefaults(t *testing.T) {
 	// fails because db is already open
 	host, key := apiKey()
 	if host != "" && key != "" {
-		t.Fatal("default values should be empty")
+		t.Fatal(errMsg)
 	}
 }
 
@@ -95,7 +96,7 @@ func TestDBDoesntHaveContextReturnsEmptyDefaults(t *testing.T) {
 
 	host, key := apiKey()
 	if host != "" && key != "" {
-		t.Fatal("default values should be empty")
+		t.Fatal(errMsg)
 	}
 }
 
@@ -116,7 +117,7 @@ func TestGetAPIKeyDBDoesntHaveHostReturnsEmptyDefaults(t *testing.T) {
 
 	host, key := apiKey()
 	if host != "" && key != "" {
-		t.Fatal("default values should be empty")
+		t.Fatal(errMsg)
 	}
 }
 
