@@ -65,11 +65,6 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 
 	db.Close()
 
-	// if err != nil {
-	// 	logger.Debug("Unable to loginmust provide --password or -p because of: %v", err)
-	// 	return fmt.Errorf("Unable to loginmust provide --password or -p")
-	// }
-
 	return nil
 }
 

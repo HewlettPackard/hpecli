@@ -81,8 +81,6 @@ func IsUpdateAvailable() bool {
 	logger.Debug("json.PublicKey       = %v", res.PublicKey)
 	logger.Debug("json.CheckSum        = %v", res.CheckSum)
 
-	// cache a copy
-	//response = res
 	return res.UpdateAvailable
 }
 
@@ -95,10 +93,10 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 		return &CheckResponse{}, nil
 	}
 
-	//Since the CLI is a short-lived process cache a copy and
-	//return the cached copy if we have already retrieved the
-	//results this session.
-	if nil != cacheResponse {
+	// Since the CLI is a short-lived process cache a copy and
+	// return the cached copy if we have already retrieved the
+	// results this session.
+	if cacheResponse != nil {
 		logger.Debug("cacheResponse present.  Not making additional remote check")
 		return cacheResponse, nil
 	}
@@ -117,14 +115,14 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 		return nil, err
 	}
 
-	var new bool
+	var updateAvailable bool
 	// If target > current, then update is available
 	if resp.version.GreaterThan(localVersion) {
-		new = true
+		updateAvailable = true
 	}
 
 	cacheResponse = &CheckResponse{
-		UpdateAvailable: new,
+		UpdateAvailable: updateAvailable,
 		RemoteVersion:   resp.version.String(),
 		Message:         resp.message,
 		URL:             resp.updateURL,

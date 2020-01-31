@@ -139,7 +139,7 @@ func TestRichTypes(t *testing.T) {
 	testGetPut(t, inval2, &outval2)
 }
 
-func testGetPut(t *testing.T, inval interface{}, outval interface{}) {
+func testGetPut(t *testing.T, inval, outval interface{}) {
 	db := openForTest(t)
 	defer cleanupStore(db, keystore)
 

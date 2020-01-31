@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	format             = "%v, %v, %v, all eyes on me!"
-	formatExp          = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.* \[(critical|warning|info|debug)\]\s* \d, \d, \d, all eyes on me!`
+	format    = "%v, %v, %v, all eyes on me!"
+	formatExp = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.* ` +
+		`\[(critical|warning|info|debug)\]\s* \d, \d, \d, all eyes on me!`
 	formatWOTimeExp    = `\d, \d, \d, all eyes on me!`
 	errorFailedCompile = "Failed to compile regexp '%v': %v"
 	errorInfoPattern   = "Info should produce a pattern '%v' but produces: %v"
@@ -141,6 +142,7 @@ func TestLogLevelToStrings(t *testing.T) {
 	}
 
 	for _, c := range cases {
+		c := c
 		t.Run(c.name, func(t *testing.T) {
 			got := c.t.String()
 			want := c.name
@@ -184,6 +186,7 @@ func TestSetLogLevel(t *testing.T) {
 	}
 
 	for _, c := range cases {
+		c := c
 		t.Run(c.name, func(t *testing.T) {
 			SetLogLevel(c.name)
 			got := Level
