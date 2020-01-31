@@ -134,7 +134,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
-//nolint:gocognit // long test method
+//nolint:gocognit  // long test method NOSONAR
 func TestMapResult(t *testing.T) {
 	cases := []struct {
 		name        string
