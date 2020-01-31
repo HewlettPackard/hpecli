@@ -38,6 +38,7 @@ func TestIsUpdateAvailableEmptyLocalVersion(t *testing.T) {
 	}
 
 	for _, c := range cases {
+		c := c
 		t.Run(c.name, func(t *testing.T) {
 			// erase cache for each test run
 			cacheResponse = nil
@@ -78,11 +79,12 @@ func TestCheckSkippedWithEnvSet(t *testing.T) {
 	got, _ := checkUpdate(&jsonSource{url: ""}, "")
 	want := &CheckResponse{}
 
-	//should return empty response because we skip everything
-	//when the env var is set
+	// should return empty response because we skip everything
+	// when the env var is set
 	verifyCheckResponse(t, got, want)
 }
 
+//nolint:funlen // long test method to handle multiple test cases
 func TestCheckUpdate(t *testing.T) {
 	cases := []struct {
 		name        string
@@ -110,9 +112,10 @@ func TestCheckUpdate(t *testing.T) {
 			},
 		},
 		{
-			name:       "check all fields",
-			localVer:   "0.1.2",
-			remoteJSON: `{"version":"0.1.1","message":"update available","url":"https://foo.bar/update","publickey":"00001111","checksum":"120E0A"}`,
+			name:     "check all fields",
+			localVer: "0.1.2",
+			remoteJSON: `{"version":"0.1.1","message":"update available","url":"https://foo.bar/update",` +
+				`"publickey":"00001111","checksum":"120E0A"}`,
 			want: &CheckResponse{
 				UpdateAvailable: false,
 				RemoteVersion:   "0.1.1",
@@ -136,6 +139,7 @@ func TestCheckUpdate(t *testing.T) {
 	}
 
 	for _, c := range cases {
+		c := c
 		t.Run(c.name, func(t *testing.T) {
 			// erase cache for each test run
 			cacheResponse = nil
@@ -208,7 +212,7 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 	}
 }
 
-func verifyCheckResponse(t *testing.T, got *CheckResponse, want *CheckResponse) {
+func verifyCheckResponse(t *testing.T, got, want *CheckResponse) {
 	const tmpl = "got: %v, wanted: %v"
 
 	if got.UpdateAvailable != want.UpdateAvailable {

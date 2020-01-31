@@ -32,7 +32,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if err = downloadUpdate(resp); err != nil {
+	if err := downloadUpdate(resp); err != nil {
 		return err
 	}
 
@@ -64,6 +64,7 @@ func getResponseBody(url string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
+	//nolint:bodyclose // body is closed above in downloadUpdate
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err

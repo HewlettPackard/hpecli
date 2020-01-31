@@ -55,7 +55,7 @@ func (j *jsonSource) get() (*remoteResponse, error) {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
@@ -110,7 +110,8 @@ func decodeField(name, value string) []byte {
 
 	result, err := hex.DecodeString(value)
 	if err != nil {
-		logger.Warning("Unable to decode remote %s field.  It will be ignored and not used to verify the remote content", name)
+		logger.Warning("Unable to decode remote %s field. "+
+			"It will be ignored and not used to verify the remote content", name)
 		logger.Debug("Problem Field: %s=%v", name, value)
 
 		return nil

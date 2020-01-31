@@ -39,6 +39,7 @@ func TestValidate(t *testing.T) {
 	}
 
 	for _, c := range cases {
+		c := c
 		t.Run(c.name, func(t *testing.T) {
 			err := c.source.validate()
 			if err == nil && c.errExpected {
@@ -96,7 +97,8 @@ func TestGetDecodeErrorWithMalformedJSON(t *testing.T) {
 
 func TestGetWithoutVersionInResponse(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, `{"message":"Some Message","url":"http://some.url","publickey":"00:11:22:33","checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
+		fmt.Fprintln(w, `{"message":"Some Message","url":"http://some.url","publickey":"00:11:22:33",`+
+			`"checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
 	}))
 	defer ts.Close()
 
@@ -110,7 +112,8 @@ func TestGetWithoutVersionInResponse(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, `{"version":"0.1.1","message":"Some Message","url":"http://another.url","publickey":"00:11:22:33","checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
+		fmt.Fprintln(w, `{"version":"0.1.1","message":"Some Message","url":"http://another.url","publickey":"00:11:22:33",`+
+			`"checksum":"120EA8A25E5D487BF68B5F7096440019"}`)
 	}))
 	defer ts.Close()
 
@@ -131,6 +134,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
+//nolint:gocognit // long test method
 func TestMapResult(t *testing.T) {
 	cases := []struct {
 		name        string
@@ -148,8 +152,9 @@ func TestMapResult(t *testing.T) {
 			errExpected: true,
 		},
 		{
-			name:        "fields match",
-			json:        &jsonResponse{Version: "0.1.1", Message: "Some Message", UpdateURL: "http://github.com/update", PublicKey: "00112233", CheckSum: "120E0A8A25E5"},
+			name: "fields match",
+			json: &jsonResponse{Version: "0.1.1", Message: "Some Message", UpdateURL: "http://github.com/update",
+				PublicKey: "00112233", CheckSum: "120E0A8A25E5"},
 			version:     ver("0.1.1"),
 			message:     "Some Message",
 			updateURL:   "http://github.com/update",
@@ -160,6 +165,7 @@ func TestMapResult(t *testing.T) {
 	}
 
 	for _, c := range cases {
+		c := c
 		t.Run(c.name, func(t *testing.T) {
 			got, err := mapResult(c.json)
 			if err == nil && c.errExpected {
@@ -194,4 +200,10 @@ func TestMapResult(t *testing.T) {
 func ver(v string) *version.Version {
 	r, _ := version.NewVersion(v)
 	return r
+}
+
+func TestDecodeField(t *testing.T) {
+	if decodeField("key", "ZZZ") != nil {
+		t.Fatal("expected nil on failure")
+	}
 }

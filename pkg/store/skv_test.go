@@ -37,7 +37,7 @@ func TestBadGet(t *testing.T) {
 	}
 
 	var val int
-	//put a string, now try and retrieve as int
+	// put a string, now try and retrieve as int
 	if err := db.Get("key1", &val); err == nil {
 		t.Fatal("didn't report error on bad get")
 	}

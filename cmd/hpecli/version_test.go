@@ -44,6 +44,7 @@ func TestIsFullVersion(t *testing.T) {
 	}
 
 	for _, c := range cases {
+		c := c
 		t.Run(c.name, func(t *testing.T) {
 			verbose = c.verbose
 			logger.Level = c.logLevel
@@ -56,8 +57,8 @@ func TestIsFullVersion(t *testing.T) {
 }
 
 func TestFullVersionOutput(t *testing.T) {
-	//if values aren't injected at compile time
-	//then everything just defaults to 0
+	// if values aren't injected at compile time
+	// then everything just defaults to 0
 	want := "0.0.0:0:0"
 	verbose = true
 
@@ -68,8 +69,8 @@ func TestFullVersionOutput(t *testing.T) {
 }
 
 func TestVersionOutput(t *testing.T) {
-	//if values aren't injected at compile time
-	//then everything just defaults to 0
+	// if values aren't injected at compile time
+	// then everything just defaults to 0
 	want := "0.0.0"
 	verbose = false
 	logger.Level = logger.InfoLevel
