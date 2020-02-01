@@ -65,6 +65,7 @@ func (level LogLevel) String() string {
 	case AlwaysLevel:
 		return "always"
 	}
+
 	return "unknown"
 }
 
@@ -117,20 +118,23 @@ func SetLogLevel(logLevel string) {
 		Level = DebugLevel
 	default:
 		Level = WarningLevel
-		Warning("%s is not a valid logging level.  Defaulting to \"warn\"", logLevel)
+		Warning("%s is not a valid logging level.  Defaulting to \"%s\"", logLevel, Level)
 	}
 }
 
 func write(lvl LogLevel, format string, a ...interface{}) {
 	if Level >= lvl {
-		a, w := extractLoggerArgs(format, a...)
+		i, w := extractLoggerArgs(a...)
+
 		if !strings.Contains(format, "\n") {
 			format = fmt.Sprintf("%s%s", format, "\n")
 		}
+
 		if Level >= DebugLevel {
 			format = prefixDebug(format, lvl)
 		}
-		s := fmt.Sprintf(format, a...)
+
+		s := fmt.Sprintf(format, i...)
 
 		if Color {
 			if CriticalLevel == lvl {
@@ -138,17 +142,19 @@ func write(lvl LogLevel, format string, a ...interface{}) {
 			} else {
 				s = color.WhiteString(s)
 			}
+
 			if !TestMode {
 				w = color.Output
 			}
-
 		}
-		fmt.Fprintf(w, s)
+
+		fmt.Fprint(w, s)
 	}
 }
 
-func extractLoggerArgs(format string, a ...interface{}) ([]interface{}, io.Writer) {
+func extractLoggerArgs(a ...interface{}) ([]interface{}, io.Writer) {
 	var w io.Writer = os.Stdout
+
 	if n := len(a); n > 0 {
 		// extract an io.Writer at the end of a
 		if value, ok := a[n-1].(io.Writer); ok {
@@ -163,5 +169,6 @@ func extractLoggerArgs(format string, a ...interface{}) ([]interface{}, io.Write
 func prefixDebug(format string, level LogLevel) string {
 	t := time.Now()
 	rfct := t.Format(time.RFC3339)
+
 	return fmt.Sprintf("%s [%s]  %s", rfct, level, format)
 }

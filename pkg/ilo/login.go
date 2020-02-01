@@ -11,45 +11,45 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	host     string
-	username string
+var iloLoginData struct {
+	host,
+	username,
 	password string
-)
+}
 
 func init() {
-	cmdIloLogin.Flags().StringVar(&host, "host", "", "ilo ip address")
-	cmdIloLogin.Flags().StringVarP(&username, "username", "u", "", "ilo username")
-	cmdIloLogin.Flags().StringVarP(&password, "password", "p", "", "ilo passowrd")
+	cmdILOLogin.Flags().StringVar(&iloLoginData.host, "host", "", "ilo ip address")
+	cmdILOLogin.Flags().StringVarP(&iloLoginData.username, "username", "u", "", "ilo username")
+	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo passowrd")
 }
 
-// getCmd represents the get command
-var cmdIloLogin = &cobra.Command{
+// cmdIloLogin represents the get command
+var cmdILOLogin = &cobra.Command{
 	Use:   "login",
 	Short: "Login to iLO: hpecli ilo login",
-	RunE:  runLogin,
+	RunE:  runILOLogin,
 }
 
-func runLogin(cmd *cobra.Command, args []string) error {
-
-	if host == "" {
+func runILOLogin(_ *cobra.Command, _ []string) error {
+	if iloLoginData.host == "" {
 		return fmt.Errorf("must provide --host or -h")
 	}
-	if !strings.HasPrefix(host, "http") {
-		host = fmt.Sprintf("http://%s", host)
+
+	if !strings.HasPrefix(iloLoginData.host, "http") {
+		iloLoginData.host = fmt.Sprintf("http://%s", iloLoginData.host)
 	}
 
-	if username == "" {
+	if iloLoginData.username == "" {
 		return fmt.Errorf("must provide --username or -u")
 	}
 
-	if password == "" {
+	if iloLoginData.password == "" {
 		// this really isn't secure to provide on the command line
 		// need to provide a way to read from stdin
 		return fmt.Errorf("must provide --password or -p")
 	}
 
-	fmt.Println(fmt.Sprintf("Attempting login with user: %v, at: %v", username, host))
+	logger.Debug("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
 
 	db, err := store.Open()
 	if err != nil {
@@ -57,21 +57,17 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("%v", err)
 	}
 	defer db.Close()
+
 	var val string
 	if err := db.Get(key(), &val); err != nil {
 		return fmt.Errorf("%v", err)
 	}
+
 	db.Close()
 
-	// if err != nil {
-	// 	logger.Debug("Unable to loginmust provide --password or -p because of: %v", err)
-	// 	return fmt.Errorf("Unable to loginmust provide --password or -p")
-	// }
-
 	return nil
-
 }
 
 func key() string {
-	return fmt.Sprintf("hpecli_ilo_token_%s", host)
+	return fmt.Sprintf("hpecli_ilo_token_%s", iloLoginData.host)
 }
