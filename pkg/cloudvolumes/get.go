@@ -95,7 +95,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 			}
 			db.Delete(key())
 			db.Close()
-			return fmt.Errorf("Stored token has expired, please login")	
+			return fmt.Errorf("Stored token has expired, please login %v", response.StatusCode)	
 		}
 		if response.StatusCode == 200 {
 			body, err := ioutil.ReadAll(response.Body)
