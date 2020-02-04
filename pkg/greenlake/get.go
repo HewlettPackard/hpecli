@@ -33,33 +33,24 @@ var glGetCmd = &cobra.Command{
 
 func runGlGet(_ *cobra.Command, _ []string) error {
 	logger.Info("greenlake/get called")
-	//cmd.SilenceUsage = true
-	//cmd.SilenceErrors = true
-	// if !strings.HasPrefix(glLoginData.host, "http") {
-	// 	glLoginData.host = fmt.Sprintf("http://%s", glLoginData.host)
-	// }
 	host, tenantID, apiKey := getTokenTenantID()
-	println("host %s api key is : ", host, apiKey)
 	glc := NewGLClientFromAPIKey(host, tenantID, apiKey)
-	println("NewGLClientFromAPIKey key is host %s TenantID %s accesstoken %s : ", host, tenantID, apiKey)
 
 	switch getPath {
 	case "users":
 		body, err := glc.GetUsers("Users")
-		println("body  is : ", body)
 		if err != nil {
 			logger.Debug("unable to get the users with the supplied credentials: %v", err)
 			return err
 		}
-		var result []User
-		if err := json.Unmarshal(body, &result); err != nil {
-			return err
-		}
-		resstring := string(body)
-		println("resstring  is : ", resstring)
 		if getJSONResult {
+			resstring := string(body)
 			fmt.Println(resstring)
 		} else {
+			var result []User
+			if err := json.Unmarshal(body, &result); err != nil {
+				return err
+			}
 			for _, user := range result {
 				fmt.Printf("Name: %s : Email: %s Active: %t\n", user.DisplayName, user.UserName, user.Active)
 			}

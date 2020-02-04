@@ -44,7 +44,7 @@ func getTokenTenantID() (host, tenantID, apiKey string) {
 
 	var apiKeyValue string
 	if err := db.Get(apiKey, &apiKeyValue); err != nil {
-		logger.Debug("Unable to retrieve current context.")
+		logger.Debug("Unable to retrieve access token from current context.")
 		return "", "", ""
 	}
 
@@ -52,14 +52,14 @@ func getTokenTenantID() (host, tenantID, apiKey string) {
 
 	var tenantIDValue string
 	if err := db.Get(tenantID, &tenantIDValue); err != nil {
-		logger.Debug("Unable to retrieve current context.")
+		logger.Debug("Unable to retrieve tenant ID from current context.")
 		return "", "", ""
 	}
 
 	return contextValue, tenantIDValue, apiKeyValue
 }
 
-func setTokenTentanID(host, glTenantID, glAccessToken string) error {
+func setTokenTenantID(host, glTenantID, glAccessToken string) error {
 	db, e := store.Open()
 	if e != nil {
 		return fmt.Errorf("unable to open keystore: %w", e)

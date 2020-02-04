@@ -29,7 +29,7 @@ func init() {
 	_ = glLoginCmd.MarkFlagRequired("tenantid")
 }
 
-// getCmd represents the get command
+// glLoginCmd represents the green lake login command
 var glLoginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login to greenlake: hpecli greenlake login",
@@ -39,8 +39,6 @@ var glLoginCmd = &cobra.Command{
 func runGLLogin(_ *cobra.Command, _ []string) error {
 
 	logger.Info("greenlake/login called")
-	//cmd.SilenceUsage = true
-	//cmd.SilenceErrors = true
 
 	if !strings.HasPrefix(glLoginData.host, "http") {
 		glLoginData.host = fmt.Sprintf("http://%s", glLoginData.host)
@@ -58,14 +56,12 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 
 	glc.APIKey = s.AccessToken
 	glc.TenantID = glLoginData.tenantID
-	println("Access Token", s.AccessToken)
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
-	if err = setTokenTentanID(glLoginData.host, glLoginData.tenantID, s.AccessToken); err != nil {
+	if err = setTokenTenantID(glLoginData.host, glLoginData.tenantID, s.AccessToken); err != nil {
 		logger.Warning("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
-		println("Successfully logged into GreenLake: ", glLoginData.host)
 		logger.Debug("Successfully logged into GreenLake: %s", glLoginData.host)
 	}
 

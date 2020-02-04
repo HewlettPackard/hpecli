@@ -14,6 +14,7 @@ func TestClientRequestFails(t *testing.T) {
 	const accessToken = "HERE_IS_A_ID"
 	const tenantID = "dummy_tenent_id"
 	getPath = "users"
+	getJSONResult = false
 
 	server := newTestServer(userURL, func(w http.ResponseWriter, r *http.Request) {
 		// cause the request to fail
@@ -23,7 +24,29 @@ func TestClientRequestFails(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	_ = setTokenTentanID(server.URL, tenantID, accessToken)
+	_ = setTokenTenantID(server.URL, tenantID, accessToken)
+
+	// check is above in the http request handler side
+	if err := runGlGet(nil, nil); err == nil {
+		t.Fatal("expected to get an error")
+	}
+}
+
+func TestPrintJSONResponse(t *testing.T) {
+	const accessToken = "HERE_IS_A_ID"
+	const tenantID = "dummy_tenent_id"
+	getPath = "users"
+	getJSONResult = true
+
+	server := newTestServer(userURL, func(w http.ResponseWriter, r *http.Request) {
+		// cause the request to fail
+		w.WriteHeader(http.StatusBadRequest)
+	})
+
+	defer server.Close()
+
+	// set context to the test server host
+	_ = setTokenTenantID(server.URL, tenantID, accessToken)
 
 	// check is above in the http request handler side
 	if err := runGlGet(nil, nil); err == nil {
@@ -35,6 +58,7 @@ func TestJSONMarshallFails(t *testing.T) {
 	const accessToken = "HERE_IS_A_ID"
 	const tenantID = "dummy_tenent_id"
 	getPath = "users"
+	getJSONResult = false
 
 	server := newTestServer(userURL, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -45,7 +69,7 @@ func TestJSONMarshallFails(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	_ = setTokenTentanID(server.URL, tenantID, accessToken)
+	_ = setTokenTenantID(server.URL, tenantID, accessToken)
 
 	// check is above in the http request handler side
 	if err := runGlGet(nil, nil); err == nil {

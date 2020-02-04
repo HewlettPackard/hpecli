@@ -54,7 +54,7 @@ func TestSetAPIKey(t *testing.T) {
 
 	const v1 = "valueToStore"
 
-	_ = setTokenTentanID(h1, t1, v1)
+	_ = setTokenTenantID(h1, t1, v1)
 
 	db, err := store.Open()
 	if err != nil {
@@ -83,7 +83,7 @@ func TestGetTokenTenantID(t *testing.T) {
 
 	const v1 = "valueToStore"
 
-	_ = setTokenTentanID(h1, t1, v1)
+	_ = setTokenTenantID(h1, t1, v1)
 
 	gotHost, gotTenantID, gotAPIKey := getTokenTenantID()
 
@@ -133,7 +133,7 @@ func TestGetAPIKeyDBDoesntHaveHostReturnsEmptyDefaults(t *testing.T) {
 
 	const v1 = "value1"
 
-	_ = setTokenTentanID(h1, t1, v1)
+	_ = setTokenTenantID(h1, t1, v1)
 
 	db, err := store.Open()
 	if err != nil {
@@ -157,7 +157,7 @@ func TestSetAPIKeyFailWithDBOpen(t *testing.T) {
 
 	defer db.Close()
 
-	err = setTokenTentanID("", "", "")
+	err = setTokenTenantID("", "", "")
 	if err == nil {
 		t.Fatal("expected error that db was already open")
 	}
