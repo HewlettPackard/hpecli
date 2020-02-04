@@ -3,121 +3,71 @@
 package greenlake
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/greenlake/client"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
-	"github.com/HewlettPackard/hpecli/pkg/store"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
-var (
-	host      string
-	userID    string
-	secretKey string
-	tenantID  string
+var glLoginData struct {
+	host,
+	userID,
+	secretKey,
+	tenantID,
 	grantType string
-)
+}
 
 func init() {
-	cmdGreenLakeLogin.Flags().StringVar(&host, "host", "", "greenlake ip address")
-	cmdGreenLakeLogin.Flags().StringVarP(&userID, "userid", "u", "", "greenlake userID")
-	cmdGreenLakeLogin.Flags().StringVarP(&secretKey, "secretkey", "s", "", "greenlake secretKey")
-	cmdGreenLakeLogin.Flags().StringVarP(&tenantID, "tenantid", "t", "", "greenlake tenantID")
+	glLoginCmd.Flags().StringVar(&glLoginData.host, "host", "", "greenlake host/ip address")
+	glLoginCmd.Flags().StringVarP(&glLoginData.userID, "userid", "u", "", "greenlake userid")
+	glLoginCmd.Flags().StringVarP(&glLoginData.secretKey, "secretkey", "s", "", "greenlake secretkey")
+	glLoginCmd.Flags().StringVarP(&glLoginData.tenantID, "tenantid", "t", "", "greenlake tenantid")
+	_ = glLoginCmd.MarkFlagRequired("host")
+	_ = glLoginCmd.MarkFlagRequired("userid")
+	_ = glLoginCmd.MarkFlagRequired("secretkey")
+	_ = glLoginCmd.MarkFlagRequired("tenantid")
 }
 
 // getCmd represents the get command
-var cmdGreenLakeLogin = &cobra.Command{
+var glLoginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login to greenlake: hpecli greenlake login",
-	RunE:  runLogin,
+	RunE:  runGLLogin,
 }
 
-func runLogin(cmd *cobra.Command, args []string) error {
+func runGLLogin(_ *cobra.Command, _ []string) error {
 
 	logger.Info("greenlake/login called")
-	cmd.SilenceUsage = true
-	cmd.SilenceErrors = true
+	//cmd.SilenceUsage = true
+	//cmd.SilenceErrors = true
 
-	reader := bufio.NewReader(os.Stdin)
-	if host == "" {
-		fmt.Print("Enter host:")
-		host, _ = reader.ReadString('\n')
-		if host == "\n" {
-			logger.Debug("Unable to login must provide --host or -h")
-			return fmt.Errorf("must provide --host or -h")
-		}
-	}
-	if !strings.HasPrefix(host, "http") {
-		host = fmt.Sprintf("http://%s", host)
+	if !strings.HasPrefix(glLoginData.host, "http") {
+		glLoginData.host = fmt.Sprintf("http://%s", glLoginData.host)
 	}
 
-	if userID == "" {
-		fmt.Print("Enter userID:")
-		userID, _ = reader.ReadString('\n')
-		if userID == "\n" {
-			logger.Debug("Unable to login must provide --userID or -u")
-			return fmt.Errorf("must provide --userID or -u")
-		}
-	}
-	if secretKey == "" {
-		fmt.Print("Enter secretKey:")
-		bytePassword, err := terminal.ReadPassword(0)
-		if err == nil {
-			//fmt.Println("\nPassword typed: " + string(bytePassword))
-		}
-		secretKey = string(bytePassword)
-		if secretKey == "" {
-			logger.Debug("Unable to login must provide --secretkey or -s")
-			return fmt.Errorf("must provide --secretkey or -s")
-		}
-	}
+	logger.Debug("Attempting login with user: %v, at: %v", glLoginData.userID, glLoginData.host)
 
-	if tenantID == "" {
-		fmt.Print("\nEnter tenantID: ")
-		tenantID, _ = reader.ReadString('\n')
-		if tenantID == "\n" {
-			logger.Debug("Unable to login must provide --tenantID or -t")
-			return fmt.Errorf("must provide --tenantID or -t")
-		}
-	}
+	glc := NewGreenLakeClient("client_credentials", glLoginData.userID, glLoginData.secretKey, glLoginData.tenantID, glLoginData.host)
 
-	fmt.Println(fmt.Sprintf("Attempting login with user: %v, at: %v", userID, host))
-
-	grantType = "client_credentials"
-	client := client.NewGreenLakeClient(grantType, userID, secretKey, tenantID, host)
-	body, err := client.GetToken()
+	s, err := glc.GetToken()
 	if err != nil {
-		logger.Debug("unable to get the token with the supplied credentials: %v", err)
+		logger.Warning("Unable to login with supplied credentials to GreenLake at: %s", glLoginData.host)
 		return err
 	}
-	var result map[string]string
 
-	json.Unmarshal(body, &result)
+	glc.APIKey = s.AccessToken
+	glc.TenantID = glLoginData.tenantID
+	println("Access Token", s.AccessToken)
 
-	token := string(result["access_token"])
-
-	key1 := "hpecli_greenlake_token_" + host
-	key2 := "hpecli_greenlake_tenantid_" + host
-
-	db, err := store.Open()
-	if err != nil {
-		logger.Debug("unable to open keystore: %v", err)
-		return fmt.Errorf("%v", err)
+	// change context to current host and save the session ID as the API key
+	// for subsequent requests
+	if err = setTokenTentanID(glLoginData.host, glLoginData.tenantID, s.AccessToken); err != nil {
+		logger.Warning("Successfully logged into GreenLake, but was unable to save the session data")
+	} else {
+		println("Successfully logged into GreenLake: ", glLoginData.host)
+		logger.Debug("Successfully logged into GreenLake: %s", glLoginData.host)
 	}
 
-	db.Put(key1, token)
-	db.Put(key2, tenantID)
-	db.Close()
 	return nil
-
-}
-
-func key() string {
-	return fmt.Sprintf("hpecli_greenlake_token_%s", host)
 }

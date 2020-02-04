@@ -3,28 +3,52 @@
 package greenlake
 
 import (
+	"fmt"
+	"net/http"
 	"testing"
-
-	"github.com/spf13/cobra"
 )
 
-func Test_runGet(t *testing.T) {
-	type args struct {
-		cmd  *cobra.Command
-		args []string
+const userURL = "/scim/v1/tenant/dummy_tenent_id/Users"
+
+func TestClientRequestFails(t *testing.T) {
+	const accessToken = "HERE_IS_A_ID"
+	const tenantID = "dummy_tenent_id"
+	getPath = "users"
+
+	server := newTestServer(userURL, func(w http.ResponseWriter, r *http.Request) {
+		// cause the request to fail
+		w.WriteHeader(http.StatusBadRequest)
+	})
+
+	defer server.Close()
+
+	// set context to the test server host
+	_ = setTokenTentanID(server.URL, tenantID, accessToken)
+
+	// check is above in the http request handler side
+	if err := runGlGet(nil, nil); err == nil {
+		t.Fatal("expected to get an error")
 	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := runGet(tt.args.cmd, tt.args.args); (err != nil) != tt.wantErr {
-				t.Errorf("runGet() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+}
+
+func TestJSONMarshallFails(t *testing.T) {
+	const accessToken = "HERE_IS_A_ID"
+	const tenantID = "dummy_tenent_id"
+	getPath = "users"
+
+	server := newTestServer(userURL, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		// malformed json will cause the request to fail
+		fmt.Fprint(w, `{"type":"server":["bad":"broken"]}`)
+	})
+
+	defer server.Close()
+
+	// set context to the test server host
+	_ = setTokenTentanID(server.URL, tenantID, accessToken)
+
+	// check is above in the http request handler side
+	if err := runGlGet(nil, nil); err == nil {
+		t.Fatal("expected to get an error")
 	}
 }

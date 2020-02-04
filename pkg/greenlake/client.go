@@ -1,6 +1,6 @@
 //(C) Copyright 2019 Hewlett Packard Enterprise Development LP
 
-package client
+package greenlake
 
 import (
 	"bytes"
@@ -18,6 +18,7 @@ type Client struct {
 	ClientSecret string
 	TenantID     string
 	Host         string
+	APIKey       string
 }
 
 // Token structure
@@ -52,11 +53,27 @@ func NewGreenLakeClient(grantType, clientID, secretKey, tenantID, host string) *
 		ClientSecret: secretKey,
 		TenantID:     tenantID,
 		Host:         host,
+		APIKey:       "",
+	}
+}
+
+// NewGLClientFromAPIKey creates a new GreenLake Client from existing API sessions key
+func NewGLClientFromAPIKey(host, tenantID, apikey string) *Client {
+	return &Client{
+		//Method:     rest.GET,
+		GrantType:    "client_credentials",
+		ClientID:     "",
+		ClientSecret: "LOCAL",
+		APIKey:       apikey,
+		TenantID:     tenantID,
+		Host:         host,
+		//Option:     rest.Options{},
 	}
 }
 
 // GetToken api
-func (c *Client) GetToken() ([]byte, error) {
+func (c *Client) GetToken() (Token, error) {
+	var result Token
 	url := fmt.Sprintf(c.Host + "/identity/v1/token")
 	jsonData := map[string]string{"grant_type": c.GrantType,
 		"client_id":     c.ClientID,
@@ -65,22 +82,23 @@ func (c *Client) GetToken() ([]byte, error) {
 	jsonValue, _ := json.Marshal(jsonData)
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonValue))
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	request.Header.Set("Content-Type", "application/json")
 	body, err := c.doRequest(request)
-	return body, err
+	json.Unmarshal(body, &result)
+	return result, err
 }
 
 //GetUsers to list users
-func (c *Client) GetUsers(path, token string) ([]byte, error) {
+func (c *Client) GetUsers(path string) ([]byte, error) {
 	url := fmt.Sprintf(c.Host + "/scim/v1/tenant/" + c.TenantID + "/" + path)
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 	request.Header.Set("Accept", "application/scim+json")
-	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("Authorization", "Bearer "+c.APIKey)
 	body, err := c.doRequest(request)
 	return body, err
 }
@@ -96,6 +114,10 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("error in response and response status: %s", response.Status)
+	}
+
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
