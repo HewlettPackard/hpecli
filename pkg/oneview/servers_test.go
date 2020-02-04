@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/store"
 )
 
 const shURL = "/rest/server-hardware"
@@ -27,7 +29,7 @@ func TestAPIKeyPutInServerRequest(t *testing.T) {
 	_ = setAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	_ = getServersByName()
+	_ = getServerHardware()
 }
 
 func TestClientServerRequestFails(t *testing.T) {
@@ -44,7 +46,7 @@ func TestClientServerRequestFails(t *testing.T) {
 	_ = setAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	if err := whichServers(nil, nil); err == nil {
+	if err := getServers(nil, nil); err == nil {
 		t.Fatal("expected to get an error")
 	}
 }
@@ -64,7 +66,18 @@ func TestServerJSONMarshallFails(t *testing.T) {
 	_ = setAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	if err := whichServers(nil, nil); err == nil {
+	if err := getServerHardware(); err == nil {
 		t.Fatal("expected to get an error")
+	}
+}
+
+func TestMissingAPIKey(t *testing.T) {
+	// when the db is open, the get apikey will fail
+	db, _ := store.Open()
+	defer db.Close()
+
+	err := getServerHardware()
+	if err == nil {
+		t.Fatal("should have retrieved error")
 	}
 }

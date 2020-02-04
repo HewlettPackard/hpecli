@@ -23,58 +23,36 @@ func init() {
 var serversCmd = &cobra.Command{
 	Use:   "servers",
 	Short: "Get servers from OneView: hpecli oneview get servers",
-	RunE:  whichServers,
+	RunE:  getServers,
 }
 
-func whichServers(_ *cobra.Command, _ []string) error {
+func getServers(_ *cobra.Command, _ []string) error {
+	return getServerHardware()
+}
+
+func getServerHardware() error {
+	host, apiKey := apiKey()
+	if apiKey == "" {
+		logger.Debug("apiKey for host: %s not set", host)
+		return fmt.Errorf("unable to retrieve the last login for OneView." +
+			"Please login to OneView using: hpecli login OneView")
+	}
+
+	ovc := NewOVClientFromAPIKey(host, apiKey)
+
+	logger.Always("Retrieving data from: %s", host)
+
+	var (
+		sh  interface{}
+		err error
+	)
+
 	if ovServersData.name != "" {
-		return getServersByName()
+		sh, err = ovc.GetServerHardwareByName(ovServersData.name)
+	} else {
+		sh, err = ovc.GetServerHardwareList(nil, "", "", "", "")
 	}
 
-	return getServers()
-}
-
-func getServersByName() error {
-	host, apiKey := apiKey()
-	if apiKey == "" {
-		logger.Debug("apiKey for host: %s not set", host)
-		return fmt.Errorf("unable to retrieve the last login for OneView." +
-			"Please login to OneView using: hpecli login OneView")
-	}
-
-	ovc := NewOVClientFromAPIKey(host, apiKey)
-
-	logger.Always("Retrieving data from: %s", host)
-
-	sh, err := ovc.GetServerHardwareByName(ovServersData.name)
-	if err != nil {
-		logger.Warning("Unable to login with supplied credentials to OneView at: %s", host)
-		return err
-	}
-
-	out, err := json.MarshalIndent(sh, "", "  ")
-	if err != nil {
-		logger.Warning("Unable to output data as JSON.  Please try the command again.")
-	}
-
-	logger.Always("%s", out)
-
-	return nil
-}
-
-func getServers() error {
-	host, apiKey := apiKey()
-	if apiKey == "" {
-		logger.Debug("apiKey for host: %s not set", host)
-		return fmt.Errorf("unable to retrieve the last login for OneView." +
-			"Please login to OneView using: hpecli login OneView")
-	}
-
-	ovc := NewOVClientFromAPIKey(host, apiKey)
-
-	logger.Always("Retrieving data from: %s", host)
-
-	sh, err := ovc.GetServerHardwareList(nil, "", "", "", "")
 	if err != nil {
 		logger.Warning("Unable to login with supplied credentials to OneView at: %s", host)
 		return err
