@@ -4,27 +4,55 @@ package oneview
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/spf13/cobra"
 )
 
+var ovServersData struct {
+	name string
+}
+
 func init() {
-	ovGetCmd.AddCommand(servers)
+	ovGetCmd.AddCommand(serversCmd)
+	serversCmd.Flags().StringVar(&ovServersData.name, "name", "", "name of the server to retrieve")
 }
 
 // login represents the oneview login command
-var servers = &cobra.Command{
+var serversCmd = &cobra.Command{
 	Use:   "servers",
 	Short: "Get servers from OneView: hpecli oneview get servers",
-	RunE:  runGetServers,
+	RunE:  getServers,
 }
 
-func runGetServers(_ *cobra.Command, _ []string) error {
+func getServers(_ *cobra.Command, _ []string) error {
+	return getServerHardware()
+}
+
+func getServerHardware() error {
 	host, apiKey := apiKey()
+	if apiKey == "" {
+		logger.Debug("apiKey for host: %s not set", host)
+		return fmt.Errorf("unable to retrieve the last login for OneView." +
+			"Please login to OneView using: hpecli login OneView")
+	}
+
 	ovc := NewOVClientFromAPIKey(host, apiKey)
 
-	sh, err := ovc.GetServerHardwareList(nil, "", "", "", "")
+	logger.Always("Retrieving data from: %s", host)
+
+	var (
+		sh  interface{}
+		err error
+	)
+
+	if ovServersData.name != "" {
+		sh, err = ovc.GetServerHardwareByName(ovServersData.name)
+	} else {
+		sh, err = ovc.GetServerHardwareList(nil, "", "", "", "")
+	}
+
 	if err != nil {
 		logger.Warning("Unable to login with supplied credentials to OneView at: %s", host)
 		return err
