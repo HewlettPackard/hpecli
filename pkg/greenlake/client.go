@@ -118,7 +118,7 @@ func (c *Client) GetUsers(path string) ([]byte, error) {
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	// Ignore invalid certificate
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 	}
 	client := &http.Client{Transport: tr}
 	response, err := client.Do(req)
