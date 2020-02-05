@@ -10,27 +10,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ovServersData struct {
+var ovEnclosureData struct {
 	name string
 }
 
 func init() {
-	ovGetCmd.AddCommand(serversCmd)
-	serversCmd.Flags().StringVar(&ovServersData.name, "name", "", "name of the server to retrieve")
+	ovGetCmd.AddCommand(enclosuresCmd)
+	enclosuresCmd.Flags().StringVar(&ovEnclosureData.name, "name", "", "name of the enclosure to retrieve")
 }
 
 // login represents the oneview login command
-var serversCmd = &cobra.Command{
-	Use:   "servers",
-	Short: "Get servers from OneView: hpecli oneview get servers",
-	RunE:  getServers,
+var enclosuresCmd = &cobra.Command{
+	Use:   "enclosures",
+	Short: "Get enclosures from OneView: hpecli oneview get enclosures",
+	RunE:  getEnclosures,
 }
 
-func getServers(_ *cobra.Command, _ []string) error {
-	return getServerHardware()
+func getEnclosures(_ *cobra.Command, _ []string) error {
+	return getEnclosuresData()
 }
 
-func getServerHardware() error {
+func getEnclosuresData() error {
 	host, apiKey := apiKey()
 	if apiKey == "" {
 		logger.Debug("apiKey for host: %s not set", host)
@@ -43,14 +43,14 @@ func getServerHardware() error {
 	logger.Always("Retrieving data from: %s", host)
 
 	var (
-		sh  interface{}
+		el  interface{}
 		err error
 	)
 
-	if ovServersData.name != "" {
-		sh, err = ovc.GetServerHardwareByName(ovServersData.name)
+	if ovEnclosureData.name != "" {
+		el, err = ovc.GetEnclosureByName(ovEnclosureData.name)
 	} else {
-		sh, err = ovc.GetServerHardwareList(nil, "", "", "", "")
+		el, err = ovc.GetEnclosures("", "", "", "", "")
 	}
 
 	if err != nil {
@@ -58,7 +58,7 @@ func getServerHardware() error {
 		return err
 	}
 
-	out, err := json.MarshalIndent(sh, "", "  ")
+	out, err := json.MarshalIndent(el, "", "  ")
 	if err != nil {
 		logger.Warning("Unable to output data as JSON.  Please try the command again.")
 	}
