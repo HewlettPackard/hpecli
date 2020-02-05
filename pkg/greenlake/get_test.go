@@ -9,6 +9,7 @@ import (
 )
 
 const userURL = "/scim/v1/tenant/dummy_tenent_id/Users"
+const errExp = "expected to get an error"
 
 func TestGLClientRequestFails(t *testing.T) {
 	const accessToken = "GreenLake_Access_Token"
@@ -31,7 +32,7 @@ func TestGLClientRequestFails(t *testing.T) {
 
 	// check is above in the http request handler side
 	if err := runGlGet(nil, nil); err == nil {
-		t.Fatal("expected to get an error")
+		t.Fatal(errExp)
 	}
 }
 
@@ -56,7 +57,7 @@ func TestPrintJSONResponse(t *testing.T) {
 
 	// check is above in the http request handler side
 	if err := runGlGet(nil, nil); err == nil {
-		t.Fatal("expected to get an error")
+		t.Fatal(errExp)
 	}
 }
 
@@ -82,6 +83,6 @@ func TestGLJSONMarshallFails(t *testing.T) {
 
 	// check is above in the http request handler side
 	if err := runGlGet(nil, nil); err == nil {
-		t.Fatal("expected to get an error")
+		t.Fatal(errExp)
 	}
 }
