@@ -1,3 +1,4 @@
+// (C) Copyright 2019 Hewlett Packard Enterprise Development LP
 package greenlake
 
 import (
@@ -11,15 +12,15 @@ import (
 const errTempl = "got: %s, wanted: %s"
 const errMsg = "default values should be empty"
 
-func TestMakeAPIKey(t *testing.T) {
-	got := makeAPIKey("")
+func TestMakeAccessToken(t *testing.T) {
+	got := makeAccessToken("")
 	if got != greenLakeAPIKeyPrefix {
 		t.Fatalf(errTempl, got, greenLakeAPIKeyPrefix)
 	}
 
-	const testHost1 = "SomeFunkyHost"
+	const testHost1 = "GreenLakeHost"
 
-	got = makeAPIKey(testHost1)
+	got = makeAccessToken(testHost1)
 	if !strings.HasPrefix(got, greenLakeAPIKeyPrefix) {
 		t.Fatalf(errTempl, got, greenLakeAPIKeyPrefix+testHost1)
 	}
@@ -35,7 +36,7 @@ func TestMakeTenantID(t *testing.T) {
 		t.Fatalf(errTempl, got, greenLakeTenantIDPrefix)
 	}
 
-	const testHost1 = "SomeFunkyHost"
+	const testHost1 = "GreenLakeHost"
 
 	got = makeTenantID(testHost1)
 	if !strings.HasPrefix(got, greenLakeTenantIDPrefix) {
@@ -47,12 +48,12 @@ func TestMakeTenantID(t *testing.T) {
 	}
 }
 
-func TestSetAPIKey(t *testing.T) {
-	const h1 = "someHost1"
+func TestSetTokenTenantID(t *testing.T) {
+	const h1 = "greenLakeHost"
 
 	const t1 = "someTenantID"
 
-	const v1 = "valueToStore"
+	const v1 = "greenLakeAccessToken"
 
 	_ = setTokenTenantID(h1, t1, v1)
 
@@ -64,10 +65,10 @@ func TestSetAPIKey(t *testing.T) {
 
 	defer db.Close()
 
-	apiKey := makeAPIKey(h1)
+	accessToken := makeAccessToken(h1)
 
 	var got string
-	if err := db.Get(apiKey, &got); err != nil {
+	if err := db.Get(accessToken, &got); err != nil {
 		t.Fatal(err)
 	}
 
@@ -77,11 +78,11 @@ func TestSetAPIKey(t *testing.T) {
 }
 
 func TestGetTokenTenantID(t *testing.T) {
-	const h1 = "someHost1"
+	const h1 = "greenLakeHost"
 
 	const t1 = "someTenantID"
 
-	const v1 = "valueToStore"
+	const v1 = "greenLakeAccessToken"
 
 	_ = setTokenTenantID(h1, t1, v1)
 
@@ -100,7 +101,7 @@ func TestGetTokenTenantID(t *testing.T) {
 	}
 }
 
-func TestGetAPIKeyFailDBOpenReturnsEmptyDefaults(t *testing.T) {
+func TestGetTokenTenantIDFailDBOpenReturnsEmptyDefaults(t *testing.T) {
 	db, _ := store.Open()
 	defer db.Close()
 
@@ -111,7 +112,7 @@ func TestGetAPIKeyFailDBOpenReturnsEmptyDefaults(t *testing.T) {
 	}
 }
 
-func TestDBDoesntHaveContextReturnsEmptyDefaults(t *testing.T) {
+func TestGLDBDoesntHaveContextReturnsEmptyDefaults(t *testing.T) {
 	db, err := store.Open()
 	if err != nil {
 		t.Fatal(err)
@@ -126,8 +127,8 @@ func TestDBDoesntHaveContextReturnsEmptyDefaults(t *testing.T) {
 	}
 }
 
-func TestGetAPIKeyDBDoesntHaveHostReturnsEmptyDefaults(t *testing.T) {
-	const h1 = "host1"
+func TestGetTokenTenantIDDBDoesntHaveHostReturnsEmptyDefaults(t *testing.T) {
+	const h1 = "wronghost"
 
 	const t1 = "tenant1"
 
@@ -140,7 +141,7 @@ func TestGetAPIKeyDBDoesntHaveHostReturnsEmptyDefaults(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = db.Delete(makeAPIKey(h1))
+	_ = db.Delete(makeAccessToken(h1))
 	db.Close()
 
 	host, tenant, key := getTokenTenantID()
@@ -149,7 +150,7 @@ func TestGetAPIKeyDBDoesntHaveHostReturnsEmptyDefaults(t *testing.T) {
 	}
 }
 
-func TestSetAPIKeyFailWithDBOpen(t *testing.T) {
+func TestSetTokenTenantIDFailWithDBOpen(t *testing.T) {
 	db, err := store.Open()
 	if err != nil {
 		t.Fatal(err)

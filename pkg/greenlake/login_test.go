@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestHostPrefixAdded(t *testing.T) {
+func TestGlHostPrefixAdded(t *testing.T) {
 	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -27,9 +27,8 @@ func TestHostPrefixAdded(t *testing.T) {
 	}
 }
 
-func TestAPIKeyIsStored(t *testing.T) {
-	const accessToken = "HERE_IS_A_ID"
-	// const tenantId = "HERE_IS_A_TenantID"
+func TestAccessTokenIsStored(t *testing.T) {
+	const accessToken = "GreenLake_Access_Token"
 
 	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

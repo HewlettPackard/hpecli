@@ -25,7 +25,7 @@ var Cmd = &cobra.Command{
 	Short: "Access to HPE GreenLake commands",
 }
 
-func getTokenTenantID() (host, tenantID, apiKey string) {
+func getTokenTenantID() (host, tenantID, accessToken string) {
 	db, err := store.Open()
 	if err != nil {
 		logger.Debug("unable to open keystore: %v", err)
@@ -40,10 +40,10 @@ func getTokenTenantID() (host, tenantID, apiKey string) {
 		return "", "", ""
 	}
 
-	apiKey = makeAPIKey(contextValue)
+	accessToken = makeAccessToken(contextValue)
 
-	var apiKeyValue string
-	if err := db.Get(apiKey, &apiKeyValue); err != nil {
+	var accessTokenValue string
+	if err := db.Get(accessToken, &accessTokenValue); err != nil {
 		logger.Debug("Unable to retrieve access token from current context.")
 		return "", "", ""
 	}
@@ -56,7 +56,7 @@ func getTokenTenantID() (host, tenantID, apiKey string) {
 		return "", "", ""
 	}
 
-	return contextValue, tenantIDValue, apiKeyValue
+	return contextValue, tenantIDValue, accessTokenValue
 }
 
 func setTokenTenantID(host, glTenantID, glAccessToken string) error {
@@ -73,9 +73,9 @@ func setTokenTenantID(host, glTenantID, glAccessToken string) error {
 	}
 
 	// Save API Key
-	apiKey := makeAPIKey(host)
-	if e := db.Put(apiKey, glAccessToken); e != nil {
-		return fmt.Errorf("unable to save apiKey for %s because of %w", host, e)
+	accessToken := makeAccessToken(host)
+	if e := db.Put(accessToken, glAccessToken); e != nil {
+		return fmt.Errorf("unable to save accessToken for %s because of %w", host, e)
 	}
 
 	// Save TeantID Key
@@ -87,7 +87,7 @@ func setTokenTenantID(host, glTenantID, glAccessToken string) error {
 	return nil
 }
 
-func makeAPIKey(host string) string {
+func makeAccessToken(host string) string {
 	return fmt.Sprintf("%s%s", greenLakeAPIKeyPrefix, host)
 }
 

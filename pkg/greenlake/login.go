@@ -37,7 +37,6 @@ var glLoginCmd = &cobra.Command{
 }
 
 func runGLLogin(_ *cobra.Command, _ []string) error {
-
 	logger.Info("greenlake/login called")
 
 	if !strings.HasPrefix(glLoginData.host, "http") {
@@ -45,10 +44,11 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 	}
 
 	logger.Debug("Attempting login with user: %v, at: %v", glLoginData.userID, glLoginData.host)
-
-	glc := NewGreenLakeClient("client_credentials", glLoginData.userID, glLoginData.secretKey, glLoginData.tenantID, glLoginData.host)
+	glc := NewGreenLakeClient("client_credentials", glLoginData.userID,
+		glLoginData.secretKey, glLoginData.tenantID, glLoginData.host)
 
 	s, err := glc.GetToken()
+
 	if err != nil {
 		logger.Warning("Unable to login with supplied credentials to GreenLake at: %s", glLoginData.host)
 		return err

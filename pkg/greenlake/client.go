@@ -1,4 +1,4 @@
-//(C) Copyright 2019 Hewlett Packard Enterprise Development LP
+// (C) Copyright 2019 Hewlett Packard Enterprise Development LP
 
 package greenlake
 
@@ -28,7 +28,7 @@ type Token struct {
 	TokenType       string `json:"token_type"`
 	Expiry          string `json:"expiry"`
 	ExpiresIn       int    `json:"expires_in"`
-	AccessTokenOnly string `json:"accessTokenOnly"`
+	AccessTokenOnly bool   `json:"accessTokenOnly"`
 }
 
 // User structure
@@ -60,20 +60,19 @@ func NewGreenLakeClient(grantType, clientID, secretKey, tenantID, host string) *
 // NewGLClientFromAPIKey creates a new GreenLake Client from existing API sessions key
 func NewGLClientFromAPIKey(host, tenantID, apikey string) *Client {
 	return &Client{
-		//Method:     rest.GET,
 		GrantType:    "client_credentials",
 		ClientID:     "",
 		ClientSecret: "LOCAL",
 		APIKey:       apikey,
 		TenantID:     tenantID,
 		Host:         host,
-		//Option:     rest.Options{},
 	}
 }
 
 // GetToken api
 func (c *Client) GetToken() (Token, error) {
 	var result Token
+
 	url := fmt.Sprintf(c.Host + "/identity/v1/token")
 	jsonData := map[string]string{"grant_type": c.GrantType,
 		"client_id":     c.ClientID,
@@ -81,50 +80,63 @@ func (c *Client) GetToken() (Token, error) {
 		"tenant_id":     c.TenantID}
 	jsonValue, _ := json.Marshal(jsonData)
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonValue))
+
 	if err != nil {
 		return result, err
 	}
+
 	request.Header.Set("Content-Type", "application/json")
 	body, err := c.doRequest(request)
-	json.Unmarshal(body, &result)
+
+	if err != nil {
+		return result, err
+	}
+
+	if err = json.Unmarshal(body, &result); err != nil {
+		return result, err
+	}
+
 	return result, err
 }
 
-//GetUsers to list users
+// GetUsers to list users
 func (c *Client) GetUsers(path string) ([]byte, error) {
 	url := fmt.Sprintf(c.Host + "/scim/v1/tenant/" + c.TenantID + "/" + path)
 	request, err := http.NewRequest("GET", url, nil)
+
 	if err != nil {
 		return nil, err
 	}
+
 	request.Header.Set("Accept", "application/scim+json")
 	request.Header.Set("Authorization", "Bearer "+c.APIKey)
 	body, err := c.doRequest(request)
+
 	return body, err
 }
 
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
-	//req.SetBasicAuth(s.ClientID, s.ClientSecret, s.Host)
 	// Ignore invalid certificate
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
 	response, err := client.Do(req)
+
 	if err != nil {
 		return nil, err
 	}
-	if response.StatusCode != 200 {
+
+	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error in response and response status: %s", response.Status)
 	}
 
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
+
 	if err != nil {
 		return nil, err
 	}
-	// if response.StatusCode != http.StatusOK {
-	// 	return nil, fmt.Errorf("greenlake didn’t respond 200 OK: %s", response.Status)
-	// }
+
 	return body, err
 }
