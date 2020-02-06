@@ -229,22 +229,23 @@ func TestFailedHomeDir(t *testing.T) {
 	os.Setenv(envKey, save)
 }
 
-// func TestCloseOnEmptyDB(t *testing.T) {
-// 	db, err := NewStore(SKV)
-// 	defer cleanupStore(db, filename)
+func TestCloseOnEmptyDB(t *testing.T) {
+	keystore = KeystoreLocation()
+	db, err := NewStore(SKV)
+	defer cleanupStore(db, keystore)
 
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	// close it so we don't leak
-// 	db.(*skvstore).db.Close()
+	// close it so we don't leak
+	db.(*skvstore).db.Close()
 
-// 	// erase the db
-// 	db.(*skvstore).db = nil
-// 	// make sure we don't panic
-// 	db.Close()
-// }
+	// erase the db
+	db.(*skvstore).db = nil
+	// make sure we don't panic
+	db.Close()
+}
 
 func getHomeDirEnvVar() string {
 	env := "HOME"

@@ -4,6 +4,7 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -89,6 +90,7 @@ func Open() (Store, error) {
 // backend - so you can use DefautlStore instead of this method
 func NewStore(se StorageEngine) (Store, error) {
 	if se == SKV {
+		fmt.Println("***keystore=" + keystore)
 		return openSKV(keystore)
 	}
 
