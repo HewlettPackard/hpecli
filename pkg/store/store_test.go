@@ -13,24 +13,20 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 )
 
 const aValue = "this.is.a.value"
 
 func TestKeystoreLocation(t *testing.T) {
-	// ensure keystore is empty for this test
-	keystore = ""
-
-	db, err := NewStore(SKV)
-	defer cleanupStore(db, keystore)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	// filename should be initialized
 	if keystore == "" {
 		t.Fatal("keystore should have a value after Open as been called")
+	}
+
+	if !strings.HasSuffix(keystore, filename) {
+		t.Fatal("expected keystore location to end in the correct filename")
 	}
 }
 
@@ -223,19 +219,33 @@ func TestFailedHomeDir(t *testing.T) {
 
 	os.Setenv(envKey, "")
 
+	location := KeystoreLocation()
+
+	s := string(filename)
+	if location != s {
+		t.Fatal("when the homedir is not found, the keystore should just be the filename")
+	}
+
+	os.Setenv(envKey, save)
+}
+
+func TestCloseOnEmptyDB(t *testing.T) {
+	keystore = KeystoreLocation()
 	db, err := NewStore(SKV)
-	defer cleanupStore(db, filename)
+
+	defer cleanupStore(db, keystore)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	s := string(filename)
-	if keystore != s {
-		t.Fatal("when the homedir is not found, the keystore should just be the filename")
-	}
+	// close it so we don't leak
+	db.(*skvstore).db.Close()
 
-	os.Setenv(envKey, save)
+	// erase the db
+	db.(*skvstore).db = nil
+	// make sure we don't panic
+	db.Close()
 }
 
 func getHomeDirEnvVar() string {
