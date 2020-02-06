@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/HewlettPackard/hpecli/pkg/context"
 	"github.com/HewlettPackard/hpecli/pkg/store"
 )
 
@@ -25,8 +26,9 @@ func TestAPIKeyPutInServerRequest(t *testing.T) {
 
 	defer server.Close()
 
+	c := initContext(t)
 	// set context to the test server host
-	_ = setAPIKey(server.URL, sessionID)
+	_ = c.SetAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	_ = getServerHardware()
@@ -42,8 +44,9 @@ func TestClientServerRequestFails(t *testing.T) {
 
 	defer server.Close()
 
+	c := initContext(t)
 	// set context to the test server host
-	_ = setAPIKey(server.URL, sessionID)
+	_ = c.SetAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getServers(nil, nil); err == nil {
@@ -62,8 +65,9 @@ func TestServerJSONMarshallFails(t *testing.T) {
 
 	defer server.Close()
 
+	c := initContext(t)
 	// set context to the test server host
-	_ = setAPIKey(server.URL, sessionID)
+	_ = c.SetAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getServerHardware(); err == nil {
@@ -80,4 +84,12 @@ func TestMissingAPIKey(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have retrieved error")
 	}
+}
+
+func initContext(t *testing.T) context.Context {
+	c, err := ovContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c
 }

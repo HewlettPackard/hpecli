@@ -14,11 +14,6 @@ var ovServersData struct {
 	name string
 }
 
-func init() {
-	ovGetCmd.AddCommand(serversCmd)
-	serversCmd.Flags().StringVar(&ovServersData.name, "name", "", "name of the server to retrieve")
-}
-
 // login represents the oneview login command
 var serversCmd = &cobra.Command{
 	Use:   "servers",
@@ -26,14 +21,24 @@ var serversCmd = &cobra.Command{
 	RunE:  getServers,
 }
 
+func init() {
+	ovGetCmd.AddCommand(serversCmd)
+	serversCmd.Flags().StringVar(&ovServersData.name, "name", "", "name of the server to retrieve")
+}
+
 func getServers(_ *cobra.Command, _ []string) error {
 	return getServerHardware()
 }
 
 func getServerHardware() error {
-	host, apiKey := apiKey()
-	if apiKey == "" {
-		logger.Debug("apiKey for host: %s not set", host)
+	c, err := ovContext()
+	if err != nil {
+		return err
+	}
+
+	host, apiKey, err := c.APIKey()
+	if err != nil {
+		logger.Debug("unable to retrieve apiKey for host: %s because of: %#v", host, err)
 		return fmt.Errorf("unable to retrieve the last login for OneView." +
 			"Please login to OneView using: hpecli login OneView")
 	}
@@ -42,11 +47,7 @@ func getServerHardware() error {
 
 	logger.Always("Retrieving data from: %s", host)
 
-	var (
-		sh  interface{}
-		err error
-	)
-
+	var sh interface{}
 	if ovServersData.name != "" {
 		sh, err = ovc.GetServerHardwareByName(ovServersData.name)
 	} else {

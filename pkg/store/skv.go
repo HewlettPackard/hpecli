@@ -45,5 +45,9 @@ func (s skvstore) Delete(key string) error {
 }
 
 func (s skvstore) Close() error {
-	return s.db.Close()
+	if s.db != nil {
+		return s.db.Close()
+	}
+
+	return nil
 }

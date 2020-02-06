@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const errTempl = "got: %s, wanted: %s"
+
 func TestHostPrefixAdded(t *testing.T) {
 	server := newTestServer("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -44,10 +46,12 @@ func TestAPIKeyIsStored(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	c := initContext(t)
+
 	// sessionId is stored - so get it and verify it
-	_, got := apiKey()
-	if got != sessionID {
-		t.Fatal(errTempl, got, sessionID)
+	_, gotAPIKey, err := c.APIKey()
+	if gotAPIKey != sessionID {
+		t.Fatalf(errTempl, gotAPIKey, sessionID)
 	}
 }
 
