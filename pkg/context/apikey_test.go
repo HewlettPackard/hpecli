@@ -1,8 +1,11 @@
 package context
 
 import (
+	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/store"
 )
 
 const (
@@ -12,6 +15,7 @@ const (
 	key          = "someKey"
 	errTempl     = "got: %s, wanted: %s"
 	fail         = "fail"
+	errExpected  = "error was expected"
 )
 
 func TestNewContext(t *testing.T) {
@@ -64,7 +68,7 @@ func TestSetContextFails(t *testing.T) {
 
 	err := c.SetAPIKey(host, key)
 	if err == nil {
-		t.Fatal("error was expected")
+		t.Fatal(errExpected)
 	}
 }
 
@@ -74,7 +78,7 @@ func TestGetContextFails(t *testing.T) {
 
 	_, _, err := c.APIKey()
 	if err == nil {
-		t.Fatal("error was expected")
+		t.Fatal(errExpected)
 	}
 }
 
@@ -83,17 +87,7 @@ func TestSetSessionKeyFails(t *testing.T) {
 	err := c.SetAPIKey(host, fail)
 
 	if err == nil {
-		t.Fatal("error was expected")
-	}
-}
-
-func TestGetSessionKeyFails(t *testing.T) {
-	c := withMockStore()
-	c.(*APIContext).ContextKey = fail
-
-	_, _, err := c.APIKey()
-	if err == nil {
-		t.Fatal("error was expected")
+		t.Fatal(errExpected)
 	}
 }
 
@@ -103,19 +97,19 @@ func TestWhenAPIKeyFails(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	store := db.(*MockStore)
-	store.Put(contextKey, fail)
+	s := db.(*MockStore)
+	s.Put(contextKey, fail)
 
 	c := withMockStore()
 
 	_, _, err = c.APIKey()
 	if err == nil {
-		t.Fatal("error was expected")
+		t.Fatal(errExpected)
 	}
 
 	err = c.SetAPIKey(host, fail)
 	if err == nil {
-		t.Fatal("error was expected")
+		t.Fatal(errExpected)
 	}
 }
 
@@ -138,6 +132,36 @@ func TestMakeAPIKey(t *testing.T) {
 	if !strings.HasSuffix(got, host) {
 		t.Fatalf(errTempl, got, apiKeyPrefix+host)
 	}
+}
+
+func TestGetAPIFailsOnDBOpen(t *testing.T) {
+	var c Context = &APIContext{
+		APIKeyPrefix: apiKeyPrefix,
+		ContextKey:   contextKey,
+		DBOpen:       FailOpen,
+	}
+
+	_, _, err := c.APIKey()
+	if err == nil {
+		t.Fatal(errExpected)
+	}
+}
+
+func TestSetAPIFailsOnDBOpen(t *testing.T) {
+	var c Context = &APIContext{
+		APIKeyPrefix: apiKeyPrefix,
+		ContextKey:   contextKey,
+		DBOpen:       FailOpen,
+	}
+
+	err := c.SetAPIKey(host, apiKeyPrefix)
+	if err == nil {
+		t.Fatal(errExpected)
+	}
+}
+
+func FailOpen() (store.Store, error) {
+	return nil, fmt.Errorf("expected")
 }
 
 func withMockStore() Context {
