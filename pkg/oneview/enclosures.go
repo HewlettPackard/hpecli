@@ -31,9 +31,13 @@ func getEnclosures(_ *cobra.Command, _ []string) error {
 }
 
 func getEnclosuresData() error {
-	host, apiKey := apiKey()
-	if apiKey == "" {
-		logger.Debug("apiKey for host: %s not set", host)
+	c, err := ovContext()
+	if err != nil {
+		return err
+	}
+	host, apiKey, err := c.APIKey()
+	if err != nil {
+		logger.Debug("unable to retrieve apiKey for host: %s because of: %#v", host, err)
 		return fmt.Errorf("unable to retrieve the last login for OneView." +
 			"Please login to OneView using: hpecli login OneView")
 	}
@@ -42,10 +46,7 @@ func getEnclosuresData() error {
 
 	logger.Always("Retrieving data from: %s", host)
 
-	var (
-		el  interface{}
-		err error
-	)
+	var el interface{}
 
 	if ovEnclosureData.name != "" {
 		el, err = ovc.GetEnclosureByName(ovEnclosureData.name)
