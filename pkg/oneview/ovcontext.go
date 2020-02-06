@@ -10,5 +10,6 @@ func ovContext() (context.Context, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return c, nil
 }

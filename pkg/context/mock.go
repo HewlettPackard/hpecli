@@ -24,7 +24,9 @@ func (ms *MockStore) Get(key string, value interface{}) error {
 	if strings.Contains(key, "fail") {
 		return errors.New("expected error")
 	}
+
 	d := gob.NewDecoder(bytes.NewReader(ms.m[key]))
+
 	return d.Decode(value)
 }
 
@@ -33,11 +35,14 @@ func (ms *MockStore) Put(key string, value interface{}) error {
 	if err := gob.NewEncoder(&buf).Encode(value); err != nil {
 		return err
 	}
+
 	ms.m[key] = buf.Bytes()
 	v := fmt.Sprintf("%s", value)
+
 	if strings.Contains(key, "fail") || strings.Contains(v, "fail") {
 		return errors.New("expected error")
 	}
+
 	return nil
 }
 

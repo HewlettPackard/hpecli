@@ -35,14 +35,14 @@ func (c APIContext) APIKey() (host, sessionKey string, err error) {
 	defer db.Close()
 
 	if err := db.Get(c.ContextKey, &host); err != nil {
-		err := fmt.Errorf("Unable to retrieve current context: %#v", err)
+		err = fmt.Errorf("unable to retrieve current context: %#v", err)
 		return "", "", err
 	}
 
 	apiKey := makeAPIKey(c.APIKeyPrefix, host)
 
 	if err := db.Get(apiKey, &sessionKey); err != nil {
-		err := fmt.Errorf("Unable to retrieve current context: %#v", err)
+		err = fmt.Errorf("unable to retrieve current context: %#v", err)
 		return "", "", err
 	}
 

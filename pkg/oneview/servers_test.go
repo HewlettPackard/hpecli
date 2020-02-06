@@ -91,5 +91,6 @@ func initContext(t *testing.T) context.Context {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return c
 }

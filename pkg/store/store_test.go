@@ -232,6 +232,7 @@ func TestFailedHomeDir(t *testing.T) {
 func TestCloseOnEmptyDB(t *testing.T) {
 	keystore = KeystoreLocation()
 	db, err := NewStore(SKV)
+
 	defer cleanupStore(db, keystore)
 
 	if err != nil {
