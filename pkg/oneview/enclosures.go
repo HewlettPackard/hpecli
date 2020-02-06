@@ -35,6 +35,7 @@ func getEnclosuresData() error {
 	if err != nil {
 		return err
 	}
+
 	host, apiKey, err := c.APIKey()
 	if err != nil {
 		logger.Debug("unable to retrieve apiKey for host: %s because of: %#v", host, err)
