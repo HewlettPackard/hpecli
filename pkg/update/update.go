@@ -3,6 +3,7 @@
 package update
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -42,7 +43,6 @@ func runUpdate(_ *cobra.Command, _ []string) error {
 func downloadUpdate(cr *CheckResponse) error {
 	body, err := getResponseBody(cr.URL)
 	if err != nil {
-		logger.Warning("Unable to download update from: %s", cr.URL)
 		return err
 	}
 	defer body.Close()
@@ -68,6 +68,9 @@ func getResponseBody(url string) (io.ReadCloser, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("\"%s\" retrieving remote executable at: %v", resp.Status, url)
 	}
 
 	return resp.Body, nil
