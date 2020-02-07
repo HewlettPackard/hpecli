@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/store"
+	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 type MockStore struct {
@@ -16,7 +16,7 @@ type MockStore struct {
 
 var ms = &MockStore{m: make(map[string][]byte)}
 
-func MockOpen() (store.Store, error) {
+func MockOpen() (db.Store, error) {
 	return ms, nil
 }
 

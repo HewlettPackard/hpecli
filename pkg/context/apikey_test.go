@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/store"
+	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 )
 
 func TestNewContext(t *testing.T) {
-	c, err := NewContext(contextKey, apiKeyPrefix, MockOpen)
+	c, err := New(contextKey, apiKeyPrefix, MockOpen)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,12 +92,13 @@ func TestSetSessionKeyFails(t *testing.T) {
 }
 
 func TestWhenAPIKeyFails(t *testing.T) {
-	db, err := MockOpen()
+	d, err := MockOpen()
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer d.Close()
 
-	s := db.(*MockStore)
+	s := d.(*MockStore)
 	s.Put(contextKey, fail)
 
 	c := withMockStore()
@@ -160,7 +161,7 @@ func TestSetAPIFailsOnDBOpen(t *testing.T) {
 	}
 }
 
-func FailOpen() (store.Store, error) {
+func FailOpen() (db.Store, error) {
 	return nil, fmt.Errorf("expected")
 }
 

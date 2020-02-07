@@ -2,11 +2,11 @@ package oneview
 
 import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/store"
+	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 func ovContext() (context.Context, error) {
-	c, err := context.NewContext(oneViewContextKey, oneViewAPIKeyPrefix, store.Open)
+	c, err := context.New(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
 	if err != nil {
 		return nil, err
 	}
