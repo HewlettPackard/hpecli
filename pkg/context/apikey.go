@@ -3,7 +3,7 @@ package context
 import (
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/pkg/store"
+	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 type Context interface {
@@ -11,7 +11,7 @@ type Context interface {
 	SetAPIKey(host, sessionKey string) error
 }
 
-type DBOpen func() (store.Store, error)
+type DBOpen func() (db.Store, error)
 
 type APIContext struct {
 	ContextKey   string
@@ -19,7 +19,7 @@ type APIContext struct {
 	DBOpen       DBOpen
 }
 
-func NewContext(contextKey, apiKeyPrefix string, dbOpen DBOpen) (Context, error) {
+func New(contextKey, apiKeyPrefix string, dbOpen DBOpen) (Context, error) {
 	return &APIContext{
 		ContextKey:   contextKey,
 		APIKeyPrefix: apiKeyPrefix,
@@ -28,20 +28,20 @@ func NewContext(contextKey, apiKeyPrefix string, dbOpen DBOpen) (Context, error)
 }
 
 func (c APIContext) APIKey() (host, sessionKey string, err error) {
-	db, err := c.DBOpen()
+	d, err := c.DBOpen()
 	if err != nil {
 		return "", "", err
 	}
-	defer db.Close()
+	defer d.Close()
 
-	if err := db.Get(c.ContextKey, &host); err != nil {
+	if err := d.Get(c.ContextKey, &host); err != nil {
 		err = fmt.Errorf("unable to retrieve current context: %#v", err)
 		return "", "", err
 	}
 
 	apiKey := makeAPIKey(c.APIKeyPrefix, host)
 
-	if err := db.Get(apiKey, &sessionKey); err != nil {
+	if err := d.Get(apiKey, &sessionKey); err != nil {
 		err = fmt.Errorf("unable to retrieve current context: %#v", err)
 		return "", "", err
 	}
@@ -50,20 +50,20 @@ func (c APIContext) APIKey() (host, sessionKey string, err error) {
 }
 
 func (c APIContext) SetAPIKey(host, sessionKey string) error {
-	db, err := c.DBOpen()
+	d, err := c.DBOpen()
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer d.Close()
 
 	// Save context key
-	if e := db.Put(c.ContextKey, host); e != nil {
+	if e := d.Put(c.ContextKey, host); e != nil {
 		return fmt.Errorf("unable to retrieve current context because of %#v", e)
 	}
 
 	// Save API Key
 	apiKey := makeAPIKey(c.APIKeyPrefix, host)
-	if e := db.Put(apiKey, sessionKey); e != nil {
+	if e := d.Put(apiKey, sessionKey); e != nil {
 		return fmt.Errorf("unable to save apiKey for %s because of %#v", host, e)
 	}
 

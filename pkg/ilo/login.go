@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/HewlettPackard/hpecli/pkg/db"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
-	"github.com/HewlettPackard/hpecli/pkg/store"
 	"github.com/spf13/cobra"
 )
 
@@ -51,19 +51,17 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 
 	logger.Debug("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
 
-	db, err := store.Open()
+	d, err := db.Open()
 	if err != nil {
 		logger.Debug("unable to open keystore: %v", err)
 		return fmt.Errorf("%v", err)
 	}
-	defer db.Close()
+	defer d.Close()
 
 	var val string
-	if err := db.Get(key(), &val); err != nil {
+	if err := d.Get(key(), &val); err != nil {
 		return fmt.Errorf("%v", err)
 	}
-
-	db.Close()
 
 	return nil
 }

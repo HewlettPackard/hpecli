@@ -4,7 +4,7 @@
 // https://github.com/rapidloop/skv/blob/master/skv_test.go
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-package store
+package db
 
 import (
 	"bytes"

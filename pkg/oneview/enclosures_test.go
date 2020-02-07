@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/store"
+	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const encURL = "/rest/enclosures"
@@ -76,8 +76,8 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 
 func TestEnclosuresMissingAPIKey(t *testing.T) {
 	// when the db is open, the get apikey will fail
-	db, _ := store.Open()
-	defer db.Close()
+	d, _ := db.Open()
+	defer d.Close()
 
 	err := getEnclosuresData()
 	if err == nil {

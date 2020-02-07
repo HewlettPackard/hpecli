@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/store"
+	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const shURL = "/rest/server-hardware"
@@ -77,8 +77,8 @@ func TestServerJSONMarshallFails(t *testing.T) {
 
 func TestMissingAPIKey(t *testing.T) {
 	// when the db is open, the get apikey will fail
-	db, _ := store.Open()
-	defer db.Close()
+	d, _ := db.Open()
+	defer d.Close()
 
 	err := getServerHardware()
 	if err == nil {
