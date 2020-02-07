@@ -69,6 +69,7 @@ func getResponseBody(url string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("\"%s\" retrieving remote executable at: %v", resp.Status, url)
 	}
