@@ -1,3 +1,5 @@
+// (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
+
 package oneview
 
 import (
@@ -5,11 +7,9 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
-func ovContext() (context.Context, error) {
-	c, err := context.New(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
-	if err != nil {
-		return nil, err
-	}
+const oneViewAPIKeyPrefix = "hpecli_oneview_token_"
+const oneViewContextKey = "hpecli_oneview_context"
 
-	return c, nil
+func ovContext() context.Context {
+	return context.NewContext(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
 }

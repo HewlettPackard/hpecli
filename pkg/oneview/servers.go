@@ -31,10 +31,7 @@ func getServers(_ *cobra.Command, _ []string) error {
 }
 
 func getServerHardware() error {
-	c, err := ovContext()
-	if err != nil {
-		return err
-	}
+	c := ovContext()
 
 	host, apiKey, err := c.APIKey()
 	if err != nil {
