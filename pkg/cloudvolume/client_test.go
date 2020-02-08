@@ -21,15 +21,15 @@ func TestNewCVCClient(t *testing.T) {
 	}
 
 	if clientHost != c.Endpoint {
-		t.Fatal("username doesn't match")
+		t.Fatal("clientHost doesn't match")
 	}
 
 	if clientUsername != c.Username {
-		t.Fatal("username doesn't match")
+		t.Fatal("clientUsername doesn't match")
 	}
 
 	if clientPassword != c.Password {
-		t.Fatal("username doesn't match")
+		t.Fatal("clientPassword doesn't match")
 	}
 }
 

@@ -25,15 +25,15 @@ func TestNewClient(t *testing.T) {
 	}
 
 	if restHost != c.Endpoint {
-		t.Fatal("username doesn't match")
+		t.Fatal("restHost doesn't match")
 	}
 
 	if restUsername != c.Username {
-		t.Fatal("username doesn't match")
+		t.Fatal("restUsername doesn't match")
 	}
 
 	if restPassword != c.Password {
-		t.Fatal("username doesn't match")
+		t.Fatal("restPassword doesn't match")
 	}
 }
 
@@ -105,27 +105,6 @@ func TestEmptyBody(t *testing.T) {
 
 	want := make([]byte, 0)
 	if !bytes.Equal(got, want) {
-		t.Fatalf(errTempl, got, want)
-	}
-}
-
-func TestNilURL(t *testing.T) {
-	const want = "GOOD REQUEST"
-
-	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, want)
-	})
-
-	defer ts.Close()
-
-	c := newClient(ts.URL, restUsername, restPassword)
-
-	got, err := c.restAPICall("GET", "/", nil)
-	if err != nil {
-		t.Fatalf("Didn't get expected result data")
-	}
-
-	if string(got) != want {
 		t.Fatalf(errTempl, got, want)
 	}
 }
