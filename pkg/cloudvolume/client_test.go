@@ -5,6 +5,7 @@ package cloudvolume
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -12,6 +13,7 @@ const (
 	clientHost     = "someClientHost"
 	clientUsername = "username"
 	clientPassword = "password"
+	clientToken    = "lkjsdfjka;sdfjlasdjkf"
 )
 
 func TestNewCVCClient(t *testing.T) {
@@ -33,6 +35,21 @@ func TestNewCVCClient(t *testing.T) {
 	}
 }
 
+func TestNewCVClientFromAPIKey(t *testing.T) {
+	c := NewCVClientFromAPIKey(clientHost, clientToken)
+	if c == nil {
+		t.Fatal("expected client to not be nil")
+	}
+
+	if clientHost != c.Endpoint {
+		t.Fatal("clientHost doesn't match")
+	}
+
+	if clientToken != c.APIKey {
+		t.Fatal("clientToken doesn't match")
+	}
+}
+
 func TestMalformedResponseForLogin(t *testing.T) {
 	const notJSON = "bad response"
 
@@ -50,7 +67,7 @@ func TestMalformedResponseForLogin(t *testing.T) {
 	}
 }
 
-func TestTokeResponseForLogin(t *testing.T) {
+func TestTokenResponseForLogin(t *testing.T) {
 	const want = "74dc0153-6daa-49ae-905e-cc59bff3225e"
 	jsonResponse := fmt.Sprintf(`{"geo":"US", "token":"%s"}`, want)
 
@@ -68,6 +85,53 @@ func TestTokeResponseForLogin(t *testing.T) {
 	}
 
 	if got != want {
+		t.Fatalf(errTempl, got, want)
+	}
+}
+
+func TestAPIKeyInjected(t *testing.T) {
+	const apiKey = "dXNlcm5hbWU6dG9rZW4="
+	// header value is base64 encoding of "username:dXNlcm5hbWU6dG9rZW4="
+	want := "Basic dXNlcm5hbWU6ZFhObGNtNWhiV1U2ZEc5clpXND0="
+
+	ts := newTestServer("/api/v2/cloud_volumes", func(w http.ResponseWriter, r *http.Request) {
+		got := r.Header.Get("Authorization")
+		if got != want {
+			t.Fatal("didn't get expected auth header")
+		}
+	})
+
+	defer ts.Close()
+
+	c := NewCVClientFromAPIKey(ts.URL, apiKey)
+
+	// checks are done on server side above
+	_, _ = c.GetCloudVolumes()
+}
+
+func TestGetCloudVolumes(t *testing.T) {
+	const compactJSON = `{"data":[{"cloud_accounts":[{"href":"https://demo.cloudvolumes.hpe.com/api/v2/` +
+		`session/cloud_accounts/F2aSi8dNerU5T3zAatrNc8z2cevknLBWYSnyOrgg","id":` +
+		`"F2aSi8dNerU5T3zAatrNc8z2cevknLBWYSnyOrgg"}]}]}`
+
+	const want = "{\n  \"data\": ["
+
+	ts := newTestServer("/api/v2/cloud_volumes", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, compactJSON)
+	})
+
+	defer ts.Close()
+
+	c := NewCVClientFromAPIKey(ts.URL, "someAPIKey")
+
+	got, err := c.GetCloudVolumes()
+	if err != nil {
+		t.Fatalf("unexpected error in getCloudVolumes attempt")
+	}
+
+	s := string(got)
+	// validate starts with with correct formatting
+	if !strings.HasPrefix(s, want) {
 		t.Fatalf(errTempl, got, want)
 	}
 }
