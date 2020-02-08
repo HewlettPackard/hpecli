@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/store"
+	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const encURL = "/rest/enclosures"
@@ -25,8 +25,9 @@ func TestAPIKeyPutInEnclosureRequest(t *testing.T) {
 
 	defer server.Close()
 
+	c := initContext(t)
 	// set context to the test server host
-	_ = setAPIKey(server.URL, sessionID)
+	_ = c.SetAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	_ = getEnclosuresData()
@@ -42,8 +43,9 @@ func TestEnclosureClientRequestFails(t *testing.T) {
 
 	defer server.Close()
 
+	c := initContext(t)
 	// set context to the test server host
-	_ = setAPIKey(server.URL, sessionID)
+	_ = c.SetAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getEnclosures(nil, nil); err == nil {
@@ -62,8 +64,9 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 
 	defer server.Close()
 
+	c := initContext(t)
 	// set context to the test server host
-	_ = setAPIKey(server.URL, sessionID)
+	_ = c.SetAPIKey(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getEnclosuresData(); err == nil {
@@ -73,8 +76,8 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 
 func TestEnclosuresMissingAPIKey(t *testing.T) {
 	// when the db is open, the get apikey will fail
-	db, _ := store.Open()
-	defer db.Close()
+	d, _ := db.Open()
+	defer d.Close()
 
 	err := getEnclosuresData()
 	if err == nil {
@@ -94,8 +97,9 @@ func TestGetEnclosureByName(t *testing.T) {
 
 	defer server.Close()
 
+	c := initContext(t)
 	// set context to the test server host
-	_ = setAPIKey(server.URL, "sessionID")
+	_ = c.SetAPIKey(server.URL, "sessionID")
 
 	if err := getEnclosuresData(); err != nil {
 		t.Fatal(err)

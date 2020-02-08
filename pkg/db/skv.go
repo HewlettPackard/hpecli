@@ -1,6 +1,6 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-package store
+package db
 
 import "github.com/rapidloop/skv"
 
@@ -45,5 +45,9 @@ func (s skvstore) Delete(key string) error {
 }
 
 func (s skvstore) Close() error {
-	return s.db.Close()
+	if s.db != nil {
+		return s.db.Close()
+	}
+
+	return nil
 }

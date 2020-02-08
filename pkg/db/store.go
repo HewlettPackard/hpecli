@@ -1,11 +1,12 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-package store
+package db
 
 import (
 	"errors"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 )
@@ -75,7 +76,7 @@ var (
 	// ErrBadValue is returned when the value supplied to the Put method is nil.
 	ErrBadValue = errors.New("db: bad value")
 
-	keystore = ""
+	keystore = KeystoreLocation()
 )
 
 // Open is what should generally be used to get access to the
@@ -87,10 +88,6 @@ func Open() (Store, error) {
 // NewStore returns a handle to a store.  Currently there is a single
 // backend - so you can use DefautlStore instead of this method
 func NewStore(se StorageEngine) (Store, error) {
-	if keystore == "" {
-		keystore = keystoreLocation()
-	}
-
 	if se == SKV {
 		return openSKV(keystore)
 	}
@@ -99,12 +96,16 @@ func NewStore(se StorageEngine) (Store, error) {
 }
 
 // return the filename in the users home directory
-func keystoreLocation() string {
+func KeystoreLocation() string {
+	// in case we can't get userhomedir - we will use just the filename
+	// which will then use the system default path
+	result := filename
+
 	if dir, err := os.UserHomeDir(); err != nil {
 		logger.Warning("Unable to retrieve users home directory: %v", err)
 	} else {
-		return path.Join(dir, filename)
+		result = filepath.ToSlash(path.Join(dir, filename))
 	}
 
-	return filename
+	return result
 }
