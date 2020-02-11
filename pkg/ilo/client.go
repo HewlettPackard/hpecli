@@ -9,12 +9,12 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 )
 
-type ILOClient struct {
+type Client struct {
 	restClient
 }
 
-func NewILOClient(host, username, password string) *ILOClient {
-	return &ILOClient{
+func NewILOClient(host, username, password string) *Client {
+	return &Client{
 		restClient{
 			Endpoint: host,
 			Username: username,
@@ -23,8 +23,8 @@ func NewILOClient(host, username, password string) *ILOClient {
 	}
 }
 
-func NewILOClientFromAPIKey(host, token string) *ILOClient {
-	return &ILOClient{
+func NewILOClientFromAPIKey(host, token string) *Client {
+	return &Client{
 		restClient{
 			Endpoint: host,
 			APIKey:   token,
@@ -32,7 +32,7 @@ func NewILOClientFromAPIKey(host, token string) *ILOClient {
 	}
 }
 
-func (c *ILOClient) Login() (string, error) {
+func (c *Client) Login() (string, error) {
 	const uriPath = "/redfish/v1/SessionService/Sessions/"
 
 	loginJSON := fmt.Sprintf(`{"UserName":"%s", "Password":"%s"}`, c.Username, c.Password)
@@ -46,7 +46,7 @@ func (c *ILOClient) Login() (string, error) {
 	return string(data), nil
 }
 
-func (c *ILOClient) GetServiceRoot() ([]byte, error) {
+func (c *Client) GetServiceRoot() ([]byte, error) {
 	const uriPath = "/redfish/v1/"
 
 	data, err := c.restAPICall("GET", uriPath, nil)
