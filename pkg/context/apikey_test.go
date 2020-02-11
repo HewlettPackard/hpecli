@@ -9,17 +9,18 @@ import (
 )
 
 const (
-	apiKeyPrefix = "somePrefix"
-	contextKey   = "someContext"
-	host         = "someHost"
-	key          = "someKey"
-	errTempl     = "got: %s, wanted: %s"
-	fail         = "fail"
-	errExpected  = "error was expected"
+	apiKeyPrefix  = "somePrefix"
+	contextKey    = "someContext"
+	host          = "someHost"
+	key           = "someKey"
+	errTempl      = "got: %s, wanted: %s"
+	fail          = "fail"
+	errExpected   = "error was expected"
+	errUnexpected = "unexpected error: %v"
 )
 
 func TestNewContext(t *testing.T) {
-	c := NewContext(contextKey, apiKeyPrefix, MockOpen)
+	c := New(contextKey, apiKeyPrefix, MockOpen)
 
 	if c.(*APIContext).ContextKey != contextKey {
 		t.Fatal("ContextKey value not set as expected")
@@ -34,7 +35,7 @@ func TestSetAPIKey(t *testing.T) {
 	c := withMockStore()
 
 	if err := c.SetAPIKey(host, key); err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Fatalf(errUnexpected, err)
 	}
 }
 
@@ -42,7 +43,7 @@ func TestGetAPIKey(t *testing.T) {
 	c := withMockStore()
 
 	if err := c.SetAPIKey(host, key); err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Fatalf(errUnexpected, err)
 	}
 
 	got1, got2, err := c.APIKey()
@@ -158,8 +159,35 @@ func TestSetAPIFailsOnDBOpen(t *testing.T) {
 	}
 }
 
+func TestSetContextPutFails(t *testing.T) {
+	c := withMockStore()
+
+	if err := c.SetContext("fail"); err == nil {
+		t.Fatalf(errExpected)
+	}
+}
+
+func TestSetContextWritesValue(t *testing.T) {
+	c := withMockStore()
+
+	if err := c.SetContext(host); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var got string
+
+	err := ms.Get(contextKey, &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got != host {
+		t.Fatal("didn't retrieve expected value after SetContext")
+	}
+}
+
 func FailOpen() (db.Store, error) {
-	return nil, fmt.Errorf("expected")
+	return nil, fmt.Errorf(errExpected)
 }
 
 func withMockStore() Context {
