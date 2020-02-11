@@ -1,5 +1,6 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
+//nolint // sonar marks as duplicate code -- need to refactor and collapse with other rest.go
 package ilo
 
 import (
