@@ -16,6 +16,13 @@ var ovLoginData struct {
 	password string
 }
 
+// ovLoginCmd represents the oneview ovLoginCmd command
+var ovLoginCmd = &cobra.Command{
+	Use:   "login",
+	Short: "Login to OneView: hpecli oneview login",
+	RunE:  runOVLogin,
+}
+
 func init() {
 	ovLoginCmd.Flags().StringVar(&ovLoginData.host, "host", "", "oneview host/ip address")
 	ovLoginCmd.Flags().StringVarP(&ovLoginData.username, "username", "u", "", "oneview username")
@@ -23,13 +30,6 @@ func init() {
 	_ = ovLoginCmd.MarkFlagRequired("host")
 	_ = ovLoginCmd.MarkFlagRequired("username")
 	_ = ovLoginCmd.MarkFlagRequired("password")
-}
-
-// ovLoginCmd represents the oneview ovLoginCmd command
-var ovLoginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Login to OneView: hpecli oneview login",
-	RunE:  runOVLogin,
 }
 
 func runOVLogin(_ *cobra.Command, _ []string) error {
@@ -49,10 +49,7 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 
 	ovc.Client.APIKey = s.ID
 
-	c, err := ovContext()
-	if err != nil {
-		return err
-	}
+	c := ovContext()
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests

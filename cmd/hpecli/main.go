@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/HewlettPackard/hpecli/pkg/cloudvolume"
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/HewlettPackard/hpecli/pkg/oneview"
@@ -41,6 +42,7 @@ func main() {
 }
 
 func addCommands(rootCmd *cobra.Command) {
+	rootCmd.AddCommand(cloudvolume.Cmd)
 	rootCmd.AddCommand(ilo.Cmd)
 	rootCmd.AddCommand(oneview.Cmd)
 	rootCmd.AddCommand(update.Cmd)
