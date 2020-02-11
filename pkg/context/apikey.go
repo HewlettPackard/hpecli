@@ -1,6 +1,7 @@
 package context
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/HewlettPackard/hpecli/pkg/db"
@@ -9,6 +10,7 @@ import (
 type Context interface {
 	APIKey() (host, apiKey string, err error)
 	SetAPIKey(host, sessionKey string) error
+	SetContext(host string) error
 }
 
 type DBOpen func() (db.Store, error)
@@ -19,7 +21,12 @@ type APIContext struct {
 	DBOpen       DBOpen
 }
 
-func NewContext(contextKey, apiKeyPrefix string, dbOpen DBOpen) Context {
+var (
+	ErrorContextNotFound = errors.New("unable to find specified context")
+	ErrorKeyNotFound     = errors.New("unable to find key for specified host")
+)
+
+func New(contextKey, apiKeyPrefix string, dbOpen DBOpen) Context {
 	return &APIContext{
 		ContextKey:   contextKey,
 		APIKeyPrefix: apiKeyPrefix,
@@ -35,15 +42,13 @@ func (c APIContext) APIKey() (host, sessionKey string, err error) {
 	defer d.Close()
 
 	if err := d.Get(c.ContextKey, &host); err != nil {
-		err = fmt.Errorf("unable to retrieve current context: %#v", err)
-		return "", "", err
+		return "", "", ErrorContextNotFound
 	}
 
 	apiKey := makeAPIKey(c.APIKeyPrefix, host)
 
 	if err := d.Get(apiKey, &sessionKey); err != nil {
-		err = fmt.Errorf("unable to retrieve current context: %#v", err)
-		return "", "", err
+		return host, "", ErrorKeyNotFound
 	}
 
 	return host, sessionKey, nil
@@ -58,13 +63,28 @@ func (c APIContext) SetAPIKey(host, sessionKey string) error {
 
 	// Save context key
 	if e := d.Put(c.ContextKey, host); e != nil {
-		return fmt.Errorf("unable to retrieve current context because of %#v", e)
+		return fmt.Errorf("unable to save current context because of %#v", e)
 	}
 
 	// Save API Key
 	apiKey := makeAPIKey(c.APIKeyPrefix, host)
-	if e := d.Put(apiKey, sessionKey); e != nil {
-		return fmt.Errorf("unable to save apiKey for %s because of %#v", host, e)
+	if err := d.Put(apiKey, sessionKey); err != nil {
+		return fmt.Errorf("unable to save apiKey for %s because of %#v", host, err)
+	}
+
+	return nil
+}
+
+func (c APIContext) SetContext(host string) error {
+	d, err := c.DBOpen()
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+
+	// Save context key
+	if err := d.Put(c.ContextKey, host); err != nil {
+		return fmt.Errorf("unable to save current context because of %#v", err)
 	}
 
 	return nil

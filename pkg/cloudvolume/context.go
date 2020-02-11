@@ -11,5 +11,5 @@ const cvAPIKeyPrefix = "hpecli_cloudvolume_token_"
 const cvContextKey = "hpecli_cloudvolume_context"
 
 func cvContext() context.Context {
-	return context.NewContext(cvContextKey, cvAPIKeyPrefix, db.Open)
+	return context.New(cvContextKey, cvAPIKeyPrefix, db.Open)
 }

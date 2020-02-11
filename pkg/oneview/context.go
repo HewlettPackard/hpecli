@@ -3,13 +3,34 @@
 package oneview
 
 import (
-	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"fmt"
+	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-const oneViewAPIKeyPrefix = "hpecli_oneview_token_"
-const oneViewContextKey = "hpecli_oneview_context"
+// Cmd represents the ilo command
+var ovContextCmd = &cobra.Command{
+	Use:   "context",
+	Short: "Chagne context to different OneView host",
+	RunE:  runSetContext,
+}
 
-func ovContext() context.Context {
-	return context.NewContext(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
+var ovContextData struct {
+	host string
+}
+
+func init() {
+	ovContextCmd.Flags().StringVar(&ovContextData.host, "host", "", "oneview host/ip address")
+	_ = ovContextCmd.MarkFlagRequired("host")
+}
+
+func runSetContext(_ *cobra.Command, _ []string) error {
+	if !strings.HasPrefix(ovContextData.host, "http") {
+		ovContextData.host = fmt.Sprintf("https://%s", ovContextData.host)
+	}
+
+	c := ovContext()
+
+	return c.SetContext(ovContextData.host)
 }
