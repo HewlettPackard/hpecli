@@ -19,10 +19,7 @@ const (
 )
 
 func TestNewContext(t *testing.T) {
-	c, err := New(contextKey, apiKeyPrefix, MockOpen)
-	if err != nil {
-		t.Fatal(err)
-	}
+	c := NewContext(contextKey, apiKeyPrefix, MockOpen)
 
 	if c.(*APIContext).ContextKey != contextKey {
 		t.Fatal("ContextKey value not set as expected")

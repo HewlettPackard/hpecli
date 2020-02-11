@@ -25,7 +25,7 @@ func TestAPIKeyPutInEnclosureRequest(t *testing.T) {
 
 	defer server.Close()
 
-	c := initContext(t)
+	c := ovContext()
 	// set context to the test server host
 	_ = c.SetAPIKey(server.URL, sessionID)
 
@@ -43,7 +43,7 @@ func TestEnclosureClientRequestFails(t *testing.T) {
 
 	defer server.Close()
 
-	c := initContext(t)
+	c := ovContext()
 	// set context to the test server host
 	_ = c.SetAPIKey(server.URL, sessionID)
 
@@ -64,7 +64,7 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 
 	defer server.Close()
 
-	c := initContext(t)
+	c := ovContext()
 	// set context to the test server host
 	_ = c.SetAPIKey(server.URL, sessionID)
 
@@ -97,7 +97,7 @@ func TestGetEnclosureByName(t *testing.T) {
 
 	defer server.Close()
 
-	c := initContext(t)
+	c := ovContext()
 	// set context to the test server host
 	_ = c.SetAPIKey(server.URL, "sessionID")
 

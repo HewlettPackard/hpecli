@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/context"
 	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
@@ -26,7 +25,7 @@ func TestAPIKeyPutInServerRequest(t *testing.T) {
 
 	defer server.Close()
 
-	c := initContext(t)
+	c := ovContext()
 	// set context to the test server host
 	_ = c.SetAPIKey(server.URL, sessionID)
 
@@ -44,7 +43,7 @@ func TestClientServerRequestFails(t *testing.T) {
 
 	defer server.Close()
 
-	c := initContext(t)
+	c := ovContext()
 	// set context to the test server host
 	_ = c.SetAPIKey(server.URL, sessionID)
 
@@ -65,7 +64,7 @@ func TestServerJSONMarshallFails(t *testing.T) {
 
 	defer server.Close()
 
-	c := initContext(t)
+	c := ovContext()
 	// set context to the test server host
 	_ = c.SetAPIKey(server.URL, sessionID)
 
@@ -84,13 +83,4 @@ func TestMissingAPIKey(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have retrieved error")
 	}
-}
-
-func initContext(t *testing.T) context.Context {
-	c, err := ovContext()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return c
 }
