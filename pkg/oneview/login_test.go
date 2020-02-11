@@ -46,7 +46,7 @@ func TestAPIKeyIsStored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c := initContext(t)
+	c := ovContext()
 
 	// sessionId is stored - so get it and verify it
 	_, gotAPIKey, _ := c.APIKey()

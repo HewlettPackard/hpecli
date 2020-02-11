@@ -27,10 +27,7 @@ func TestContextIsSetInDB(t *testing.T) {
 	// sets the context in the DB
 	_ = runSetContext(nil, nil)
 
-	c, err := ovContext()
-	if err != nil {
-		t.Fatal(err)
-	}
+	c := ovContext()
 
 	// get value directly from db to verify it was written
 	got, _, err := c.APIKey()

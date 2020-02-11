@@ -1,3 +1,5 @@
+// (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
+
 package oneview
 
 import (
@@ -28,10 +30,7 @@ func runSetContext(_ *cobra.Command, _ []string) error {
 		ovContextData.host = fmt.Sprintf("https://%s", ovContextData.host)
 	}
 
-	c, err := ovContext()
-	if err != nil {
-		return err
-	}
+	c := ovContext()
 
 	return c.SetContext(ovContextData.host)
 }

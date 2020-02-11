@@ -26,12 +26,12 @@ var (
 	ErrorKeyNotFound     = errors.New("unable to find key for specified host")
 )
 
-func New(contextKey, apiKeyPrefix string, dbOpen DBOpen) (Context, error) {
+func New(contextKey, apiKeyPrefix string, dbOpen DBOpen) Context {
 	return &APIContext{
 		ContextKey:   contextKey,
 		APIKeyPrefix: apiKeyPrefix,
 		DBOpen:       dbOpen,
-	}, nil
+	}
 }
 
 func (c APIContext) APIKey() (host, sessionKey string, err error) {
