@@ -1,6 +1,6 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-package cloudvolume
+package ilo
 
 import (
 	"fmt"
@@ -13,11 +13,11 @@ const (
 	clientHost     = "someClientHost"
 	clientUsername = "username"
 	clientPassword = "password"
-	clientToken    = "lkjsdfjka;sdfjlasdjkf"
+	clientToken    = "ljwer;lkjl23j4lk3l;jlk"
 )
 
-func TestNewCVCClient(t *testing.T) {
-	c := NewCVClient(clientHost, clientUsername, clientPassword)
+func TestNeILOCClient(t *testing.T) {
+	c := NewILOClient(clientHost, clientUsername, clientPassword)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -35,8 +35,8 @@ func TestNewCVCClient(t *testing.T) {
 	}
 }
 
-func TestNewCVClientFromAPIKey(t *testing.T) {
-	c := NewCVClientFromAPIKey(clientHost, clientToken)
+func TestNewILOClientFromAPIKey(t *testing.T) {
+	c := NewILOClientFromAPIKey(clientHost, clientToken)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -53,13 +53,13 @@ func TestNewCVClientFromAPIKey(t *testing.T) {
 func TestMalformedResponseForLogin(t *testing.T) {
 	const notJSON = "bad response"
 
-	ts := newTestServer("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+	ts := newTestServer("/redfish/v1/SessionService/Sessions/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, notJSON)
 	})
 
 	defer ts.Close()
 
-	c := NewCVClient(ts.URL, clientUsername, clientPassword)
+	c := NewILOClient(ts.URL, restUsername, restPassword)
 
 	_, err := c.Login()
 	if err == nil {
@@ -69,15 +69,15 @@ func TestMalformedResponseForLogin(t *testing.T) {
 
 func TestTokenResponseForLogin(t *testing.T) {
 	const want = "74dc0153-6daa-49ae-905e-cc59bff3225e"
-	jsonResponse := fmt.Sprintf(`{"geo":"US", "token":"%s"}`, want)
 
-	ts := newTestServer("/auth/login", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, jsonResponse)
+	ts := newTestServer("/redfish/v1/sessionservice/sessions/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("x-auth-token", want)
+		w.WriteHeader(http.StatusCreated)
 	})
 
 	defer ts.Close()
 
-	c := NewCVClient(ts.URL, clientUsername, clientPassword)
+	c := NewILOClient(ts.URL, restUsername, restPassword)
 
 	got, err := c.Login()
 	if err != nil {
@@ -90,12 +90,10 @@ func TestTokenResponseForLogin(t *testing.T) {
 }
 
 func TestAPIKeyInjected(t *testing.T) {
-	const apiKey = "dXNlcm5hbWU6dG9rZW4="
-	// header value is base64 encoding of "username:dXNlcm5hbWU6dG9rZW4="
-	want := "Basic dXNlcm5hbWU6ZFhObGNtNWhiV1U2ZEc5clpXND0="
+	const want = "dXNlcm5hbWU6dG9rZW4="
 
-	ts := newTestServer("/api/v2/cloud_volumes", func(w http.ResponseWriter, r *http.Request) {
-		got := r.Header.Get("Authorization")
+	ts := newTestServer("/redfish/v1/", func(w http.ResponseWriter, r *http.Request) {
+		got := r.Header.Get("X-Auth-Token")
 		if got != want {
 			t.Fatal("didn't get expected auth header")
 		}
@@ -103,30 +101,30 @@ func TestAPIKeyInjected(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewCVClientFromAPIKey(ts.URL, apiKey)
+	c := NewILOClientFromAPIKey(ts.URL, want)
 
 	// checks are done on server side above
-	_, _ = c.GetCloudVolumes()
+	_, _ = c.GetServiceRoot()
 }
 
-func TestGetCloudVolumes(t *testing.T) {
-	const compactJSON = `{"data":[{"cloud_accounts":[{"href":"https://demo.cloudvolumes.hpe.com/api/v2/` +
-		`session/cloud_accounts/F2aSi8dNerU5T3zAatrNc8z2cevknLBWYSnyOrgg","id":` +
-		`"F2aSi8dNerU5T3zAatrNc8z2cevknLBWYSnyOrgg"}]}]}`
+func TestGetServiceRoot(t *testing.T) {
+	const compactJSON = `{"@odata.context":"/redfish/v1/$metadata#ServiceRoot.ServiceRoot","@odata.id":"/redfish/v1/",` +
+		`"@odata.type":"#ServiceRoot.1.0.0.ServiceRoot","AccountService":{"@odata.id":"/redfish/v1/AccountService/"},` +
+		`"Chassis":{"@odata.id":"/redfish/v1/Chassis/"}}`
 
-	const want = "{\n  \"data\": ["
+	const want = "{\n  \"@odata.context\": \"/redfish/v1/$metadata#ServiceRoot.ServiceRoot\",\n"
 
-	ts := newTestServer("/api/v2/cloud_volumes", func(w http.ResponseWriter, r *http.Request) {
+	ts := newTestServer("/redfish/v1/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, compactJSON)
 	})
 
 	defer ts.Close()
 
-	c := NewCVClientFromAPIKey(ts.URL, "someAPIKey")
+	c := NewILOClientFromAPIKey(ts.URL, "someAPIKey")
 
-	got, err := c.GetCloudVolumes()
+	got, err := c.GetServiceRoot()
 	if err != nil {
-		t.Fatalf("unexpected error in getCloudVolumes attempt")
+		t.Fatalf("unexpected error in GetServiceRoot attempt")
 	}
 
 	s := string(got)
