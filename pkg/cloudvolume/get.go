@@ -7,12 +7,11 @@ import (
 )
 
 // Cmd represents the ilo command
-var Cmd = &cobra.Command{
-	Use:   "cloudvolume",
-	Short: "Access to HPE Nimble Cloud Volume commands",
+var cmdGet = &cobra.Command{
+	Use:   "get",
+	Short: "Get resources from HPE Nimble Cloud Volumes",
 }
 
 func init() {
-	Cmd.AddCommand(cmdGet)
-	Cmd.AddCommand(cmdLogin)
+	cmdGet.AddCommand(cmdGetVolumes)
 }

@@ -24,7 +24,16 @@ func NewCVClient(host, username, password string) *CVClient {
 	}
 }
 
-func (c CVClient) Login() (string, error) {
+func NewCVClientFromAPIKey(host, token string) *CVClient {
+	return &CVClient{
+		restClient{
+			Endpoint: host,
+			APIKey:   token,
+		},
+	}
+}
+
+func (c *CVClient) Login() (string, error) {
 	const uriPath = "/auth/login"
 
 	loginJSON := fmt.Sprintf(`{"email":"%s", "password":"%s"}`, c.Username, c.Password)
@@ -48,4 +57,16 @@ func (c CVClient) Login() (string, error) {
 	}
 
 	return lr.Token, nil
+}
+
+func (c *CVClient) GetCloudVolumes() ([]byte, error) {
+	const uriPath = "/api/v2/cloud_volumes"
+
+	data, err := c.restAPICall("GET", uriPath, nil)
+	if err != nil {
+		logger.Critical("Unable to login as: %s to: %s", c.Username, c.Endpoint)
+		return nil, err
+	}
+
+	return data, nil
 }

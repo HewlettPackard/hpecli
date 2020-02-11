@@ -37,7 +37,7 @@ func getEnclosuresData() error {
 	if err != nil {
 		logger.Debug("unable to retrieve apiKey for host: %s because of: %#v", host, err)
 		return fmt.Errorf("unable to retrieve the last login for OneView." +
-			"Please login to OneView using: hpecli login OneView")
+			"Please login to OneView using: hpecli oneview login")
 	}
 
 	ovc := NewOVClientFromAPIKey(host, apiKey)
