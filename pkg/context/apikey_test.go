@@ -161,6 +161,33 @@ func TestSetAPIFailsOnDBOpen(t *testing.T) {
 	}
 }
 
+func TestSetContextPutFails(t *testing.T) {
+	c := withMockStore()
+
+	if err := c.SetContext("fail"); err == nil {
+		t.Fatalf("Didn't find expected error")
+	}
+}
+
+func TestSetContextWritesValue(t *testing.T) {
+	c := withMockStore()
+
+	if err := c.SetContext(host); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var got string
+
+	err := ms.Get(contextKey, &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got != host {
+		t.Fatal("didn't retrieve expected value after SetContext")
+	}
+}
+
 func FailOpen() (db.Store, error) {
 	return nil, fmt.Errorf("expected")
 }

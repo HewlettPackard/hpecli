@@ -6,9 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const oneViewAPIKeyPrefix = "hpecli_oneview_token_"
-const oneViewContextKey = "hpecli_oneview_context"
-
 // Cmd represents the ilo command
 var Cmd = &cobra.Command{
 	Use:   "oneview",
@@ -16,6 +13,7 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
+	Cmd.AddCommand(ovContextCmd)
 	Cmd.AddCommand(ovGetCmd)
 	Cmd.AddCommand(ovLoginCmd)
 }
