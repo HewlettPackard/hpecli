@@ -3,6 +3,9 @@
 package cloudvolume
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -44,6 +47,10 @@ func (c *restClient) restAPICall(method, urlPath string, body io.Reader) ([]byte
 		req.Header.Add("Content-Type", "application/json")
 	}
 
+	authHeader := "username:" + c.APIKey
+	encoded := base64.StdEncoding.EncodeToString([]byte(authHeader))
+	req.Header.Set("Authorization", "Basic "+encoded)
+
 	tr := &http.Transport{}
 	client := &http.Client{Transport: tr}
 
@@ -73,7 +80,13 @@ func (c *restClient) restAPICall(method, urlPath string, body io.Reader) ([]byte
 		return nil, err
 	}
 
-	return data, nil
+	dst := &bytes.Buffer{}
+	if err := json.Indent(dst, data, "", "  "); err != nil {
+		logger.Warning("Unable to pretty-print output.")
+		return data, nil
+	}
+
+	return dst.Bytes(), nil
 }
 
 func normalize(u string) (string, error) {
