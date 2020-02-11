@@ -29,6 +29,7 @@ func newClient(host, user, password string) *restClient {
 	return &restClient{Endpoint: host, Username: user, Password: password}
 }
 
+//nolint:funlen //ignore for now that this is a long method
 func (c *restClient) restAPICall(method, urlPath string, body io.Reader) ([]byte, error) {
 	u, err := normalize(c.Endpoint + urlPath)
 	if err != nil {
@@ -50,6 +51,7 @@ func (c *restClient) restAPICall(method, urlPath string, body io.Reader) ([]byte
 	req.Header.Set("X-Auth-Token", c.APIKey)
 
 	tr := &http.Transport{
+		//nolint:gosec // need this for ilo.. because they usually have self-signed certs
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
