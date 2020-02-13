@@ -27,12 +27,15 @@ func TestOptionsExecuted(t *testing.T) {
 	fn1 := func(r *Request) {
 		r.SetBasicAuth("username", "password")
 	}
+
 	fn2 := func(r *Request) {
 		r.Header.Set("content-type", "junk-setting")
 	}
+
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
+
 	defer ts.Close()
 
 	r, err := Get(ts.URL, fn1, fn2)
