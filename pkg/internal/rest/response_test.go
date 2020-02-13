@@ -24,10 +24,10 @@ func TestResponseType(t *testing.T) {
 
 	got := reflect.TypeOf(r)
 	want := reflect.TypeOf(&Response{})
+
 	if got != want {
 		t.Fatalf(errTmpl, got, want)
 	}
-
 }
 
 func TestByteResponse(t *testing.T) {
@@ -35,6 +35,7 @@ func TestByteResponse(t *testing.T) {
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(want)
 	})
+
 	defer ts.Close()
 
 	r, err := Get(ts.URL)
@@ -54,6 +55,7 @@ func TestJSONResponse(t *testing.T) {
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(compactJSON)
 	})
+
 	defer ts.Close()
 
 	r, err := Get(ts.URL)
@@ -62,7 +64,7 @@ func TestJSONResponse(t *testing.T) {
 	}
 
 	got := r.JSON()
-	if !(bytes.Equal(got, []byte(want))) {
+	if !(bytes.Equal(got, want)) {
 		t.Fatalf(errTmpl, got, want)
 	}
 }
@@ -73,6 +75,7 @@ func TestJSONPrettyPrintFailure(t *testing.T) {
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(want)
 	})
+
 	defer ts.Close()
 
 	r, err := Get(ts.URL)
@@ -91,6 +94,7 @@ func TestUnmarshall(t *testing.T) {
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(compactJSON)
 	})
+
 	defer ts.Close()
 
 	r, err := Get(ts.URL)
@@ -113,17 +117,19 @@ func TestUnmarshall(t *testing.T) {
 	if mt.Geo != "geovalue" {
 		t.Fatal("unmarshall didn't get expected field value: geovalue")
 	}
+
 	if mt.Token != "tokenvalue" {
 		t.Fatal("unmarshall didn't get expected field value: tokenvalue")
 	}
 }
 
 func TestUnmarshallFails(t *testing.T) {
-	//bad json causes unmarshall error
+	// bad json causes unmarshall error
 	compactJSON := []byte(`{`)
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(compactJSON)
 	})
+
 	defer ts.Close()
 
 	r, err := Get(ts.URL)
