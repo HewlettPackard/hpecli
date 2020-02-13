@@ -3,44 +3,42 @@
 package cloudvolume
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
 )
 
 type CVClient struct {
-	restClient
+	Host     string
+	Username string
+	Password string
+	APIKey   string
+	*rest.Request
 }
 
 func NewCVClient(host, username, password string) *CVClient {
 	return &CVClient{
-		restClient{
-			Endpoint: host,
-			Username: username,
-			Password: password,
-		},
+		Host:     host,
+		Username: username,
+		Password: password,
 	}
 }
 
 func NewCVClientFromAPIKey(host, token string) *CVClient {
 	return &CVClient{
-		restClient{
-			Endpoint: host,
-			APIKey:   token,
-		},
+		Host:   host,
+		APIKey: token,
 	}
 }
 
 func (c *CVClient) Login() (string, error) {
 	const uriPath = "/auth/login"
 
-	loginJSON := fmt.Sprintf(`{"email":"%s", "password":"%s"}`, c.Username, c.Password)
+	postBody := fmt.Sprintf(`{"email":"%s", "password":"%s"}`, c.Username, c.Password)
 
-	data, err := c.restAPICall("POST", uriPath, strings.NewReader(loginJSON))
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(postBody), AddJSONMimeType())
 	if err != nil {
-		logger.Critical("Unable to login as: %s to: %s", c.Username, c.Endpoint)
 		return "", err
 	}
 
@@ -51,22 +49,33 @@ func (c *CVClient) Login() (string, error) {
 
 	var lr loginResponse
 
-	if err := json.Unmarshal(data, &lr); err != nil {
-		logger.Debug("expcted login response, but received: %s", lr)
-		return "", err
+	err = resp.Unmarshall(&lr)
+	if err == nil {
+		return lr.Token, nil
 	}
 
-	return lr.Token, nil
+	return "", fmt.Errorf("unable to get response from login command")
 }
 
 func (c *CVClient) GetCloudVolumes() ([]byte, error) {
 	const uriPath = "/api/v2/cloud_volumes"
 
-	data, err := c.restAPICall("GET", uriPath, nil)
+	resp, err := rest.Get(c.Host+uriPath, c.AddAuth())
 	if err != nil {
-		logger.Critical("Unable to login as: %s to: %s", c.Username, c.Endpoint)
-		return nil, err
+		return []byte{}, err
 	}
 
-	return data, nil
+	return resp.JSON(), nil
+}
+
+func (c *CVClient) AddAuth() func(*rest.Request) {
+	return func(r *rest.Request) {
+		r.Request.SetBasicAuth("username", c.APIKey)
+	}
+}
+
+func AddJSONMimeType() func(*rest.Request) {
+	return func(r *rest.Request) {
+		r.Header.Set("Content-Type", "application/json")
+	}
 }
