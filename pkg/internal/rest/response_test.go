@@ -14,7 +14,9 @@ const errTmpl = "Unexpected value - got=%s, want=%s"
 
 func TestResponseType(t *testing.T) {
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
 	})
+
 	defer ts.Close()
 
 	r, err := Get(ts.URL)
