@@ -66,7 +66,7 @@ func Post(urlStr string, body io.Reader, options ...func(*Request)) (*Response, 
 }
 
 func do(method, urlStr string, body io.Reader, options ...func(*Request)) (*Response, error) {
-	request, err := wrapRequest("POST", urlStr, body, options)
+	request, err := wrapRequest(method, urlStr, body, options)
 	if err != nil {
 		return nil, err
 	}
