@@ -52,3 +52,20 @@ func TestOptionsExecuted(t *testing.T) {
 		t.Fatal("didn't get header content-type value after set")
 	}
 }
+
+func TestPost(t *testing.T) {
+	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+	})
+
+	defer ts.Close()
+
+	r, err := Post(ts.URL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if r.StatusCode != http.StatusCreated {
+		t.Fatal("expected ")
+	}
+}
