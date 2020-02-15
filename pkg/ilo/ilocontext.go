@@ -22,8 +22,10 @@ func storeContext(key, token string) error {
 
 func getContext() (*iloContextData, error) {
 	c := context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+
 	var d iloContextData
 	err := c.APIKey(&d)
+
 	return &d, err
 }
 

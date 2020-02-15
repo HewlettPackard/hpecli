@@ -22,8 +22,10 @@ func storeContext(key, token string) error {
 
 func getContext() (*ovContextData, error) {
 	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
+
 	var d ovContextData
 	err := c.APIKey(&d)
+
 	return &d, err
 }
 

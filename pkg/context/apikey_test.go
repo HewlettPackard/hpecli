@@ -47,6 +47,7 @@ func TestGetAPIKey(t *testing.T) {
 	}
 
 	var got string
+
 	err := c.APIKey(&got)
 	if err != nil {
 		t.Fatal(err)
@@ -72,6 +73,7 @@ func TestGetContextFails(t *testing.T) {
 	c.(*APIContext).ContextKey = fail
 
 	var v string
+
 	err := c.APIKey(&v)
 	if err == nil {
 		t.Fatal(errExpected)
@@ -100,6 +102,7 @@ func TestWhenAPIKeyFails(t *testing.T) {
 	c := withMockStore()
 
 	var key string
+
 	err = c.APIKey(&key)
 	if err == nil {
 		t.Fatal(errExpected)

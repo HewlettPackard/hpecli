@@ -46,7 +46,7 @@ func TestAPIKeyIsStored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := getContext()
+	got, _ := getContext()
 
 	if got.APIKey != sessionID {
 		t.Fatalf(errTempl, got.APIKey, sessionID)

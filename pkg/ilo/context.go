@@ -29,5 +29,6 @@ func runSetContext(_ *cobra.Command, _ []string) error {
 	if !strings.HasPrefix(iloContextHost.host, "http") {
 		iloContextHost.host = fmt.Sprintf("https://%s", iloContextHost.host)
 	}
+
 	return changeContext(iloContextHost.host)
 }

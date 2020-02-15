@@ -22,7 +22,9 @@ func storeContext(key, token string) error {
 
 func getContext() (*cvContextData, error) {
 	c := context.New(cvContextKey, cvAPIKeyPrefix, db.Open)
+
 	var d cvContextData
 	err := c.APIKey(&d)
+
 	return &d, err
 }

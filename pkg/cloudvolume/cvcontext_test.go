@@ -18,6 +18,7 @@ func TestStoreContextFailsEmptyKey(t *testing.T) {
 
 func TestStoreGetWorks(t *testing.T) {
 	const h1 = "host1"
+
 	const v1 = "value1"
 
 	if err := storeContext(h1, v1); err != nil {
@@ -36,5 +37,4 @@ func TestStoreGetWorks(t *testing.T) {
 	if d.APIKey != v1 {
 		t.Fatal("didn't retrieve matching apikey value")
 	}
-
 }

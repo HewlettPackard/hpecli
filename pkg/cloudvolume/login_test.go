@@ -34,6 +34,7 @@ func TestLoginWorks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	got := d.APIKey
 
 	if got != want {
