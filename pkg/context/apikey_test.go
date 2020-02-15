@@ -46,17 +46,14 @@ func TestGetAPIKey(t *testing.T) {
 		t.Fatalf(errUnexpected, err)
 	}
 
-	got1, got2, err := c.APIKey()
+	var got string
+	err := c.APIKey(&got)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got1 != host {
+	if got != key {
 		t.Fatal("wrong host returned")
-	}
-
-	if got2 != key {
-		t.Fatal("wrong key returned")
 	}
 }
 
@@ -74,7 +71,8 @@ func TestGetContextFails(t *testing.T) {
 	c := withMockStore()
 	c.(*APIContext).ContextKey = fail
 
-	_, _, err := c.APIKey()
+	var v string
+	err := c.APIKey(&v)
 	if err == nil {
 		t.Fatal(errExpected)
 	}
@@ -101,7 +99,8 @@ func TestWhenAPIKeyFails(t *testing.T) {
 
 	c := withMockStore()
 
-	_, _, err = c.APIKey()
+	var key string
+	err = c.APIKey(&key)
 	if err == nil {
 		t.Fatal(errExpected)
 	}
@@ -140,7 +139,7 @@ func TestGetAPIFailsOnDBOpen(t *testing.T) {
 		DBOpen:       FailOpen,
 	}
 
-	_, _, err := c.APIKey()
+	err := c.APIKey(nil)
 	if err == nil {
 		t.Fatal(errExpected)
 	}
@@ -159,18 +158,18 @@ func TestSetAPIFailsOnDBOpen(t *testing.T) {
 	}
 }
 
-func TestSetContextPutFails(t *testing.T) {
+func TestChangeContextPutFails(t *testing.T) {
 	c := withMockStore()
 
-	if err := c.SetContext("fail"); err == nil {
+	if err := c.ChangeContext("fail"); err == nil {
 		t.Fatalf(errExpected)
 	}
 }
 
-func TestSetContextWritesValue(t *testing.T) {
+func TestChangeContextWritesValue(t *testing.T) {
 	c := withMockStore()
 
-	if err := c.SetContext(host); err != nil {
+	if err := c.ChangeContext(host); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -182,7 +181,7 @@ func TestSetContextWritesValue(t *testing.T) {
 	}
 
 	if got != host {
-		t.Fatal("didn't retrieve expected value after SetContext")
+		t.Fatal("didn't retrieve expected value after ChangeContext")
 	}
 }
 

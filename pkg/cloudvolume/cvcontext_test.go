@@ -2,21 +2,39 @@ package cloudvolume
 
 import (
 	"testing"
-
-	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
-func TestContextNotNil(t *testing.T) {
-	c := cvContext()
-	if c == nil {
-		t.Fatal("cvContext() returned nil")
+func TestStoreContext(t *testing.T) {
+	if err := storeContext("host1", "blahKey"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestStoreContextFailsEmptyKey(t *testing.T) {
+	if err := storeContext("", "blahKey"); err == nil {
+		t.Fatal("expected failure no empty key")
+	}
+}
+
+func TestStoreGetWorks(t *testing.T) {
+	const h1 = "host1"
+	const v1 = "value1"
+
+	if err := storeContext(h1, v1); err != nil {
+		t.Fatal(err)
 	}
 
-	if cvAPIKeyPrefix != c.(*context.APIContext).APIKeyPrefix {
-		t.Fatalf("APIKeyPrefix wasn't stored correctly")
+	d, err := getContext()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if cvContextKey != c.(*context.APIContext).ContextKey {
-		t.Fatalf("ContextKey wasn't stored correctly")
+	if d.Host != h1 {
+		t.Fatal("didn't retrieve matching host value")
 	}
+
+	if d.APIKey != v1 {
+		t.Fatal("didn't retrieve matching apikey value")
+	}
+
 }

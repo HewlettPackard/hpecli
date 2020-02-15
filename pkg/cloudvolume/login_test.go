@@ -23,19 +23,18 @@ func TestLoginWorks(t *testing.T) {
 	cvLoginData.host = ts.URL
 
 	// erase value from db - so we know it is empty
-	c := cvContext()
-	c.SetAPIKey(ts.URL, "")
+	storeContext(ts.URL, "")
 
 	err := runCVLogin(nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// now check value is written to the db
-	_, got, err := c.APIKey()
+	d, err := getContext()
 	if err != nil {
 		t.Fatal(err)
 	}
+	got := d.APIKey
 
 	if got != want {
 		t.Fatalf(errTempl, got, want)

@@ -13,24 +13,22 @@ import (
 var ovContextCmd = &cobra.Command{
 	Use:   "context",
 	Short: "Chagne context to different OneView host",
-	RunE:  runSetContext,
+	RunE:  runChangeContext,
 }
 
-var ovContextData struct {
+var ovContextHost struct {
 	host string
 }
 
 func init() {
-	ovContextCmd.Flags().StringVar(&ovContextData.host, "host", "", "oneview host/ip address")
+	ovContextCmd.Flags().StringVar(&ovContextHost.host, "host", "", "oneview host/ip address")
 	_ = ovContextCmd.MarkFlagRequired("host")
 }
 
-func runSetContext(_ *cobra.Command, _ []string) error {
-	if !strings.HasPrefix(ovContextData.host, "http") {
-		ovContextData.host = fmt.Sprintf("https://%s", ovContextData.host)
+func runChangeContext(_ *cobra.Command, _ []string) error {
+	if !strings.HasPrefix(ovContextHost.host, "http") {
+		ovContextHost.host = fmt.Sprintf("https://%s", ovContextHost.host)
 	}
 
-	c := ovContext()
-
-	return c.SetContext(ovContextData.host)
+	return changeContext(ovContextHost.host)
 }

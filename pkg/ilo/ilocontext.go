@@ -10,6 +10,24 @@ import (
 const iloAPIKeyPrefix = "hpecli_ilo_token_"
 const iloContextKey = "hpecli_ilo_context"
 
-func iloContext() context.Context {
-	return context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+type iloContextData struct {
+	Host   string
+	APIKey string
+}
+
+func storeContext(key, token string) error {
+	c := context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+	return c.SetAPIKey(key, &iloContextData{key, token})
+}
+
+func getContext() (*iloContextData, error) {
+	c := context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+	var d iloContextData
+	err := c.APIKey(&d)
+	return &d, err
+}
+
+func changeContext(key string) error {
+	c := context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+	return c.ChangeContext(key)
 }

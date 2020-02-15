@@ -10,6 +10,19 @@ import (
 const cvAPIKeyPrefix = "hpecli_cloudvolume_token_"
 const cvContextKey = "hpecli_cloudvolume_context"
 
-func cvContext() context.Context {
-	return context.New(cvContextKey, cvAPIKeyPrefix, db.Open)
+type cvContextData struct {
+	Host   string
+	APIKey string
+}
+
+func storeContext(key, token string) error {
+	c := context.New(cvContextKey, cvAPIKeyPrefix, db.Open)
+	return c.SetAPIKey(key, &cvContextData{key, token})
+}
+
+func getContext() (*cvContextData, error) {
+	c := context.New(cvContextKey, cvAPIKeyPrefix, db.Open)
+	var d cvContextData
+	err := c.APIKey(&d)
+	return &d, err
 }
