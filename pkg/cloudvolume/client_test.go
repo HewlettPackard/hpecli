@@ -5,6 +5,7 @@ package cloudvolume
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -14,7 +15,16 @@ const (
 	clientUsername = "username"
 	clientPassword = "password"
 	clientToken    = "lkjsdfjka;sdfjlasdjkf"
+	errTempl       = "got=%s, want=%s"
 )
+
+func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+	mux.HandleFunc(path, h)
+
+	return server
+}
 
 func TestNewCVCClient(t *testing.T) {
 	c := NewCVClient(clientHost, clientUsername, clientPassword)
@@ -22,7 +32,7 @@ func TestNewCVCClient(t *testing.T) {
 		t.Fatal("expected client to not be nil")
 	}
 
-	if clientHost != c.Endpoint {
+	if clientHost != c.Host {
 		t.Fatal("clientHost doesn't match")
 	}
 
@@ -41,7 +51,7 @@ func TestNewCVClientFromAPIKey(t *testing.T) {
 		t.Fatal("expected client to not be nil")
 	}
 
-	if clientHost != c.Endpoint {
+	if clientHost != c.Host {
 		t.Fatal("clientHost doesn't match")
 	}
 
@@ -59,7 +69,7 @@ func TestMalformedResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewCVClient(ts.URL, restUsername, restPassword)
+	c := NewCVClient(ts.URL, clientUsername, clientPassword)
 
 	_, err := c.Login()
 	if err == nil {
@@ -77,7 +87,7 @@ func TestTokenResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewCVClient(ts.URL, restUsername, restPassword)
+	c := NewCVClient(ts.URL, clientUsername, clientPassword)
 
 	got, err := c.Login()
 	if err != nil {

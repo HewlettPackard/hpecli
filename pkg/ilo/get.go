@@ -7,13 +7,11 @@ import (
 )
 
 func init() {
-	Cmd.AddCommand(cmdILOContext)
-	Cmd.AddCommand(cmdILOGet)
-	Cmd.AddCommand(cmdILOLogin)
+	cmdILOGet.AddCommand(cmdILOServiceRoot)
 }
 
 // Cmd represents the ilo command
-var Cmd = &cobra.Command{
-	Use:   "ilo",
-	Short: "Access to HPE iLO commands",
+var cmdILOGet = &cobra.Command{
+	Use:   "get",
+	Short: "Get details from iLO",
 }

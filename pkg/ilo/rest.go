@@ -1,10 +1,11 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-package cloudvolume
+//nolint // sonar marks as duplicate code -- need to refactor and collapse with other rest.go
+package ilo
 
 import (
 	"bytes"
-	"encoding/base64"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -29,6 +30,7 @@ func newClient(host, user, password string) *restClient {
 	return &restClient{Endpoint: host, Username: user, Password: password}
 }
 
+//nolint:funlen //ignore for now that this is a long method
 func (c *restClient) restAPICall(method, urlPath string, body io.Reader) ([]byte, error) {
 	u, err := normalize(c.Endpoint + urlPath)
 	if err != nil {
@@ -47,11 +49,12 @@ func (c *restClient) restAPICall(method, urlPath string, body io.Reader) ([]byte
 		req.Header.Add("Content-Type", "application/json")
 	}
 
-	authHeader := "username:" + c.APIKey
-	encoded := base64.StdEncoding.EncodeToString([]byte(authHeader))
-	req.Header.Set("Authorization", "Basic "+encoded)
+	req.Header.Set("X-Auth-Token", c.APIKey)
 
-	tr := &http.Transport{}
+	tr := &http.Transport{
+		//nolint:gosec // need this for ilo.. because they usually have self-signed certs
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	client := &http.Client{Transport: tr}
 
 	// setup proxy
@@ -70,6 +73,12 @@ func (c *restClient) restAPICall(method, urlPath string, body io.Reader) ([]byte
 	}
 
 	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusCreated {
+		// login does post that responds with 201
+		token := resp.Header.Get("X-Auth-Token")
+		return []byte(token), nil
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("remote request failed with: \"%s\"", resp.Status)

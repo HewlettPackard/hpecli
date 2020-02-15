@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/db"
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/spf13/cobra"
 )
@@ -17,12 +16,6 @@ var iloLoginData struct {
 	password string
 }
 
-func init() {
-	cmdILOLogin.Flags().StringVar(&iloLoginData.host, "host", "", "ilo ip address")
-	cmdILOLogin.Flags().StringVarP(&iloLoginData.username, "username", "u", "", "ilo username")
-	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo passowrd")
-}
-
 // cmdIloLogin represents the get command
 var cmdILOLogin = &cobra.Command{
 	Use:   "login",
@@ -30,42 +23,39 @@ var cmdILOLogin = &cobra.Command{
 	RunE:  runILOLogin,
 }
 
+func init() {
+	cmdILOLogin.Flags().StringVar(&iloLoginData.host, "host", "", "ilo ip address")
+	cmdILOLogin.Flags().StringVarP(&iloLoginData.username, "username", "u", "", "ilo username")
+	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo passowrd")
+	_ = cmdILOLogin.MarkFlagRequired("host")
+	_ = cmdILOLogin.MarkFlagRequired("username")
+	_ = cmdILOLogin.MarkFlagRequired("password")
+}
+
 func runILOLogin(_ *cobra.Command, _ []string) error {
-	if iloLoginData.host == "" {
-		return fmt.Errorf("must provide --host or -h")
-	}
-
 	if !strings.HasPrefix(iloLoginData.host, "http") {
-		iloLoginData.host = fmt.Sprintf("http://%s", iloLoginData.host)
-	}
-
-	if iloLoginData.username == "" {
-		return fmt.Errorf("must provide --username or -u")
-	}
-
-	if iloLoginData.password == "" {
-		// this really isn't secure to provide on the command line
-		// need to provide a way to read from stdin
-		return fmt.Errorf("must provide --password or -p")
+		iloLoginData.host = fmt.Sprintf("https://%s", iloLoginData.host)
 	}
 
 	logger.Debug("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
 
-	d, err := db.Open()
-	if err != nil {
-		logger.Debug("unable to open keystore: %v", err)
-		return fmt.Errorf("%v", err)
-	}
-	defer d.Close()
+	cl := NewILOClient(iloLoginData.host, iloLoginData.username, iloLoginData.password)
 
-	var val string
-	if err := d.Get(key(), &val); err != nil {
-		return fmt.Errorf("%v", err)
+	token, err := cl.Login()
+	if err != nil {
+		logger.Warning("Unable to login with supplied credentials to ilo at: %s", iloLoginData.host)
+		return err
+	}
+
+	c := iloContext()
+
+	// change context to current host and save the session ID as the API key
+	// for subsequent requests
+	if err = c.SetAPIKey(iloLoginData.host, token); err != nil {
+		logger.Warning("Successfully logged into ilo, but was unable to save the session data")
+	} else {
+		logger.Debug("Successfully logged into ilo: %s", iloLoginData.host)
 	}
 
 	return nil
-}
-
-func key() string {
-	return fmt.Sprintf("hpecli_ilo_token_%s", iloLoginData.host)
 }
