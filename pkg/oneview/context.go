@@ -1,15 +1,36 @@
+// (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
+
 package oneview
 
 import (
-	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"fmt"
+	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-func ovContext() (context.Context, error) {
-	c, err := context.New(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
-	if err != nil {
-		return nil, err
+// Cmd represents the ilo command
+var ovContextCmd = &cobra.Command{
+	Use:   "context",
+	Short: "Chagne context to different OneView host",
+	RunE:  runSetContext,
+}
+
+var ovContextData struct {
+	host string
+}
+
+func init() {
+	ovContextCmd.Flags().StringVar(&ovContextData.host, "host", "", "oneview host/ip address")
+	_ = ovContextCmd.MarkFlagRequired("host")
+}
+
+func runSetContext(_ *cobra.Command, _ []string) error {
+	if !strings.HasPrefix(ovContextData.host, "http") {
+		ovContextData.host = fmt.Sprintf("https://%s", ovContextData.host)
 	}
 
-	return c, nil
+	c := ovContext()
+
+	return c.SetContext(ovContextData.host)
 }

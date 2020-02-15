@@ -1,6 +1,6 @@
 // (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
 
-package oneview
+package cloudvolume
 
 import (
 	"github.com/spf13/cobra"
@@ -8,12 +8,11 @@ import (
 
 // Cmd represents the ilo command
 var Cmd = &cobra.Command{
-	Use:   "oneview",
-	Short: "Access to HPE OneView commands",
+	Use:   "cloudvolume",
+	Short: "Access to HPE Nimble Cloud Volume commands",
 }
 
 func init() {
-	Cmd.AddCommand(ovContextCmd)
-	Cmd.AddCommand(ovGetCmd)
-	Cmd.AddCommand(ovLoginCmd)
+	Cmd.AddCommand(cmdGet)
+	Cmd.AddCommand(cmdLogin)
 }
