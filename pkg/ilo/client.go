@@ -4,56 +4,77 @@ package ilo
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
 )
 
 type Client struct {
-	restClient
+	Host     string
+	Username string
+	Password string
+	APIKey   string
+	*rest.Request
 }
 
 func NewILOClient(host, username, password string) *Client {
 	return &Client{
-		restClient{
-			Endpoint: host,
-			Username: username,
-			Password: password,
-		},
+		Host:     host,
+		Username: username,
+		Password: password,
 	}
 }
 
 func NewILOClientFromAPIKey(host, token string) *Client {
 	return &Client{
-		restClient{
-			Endpoint: host,
-			APIKey:   token,
-		},
+		Host:   host,
+		APIKey: token,
 	}
 }
 
 func (c *Client) Login() (string, error) {
-	const uriPath = "/redfish/v1/SessionService/Sessions/"
+	const uriPath = "/redfish/v1/sessionservice/sessions/"
 
 	loginJSON := fmt.Sprintf(`{"UserName":"%s", "Password":"%s"}`, c.Username, c.Password)
 
-	data, err := c.restAPICall("POST", uriPath, strings.NewReader(loginJSON))
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), AddJSONMimeType())
 	if err != nil {
-		logger.Critical("Unable to login as: %s to: %s", c.Username, c.Endpoint)
 		return "", err
 	}
 
-	return string(data), nil
+	if resp.StatusCode != http.StatusCreated {
+		return "", fmt.Errorf("unable to create login sessions to ilo.  Repsponse was: %+v", resp.Status)
+	}
+
+	token := resp.Header.Get("X-Auth-Token")
+
+	if token == "" {
+		return "", fmt.Errorf("unable to create login toekn from session")
+	}
+
+	return token, nil
 }
 
 func (c *Client) GetServiceRoot() ([]byte, error) {
 	const uriPath = "/redfish/v1/"
 
-	data, err := c.restAPICall("GET", uriPath, nil)
+	resp, err := rest.Get(c.Host+uriPath, c.AddAuth())
 	if err != nil {
-		logger.Critical("Unable to get service root at: %s", c.Endpoint)
-		return nil, err
+		return []byte{}, err
 	}
 
-	return data, nil
+	return resp.JSON(), nil
+}
+
+func (c *Client) AddAuth() func(*rest.Request) {
+	return func(r *rest.Request) {
+		r.Header.Add("X-Auth-Token", c.APIKey)
+	}
+}
+
+func AddJSONMimeType() func(*rest.Request) {
+	return func(r *rest.Request) {
+		r.Header.Set("Content-Type", "application/json")
+	}
 }

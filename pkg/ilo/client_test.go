@@ -5,6 +5,7 @@ package ilo
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -14,15 +15,16 @@ const (
 	clientUsername = "username"
 	clientPassword = "password"
 	clientToken    = "ljwer;lkjl23j4lk3l;jlk"
+	errTempl       = "got=%s, want=%s"
 )
 
-func TestNeILOCClient(t *testing.T) {
+func TestNewILOCClient(t *testing.T) {
 	c := NewILOClient(clientHost, clientUsername, clientPassword)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
 
-	if clientHost != c.Endpoint {
+	if clientHost != c.Host {
 		t.Fatal("clientHost doesn't match")
 	}
 
@@ -41,7 +43,7 @@ func TestNewILOClientFromAPIKey(t *testing.T) {
 		t.Fatal("expected client to not be nil")
 	}
 
-	if clientHost != c.Endpoint {
+	if clientHost != c.Host {
 		t.Fatal("clientHost doesn't match")
 	}
 
@@ -53,13 +55,13 @@ func TestNewILOClientFromAPIKey(t *testing.T) {
 func TestMalformedResponseForLogin(t *testing.T) {
 	const notJSON = "bad response"
 
-	ts := newTestServer("/redfish/v1/SessionService/Sessions/", func(w http.ResponseWriter, r *http.Request) {
+	ts := newTestServer("/redfish/v1/sessionservice/sessions/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, notJSON)
 	})
 
 	defer ts.Close()
 
-	c := NewILOClient(ts.URL, restUsername, restPassword)
+	c := NewILOClient(ts.URL, clientUsername, clientPassword)
 
 	_, err := c.Login()
 	if err == nil {
@@ -77,7 +79,7 @@ func TestTokenResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewILOClient(ts.URL, restUsername, restPassword)
+	c := NewILOClient(ts.URL, clientUsername, clientPassword)
 
 	got, err := c.Login()
 	if err != nil {
@@ -132,4 +134,12 @@ func TestGetServiceRoot(t *testing.T) {
 	if !strings.HasPrefix(s, want) {
 		t.Fatalf(errTempl, got, want)
 	}
+}
+
+func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+	mux.HandleFunc(path, h)
+
+	return server
 }
