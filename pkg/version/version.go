@@ -11,7 +11,7 @@ import (
 
 // values are injected by the linker at build time via ldflags
 var buildDate = "0"
-var gitCommitId = "0"
+var gitCommitID = "0"
 var version = "0.0.0"
 
 var verbose bool
@@ -51,5 +51,5 @@ func Get() string {
 
 // GetFull returns the long version. (e.g. 0.0.2:6683f37:2019-11-23)
 func GetFull() string {
-	return fmt.Sprintf("%s:%s:%s", version, gitCommitId, buildDate)
+	return fmt.Sprintf("%s:%s:%s", version, gitCommitID, buildDate)
 }

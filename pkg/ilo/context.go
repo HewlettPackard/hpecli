@@ -16,13 +16,11 @@ var cmdILOContext = &cobra.Command{
 	RunE:  runSetContext,
 }
 
-
 var iloContextHost struct {
 	host string
 }
 
 func init() {
-
 	cmdILOContext.Flags().StringVar(&iloContextHost.host, "host", "", "ilo host/ip address")
 	_ = cmdILOContext.MarkFlagRequired("host")
 }

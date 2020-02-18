@@ -9,10 +9,11 @@ import (
 )
 
 const v1 = "0.0.1"
+const v0 = "0.0.0"
 const expectedError = "got: %v, want: %v"
 
 func TestGetDefault(t *testing.T) {
-	want := "0.0.0"
+	want := v0
 	got := Get()
 
 	if got != want {
@@ -32,9 +33,9 @@ func TestGet(t *testing.T) {
 
 func TestGetFull(t *testing.T) {
 	version = v1
-	gitCommitId = "234a39f"
+	gitCommitID = "234a39f"
 	buildDate = "2019-01-01"
-	want := v1 + ":" + gitCommitId + ":" + buildDate
+	want := v1 + ":" + gitCommitID + ":" + buildDate
 	got := GetFull()
 
 	if got != want {
@@ -89,8 +90,8 @@ func TestIsFullVersion(t *testing.T) {
 }
 
 func TestFullVersionOutput(t *testing.T) {
-	version = "0.0.0"
-	gitCommitId = "0"
+	version = v0
+	gitCommitID = "0"
 	buildDate = "0"
 
 	// if values aren't injected at compile time
@@ -107,7 +108,7 @@ func TestFullVersionOutput(t *testing.T) {
 func TestVersionOutput(t *testing.T) {
 	// if values aren't injected at compile time
 	// then everything just defaults to 0
-	want := "0.0.0"
+	want := v0
 	verbose = false
 	logger.Level = logger.InfoLevel
 
