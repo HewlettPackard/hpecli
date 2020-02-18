@@ -80,6 +80,7 @@ func do(method, urlStr string, body io.Reader, options ...func(*Request)) (*Resp
 	return &Response{Response: resp}, nil
 }
 
+
 func AddHeaders(key, value string) func(*Request) {
 	return func(r *Request) {
 		r.Header.Set(key, value)
