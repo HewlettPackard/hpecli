@@ -8,9 +8,9 @@ import (
 )
 
 type Context interface {
-	APIKey() (host, apiKey string, err error)
-	SetAPIKey(host, sessionKey string) error
-	SetContext(host string) error
+	APIKey(value interface{}) error
+	SetAPIKey(key string, value interface{}) error
+	ChangeContext(key string) error
 }
 
 type DBOpen func() (db.Store, error)
@@ -24,6 +24,7 @@ type APIContext struct {
 var (
 	ErrorContextNotFound = errors.New("unable to find specified context")
 	ErrorKeyNotFound     = errors.New("unable to find key for specified host")
+	ErrorInvalidKey      = errors.New("invalid key specified.  Key can not be empty")
 )
 
 func New(contextKey, apiKeyPrefix string, dbOpen DBOpen) Context {
@@ -34,48 +35,32 @@ func New(contextKey, apiKeyPrefix string, dbOpen DBOpen) Context {
 	}
 }
 
-func (c APIContext) APIKey() (host, sessionKey string, err error) {
-	d, err := c.DBOpen()
-	if err != nil {
-		return "", "", err
-	}
-	defer d.Close()
-
-	if err := d.Get(c.ContextKey, &host); err != nil {
-		return "", "", ErrorContextNotFound
-	}
-
-	apiKey := makeAPIKey(c.APIKeyPrefix, host)
-
-	if err := d.Get(apiKey, &sessionKey); err != nil {
-		return host, "", ErrorKeyNotFound
-	}
-
-	return host, sessionKey, nil
-}
-
-func (c APIContext) SetAPIKey(host, sessionKey string) error {
+func (c APIContext) APIKey(value interface{}) error {
 	d, err := c.DBOpen()
 	if err != nil {
 		return err
 	}
 	defer d.Close()
 
-	// Save context key
-	if e := d.Put(c.ContextKey, host); e != nil {
-		return fmt.Errorf("unable to save current context because of %#v", e)
+	var host string
+	if err := d.Get(c.ContextKey, &host); err != nil {
+		return ErrorContextNotFound
 	}
 
-	// Save API Key
 	apiKey := makeAPIKey(c.APIKeyPrefix, host)
-	if err := d.Put(apiKey, sessionKey); err != nil {
-		return fmt.Errorf("unable to save apiKey for %s because of %#v", host, err)
+
+	if err := d.Get(apiKey, value); err != nil {
+		return ErrorKeyNotFound
 	}
 
 	return nil
 }
 
-func (c APIContext) SetContext(host string) error {
+func (c APIContext) SetAPIKey(key string, value interface{}) error {
+	if key == "" {
+		return ErrorInvalidKey
+	}
+
 	d, err := c.DBOpen()
 	if err != nil {
 		return err
@@ -83,7 +68,32 @@ func (c APIContext) SetContext(host string) error {
 	defer d.Close()
 
 	// Save context key
-	if err := d.Put(c.ContextKey, host); err != nil {
+	if e := d.Put(c.ContextKey, key); e != nil {
+		return fmt.Errorf("unable to save current context because of %#v", e)
+	}
+
+	// Save API Key
+	apiKey := makeAPIKey(c.APIKeyPrefix, key)
+	if err := d.Put(apiKey, value); err != nil {
+		return fmt.Errorf("unable to save apiKey for %s because of %#v", key, err)
+	}
+
+	return nil
+}
+
+func (c APIContext) ChangeContext(key string) error {
+	if key == "" {
+		return ErrorInvalidKey
+	}
+
+	d, err := c.DBOpen()
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+
+	// Save context key
+	if err := d.Put(c.ContextKey, key); err != nil {
 		return fmt.Errorf("unable to save current context because of %#v", err)
 	}
 
@@ -91,5 +101,5 @@ func (c APIContext) SetContext(host string) error {
 }
 
 func makeAPIKey(apiKeyPrefix, host string) string {
-	return fmt.Sprintf("%s-%s", apiKeyPrefix, host)
+	return apiKeyPrefix + host
 }

@@ -16,21 +16,21 @@ var cmdILOContext = &cobra.Command{
 	RunE:  runSetContext,
 }
 
-var iloContextData struct {
+
+var iloContextHost struct {
 	host string
 }
 
 func init() {
-	cmdILOContext.Flags().StringVar(&iloContextData.host, "host", "", "ilo host/ip address")
+
+	cmdILOContext.Flags().StringVar(&iloContextHost.host, "host", "", "ilo host/ip address")
 	_ = cmdILOContext.MarkFlagRequired("host")
 }
 
 func runSetContext(_ *cobra.Command, _ []string) error {
-	if !strings.HasPrefix(iloContextData.host, "http") {
-		iloContextData.host = fmt.Sprintf("https://%s", iloContextData.host)
+	if !strings.HasPrefix(iloContextHost.host, "http") {
+		iloContextHost.host = fmt.Sprintf("https://%s", iloContextHost.host)
 	}
 
-	c := iloContext()
-
-	return c.SetContext(iloContextData.host)
+	return changeContext(iloContextHost.host)
 }
