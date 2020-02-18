@@ -37,7 +37,7 @@ func (c *CVClient) Login() (string, error) {
 
 	postBody := fmt.Sprintf(`{"email":"%s", "password":"%s"}`, c.Username, c.Password)
 
-	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(postBody), AddJSONMimeType())
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(postBody), rest.AddJSONMimeType())
 	if err != nil {
 		return "", err
 	}
@@ -71,11 +71,5 @@ func (c *CVClient) GetCloudVolumes() ([]byte, error) {
 func (c *CVClient) AddAuth() func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Request.SetBasicAuth("username", c.APIKey)
-	}
-}
-
-func AddJSONMimeType() func(*rest.Request) {
-	return func(r *rest.Request) {
-		r.Header.Set("Content-Type", "application/json")
 	}
 }

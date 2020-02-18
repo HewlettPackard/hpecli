@@ -79,3 +79,9 @@ func do(method, urlStr string, body io.Reader, options ...func(*Request)) (*Resp
 
 	return &Response{Response: resp}, nil
 }
+
+func AddJSONMimeType() func(*Request) {
+	return func(r *Request) {
+		r.Header.Set("content-type", "application/json")
+	}
+}
