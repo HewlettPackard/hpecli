@@ -11,6 +11,7 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/HewlettPackard/hpecli/pkg/oneview"
 	"github.com/HewlettPackard/hpecli/pkg/update"
+	"github.com/HewlettPackard/hpecli/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +22,8 @@ func main() {
 	}
 
 	addCommands(rootCmd)
+
+	rootCmd.SetVersionTemplate("something out")
 
 	logLevel := rootCmd.PersistentFlags().StringP("loglevel", "l", "warning",
 		"set log level.  Possible values are: debug, info, warning, critical")
@@ -46,5 +49,5 @@ func addCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(ilo.Cmd)
 	rootCmd.AddCommand(oneview.Cmd)
 	rootCmd.AddCommand(update.Cmd)
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(version.Cmd)
 }

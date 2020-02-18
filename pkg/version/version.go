@@ -2,7 +2,47 @@
 
 package version
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/spf13/cobra"
+)
+
+// values are injected by the linker at build time via ldflags
+var buildDate = "0"
+var gitCommitId = "0"
+var version = "0.0.0"
+
+var verbose bool
+
+// Cmd version
+var Cmd = &cobra.Command{
+	Use:   "version",
+	Short: "Displays version of hpecli",
+	Run:   run,
+}
+
+func init() {
+	Cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose version")
+}
+
+func run(_ *cobra.Command, _ []string) {
+	v := versionOutput()
+	logger.Always(v)
+}
+
+func versionOutput() string {
+	if isFullVersion() {
+		return GetFull()
+	}
+
+	return Get()
+}
+
+func isFullVersion() bool {
+	return verbose || logger.Level >= logger.DebugLevel
+}
 
 // Get returns the short version. just the version (e.g. 0.0.1)
 func Get() string {
@@ -11,5 +51,5 @@ func Get() string {
 
 // GetFull returns the long version. (e.g. 0.0.2:6683f37:2019-11-23)
 func GetFull() string {
-	return fmt.Sprintf("%s:%s:%s", version, gitCommit, builtAt)
+	return fmt.Sprintf("%s:%s:%s", version, gitCommitId, buildDate)
 }
