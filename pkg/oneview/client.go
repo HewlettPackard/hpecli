@@ -50,7 +50,8 @@ func NewOVClientFromAPIKey(host, apikey string) *ov.OVClient {
 func Login(host, username, password string) (string, error) {
 	const uriPath = "/rest/login-sessions"
 
-	loginJSON := fmt.Sprintf(`{"userName":"%s", "password":"%s", "authLoginDomain":"LOCAL", "loginMsgAck":"true"}`, username, password)
+	loginJSON := fmt.Sprintf(`{"userName":"%s", "password":"%s", "authLoginDomain":"LOCAL", "loginMsgAck":"true"}`,
+		username, password)
 
 	resp, err := rest.Post(host+uriPath, strings.NewReader(loginJSON), rest.AddJSONMimeType(), AddAPIHeaders())
 	if err != nil {
