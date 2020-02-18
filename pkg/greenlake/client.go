@@ -3,16 +3,14 @@
 package greenlake
 
 import (
-	"bytes"
-	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"strings"
+
+	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
 )
 
-// Client - wrapper class for greenlake api's
-type Client struct {
+// GLClient - wrapper class for greenlake api's
+type GLClient struct {
 	GrantType    string
 	ClientID     string
 	ClientSecret string
@@ -45,9 +43,9 @@ type Name struct {
 	GivenName  string `json:"givenName"`
 }
 
-// NewGreenLakeClient create
-func NewGreenLakeClient(grantType, clientID, secretKey, tenantID, host string) *Client {
-	return &Client{
+// NewGLClient create
+func NewGLClient(grantType, clientID, secretKey, tenantID, host string) *GLClient {
+	return &GLClient{
 		GrantType:    grantType,
 		ClientID:     clientID,
 		ClientSecret: secretKey,
@@ -57,9 +55,9 @@ func NewGreenLakeClient(grantType, clientID, secretKey, tenantID, host string) *
 	}
 }
 
-// NewGLClientFromAPIKey creates a new GreenLake Client from existing API sessions key
-func NewGLClientFromAPIKey(host, tenantID, apikey string) *Client {
-	return &Client{
+// NewGLClientFromAPIKey creates a new GreenLake GLClient from existing API sessions key
+func NewGLClientFromAPIKey(host, tenantID, apikey string) *GLClient {
+	return &GLClient{
 		GrantType:    "client_credentials",
 		ClientID:     "",
 		ClientSecret: "LOCAL",
@@ -70,73 +68,49 @@ func NewGLClientFromAPIKey(host, tenantID, apikey string) *Client {
 }
 
 // GetToken api
-func (c *Client) GetToken() (Token, error) {
+func (c *GLClient) GetToken() (Token, error) {
+	const uriPath = "/identity/v1/token"
+
+	postBody := fmt.Sprintf(`{"grant_type":"%s", "client_id":"%s", "client_secret":"%s", "tenant_id":"%s"}`, c.GrantType, c.Password, c.ClientSecret, c.TenantID)
+
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(postBody), AddJSONMimeType())
+	if err != nil {
+		return "", err
+	}
+
 	var result Token
 
-	url := fmt.Sprintf(c.Host + "/identity/v1/token")
-	jsonData := map[string]string{"grant_type": c.GrantType,
-		"client_id":     c.ClientID,
-		"client_secret": c.ClientSecret,
-		"tenant_id":     c.TenantID}
-	jsonValue, _ := json.Marshal(jsonData)
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonValue))
-
-	if err != nil {
-		return result, err
+	err = resp.Unmarshall(&result)
+	if err == nil {
+		return result.AccessToken, nil
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	body, err := c.doRequest(request)
-
-	if err != nil {
-		return result, err
-	}
-
-	if err = json.Unmarshal(body, &result); err != nil {
-		return result, err
-	}
-
-	return result, err
+	return "", fmt.Errorf("unable to get response from login command")
 }
 
 // GetUsers to list users
-func (c *Client) GetUsers(path string) ([]byte, error) {
-	url := fmt.Sprintf(c.Host + "/scim/v1/tenant/" + c.TenantID + "/" + path)
-	request, err := http.NewRequest("GET", url, nil)
+func (c *GLClient) GetUsers(path string) ([]byte, error) {
+	uriPath := fmt.Sprintf("/scim/v1/tenant/" + c.TenantID + "/" + path)
 
+	resp, err := rest.Get(c.Host+uriPath, c.AddAuth())
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
-	request.Header.Set("Accept", "application/scim+json")
-	request.Header.Set("Authorization", "Bearer "+c.APIKey)
-	body, err := c.doRequest(request)
-
-	return body, err
+	return resp.JSON(), nil
 }
 
-func (c *Client) doRequest(req *http.Request) ([]byte, error) {
-	// Ignore invalid certificate
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+// AddAuth func
+func (c *GLClient) AddAuth() func(*rest.Request) {
+	return func(r *rest.Request) {
+		r.Request.SetBasicAuth("username", c.APIKey)
 	}
-	client := &http.Client{Transport: tr}
-	response, err := client.Do(req)
+}
 
-	if err != nil {
-		return nil, err
+// AddJSONMimeType func
+func AddJSONMimeType() func(*rest.Request) {
+	return func(r *rest.Request) {
+		r.Header.Set("Content-Type", "application/json")
+		r.Header.Set("Accept", "pplication/scim+json")
 	}
-
-	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("error in response and response status: %s", response.Status)
-	}
-
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return body, err
 }
