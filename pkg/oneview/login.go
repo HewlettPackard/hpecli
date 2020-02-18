@@ -39,19 +39,26 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 
 	logger.Debug("Attempting login with user: %v, at: %v", ovLoginData.username, ovLoginData.host)
 
-	ovc := NewOVClient(ovLoginData.host, ovLoginData.username, ovLoginData.password)
-
-	s, err := ovc.SessionLogin()
+	// OneView Login currently doesn't support forced login message acknolwedgement - so we roll our own
+	token, err := Login(ovLoginData.host, ovLoginData.username, ovLoginData.password)
 	if err != nil {
 		logger.Warning("Unable to login with supplied credentials to OneView at: %s", ovLoginData.host)
 		return err
 	}
 
-	ovc.Client.APIKey = s.ID
+	// ovc := NewOVClient(ovLoginData.host, ovLoginData.username, ovLoginData.password)
+
+	// s, err := ovc.SessionLogin()
+	// if err != nil {
+	// 	logger.Warning("Unable to login with supplied credentials to OneView at: %s", ovLoginData.host)
+	// 	return err
+	// }
+
+	// ovc.Client.APIKey = s.ID
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
-	if err = storeContext(ovLoginData.host, s.ID); err != nil {
+	if err = storeContext(ovLoginData.host, token); err != nil {
 		logger.Warning("Successfully logged into OneView, but was unable to save the session data")
 	} else {
 		logger.Debug("Successfully logged into OneView: %s", ovLoginData.host)
