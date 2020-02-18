@@ -31,18 +31,18 @@ func getEnclosures(_ *cobra.Command, _ []string) error {
 }
 
 func getEnclosuresData() error {
-	c := ovContext()
-
-	host, apiKey, err := c.APIKey()
+	d, err := getContext()
 	if err != nil {
-		logger.Debug("unable to retrieve apiKey for host: %s because of: %#v", host, err)
+		logger.Debug("unable to retrieve apiKey because of: %#v", err)
 		return fmt.Errorf("unable to retrieve the last login for OneView." +
 			"Please login to OneView using: hpecli oneview login")
 	}
 
-	ovc := NewOVClientFromAPIKey(host, apiKey)
+	ovc := NewOVClientFromAPIKey(d.Host, d.APIKey)
 
-	logger.Always("Retrieving data from: %s", host)
+	// not sure we want to show the host we are retieving from.
+	// it's good to know - but then breaks json data format being returned
+	logger.Always("Retrieving data from: %s", d.Host)
 
 	var el interface{}
 
@@ -53,7 +53,7 @@ func getEnclosuresData() error {
 	}
 
 	if err != nil {
-		logger.Warning("Unable to login with supplied credentials to OneView at: %s", host)
+		logger.Warning("Unable to login with supplied credentials to OneView at: %s", d.Host)
 		return err
 	}
 

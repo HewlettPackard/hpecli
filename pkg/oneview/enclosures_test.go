@@ -25,9 +25,8 @@ func TestAPIKeyPutInEnclosureRequest(t *testing.T) {
 
 	defer server.Close()
 
-	c := ovContext()
 	// set context to the test server host
-	_ = c.SetAPIKey(server.URL, sessionID)
+	storeContext(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	_ = getEnclosuresData()
@@ -43,9 +42,8 @@ func TestEnclosureClientRequestFails(t *testing.T) {
 
 	defer server.Close()
 
-	c := ovContext()
 	// set context to the test server host
-	_ = c.SetAPIKey(server.URL, sessionID)
+	storeContext(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getEnclosures(nil, nil); err == nil {
@@ -64,9 +62,8 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 
 	defer server.Close()
 
-	c := ovContext()
 	// set context to the test server host
-	_ = c.SetAPIKey(server.URL, sessionID)
+	storeContext(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getEnclosuresData(); err == nil {
@@ -86,8 +83,7 @@ func TestEnclosuresMissingAPIKey(t *testing.T) {
 }
 
 func TestGetEnclosureByName(t *testing.T) {
-	const name = "server-name"
-	ovEnclosureData.name = name
+	ovEnclosureData.name = "enc-name"
 
 	server := newTestServer(encURL, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -97,9 +93,8 @@ func TestGetEnclosureByName(t *testing.T) {
 
 	defer server.Close()
 
-	c := ovContext()
 	// set context to the test server host
-	_ = c.SetAPIKey(server.URL, "sessionID")
+	storeContext(server.URL, "sessionID")
 
 	if err := getEnclosuresData(); err != nil {
 		t.Fatal(err)
