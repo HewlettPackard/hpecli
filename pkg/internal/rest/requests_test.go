@@ -28,9 +28,9 @@ func TestOptionsExecuted(t *testing.T) {
 		r.SetBasicAuth("username", "password")
 	}
 
-	fn2 := func(r *Request) {
-		r.Header.Set("content-type", "junk-setting")
-	}
+	fn2 := AddJSONMimeType()
+
+	fn3 := AddHeaders("someKey", "someValue")
 
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -38,7 +38,7 @@ func TestOptionsExecuted(t *testing.T) {
 
 	defer ts.Close()
 
-	r, err := Get(ts.URL, fn1, fn2)
+	r, err := Get(ts.URL, fn1, fn2, fn3)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,8 +48,12 @@ func TestOptionsExecuted(t *testing.T) {
 		t.Fatal("didn't get basic auth values after set")
 	}
 
-	if r.Request.Header.Get("content-type") != "junk-setting" {
+	if r.Request.Header.Get("content-type") != "application/json" {
 		t.Fatal("didn't get header content-type value after set")
+	}
+
+	if r.Request.Header.Get("someKey") != "someValue" {
+		t.Fatal("didn't get header someKey value after set")
 	}
 }
 

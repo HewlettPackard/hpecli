@@ -80,8 +80,13 @@ func do(method, urlStr string, body io.Reader, options ...func(*Request)) (*Resp
 	return &Response{Response: resp}, nil
 }
 
-func AddJSONMimeType() func(*Request) {
+
+func AddHeaders(key, value string) func(*Request) {
 	return func(r *Request) {
-		r.Header.Set("content-type", "application/json")
+		r.Header.Set(key, value)
 	}
+}
+
+func AddJSONMimeType() func(*Request) {
+	return AddHeaders("Content-Type", "application/json")
 }
