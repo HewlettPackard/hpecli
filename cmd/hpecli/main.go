@@ -15,6 +15,12 @@ import (
 )
 
 func main() {
+	updateAvailableChan := make(chan bool)
+
+	go func() {
+		updateAvailableChan <- update.IsUpdateAvailable()
+	}()
+
 	var rootCmd = &cobra.Command{
 		Use:   "hpecli",
 		Short: "hpe cli for accessing various services",
@@ -28,9 +34,6 @@ func main() {
 	cobra.OnInitialize(func() {
 		logger.Color = true
 		logger.SetLogLevel(*logLevel)
-		if update.IsUpdateAvailable() {
-			logger.Always("  An updated version of the CLI is available")
-		}
 	})
 
 	const exitError = 1
@@ -38,6 +41,11 @@ func main() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(exitError)
+	}
+
+	newRelease := <-updateAvailableChan
+	if newRelease {
+		logger.Always("  An updated version of the CLI is available")
 	}
 }
 
