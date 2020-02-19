@@ -14,8 +14,7 @@ var glLoginData struct {
 	host,
 	userID,
 	secretKey,
-	tenantID,
-	grantType string
+	tenantID string
 }
 
 // cmdGLLogin represents the green lake login command

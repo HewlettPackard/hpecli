@@ -8,8 +8,6 @@ import (
 )
 
 const glAPIKeyPrefix = "hpecli_greenlake_token_"
-
-// const glTenantIDPrefix = "hpecli_greenlake_tenantid_"
 const glContextKey = "hpecli_greenlake_context"
 
 type glContextData struct {

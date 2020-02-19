@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -142,7 +141,7 @@ func TestGetUsers(t *testing.T) {
 
 	s := string(got)
 	// validate starts with with correct formatting
-	if !strings.HasPrefix(s, want) {
+	if s != want {
 		t.Fatalf(errTempl, got, want)
 	}
 }

@@ -63,7 +63,7 @@ func (c *GLClient) Login() (string, error) {
 	"client_secret":"%s", "tenant_id":"%s"}`,
 		c.GrantType, c.ClientID, c.ClientSecret, c.TenantID)
 
-	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), AddJSONMimeType())
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), rest.AddJSONMimeType())
 	if err != nil {
 		return "", err
 	}
@@ -98,12 +98,5 @@ func (c *GLClient) GetUsers() ([]byte, error) {
 func (c *GLClient) AddAuth() func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Header.Add("Authorization", "Bearer "+c.APIKey)
-	}
-}
-
-// AddJSONMimeType func
-func AddJSONMimeType() func(*rest.Request) {
-	return func(r *rest.Request) {
-		r.Header.Set("Content-Type", "application/json")
 	}
 }

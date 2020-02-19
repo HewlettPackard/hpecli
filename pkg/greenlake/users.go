@@ -28,9 +28,9 @@ func runGLGetUsers(_ *cobra.Command, _ []string) error {
 
 	logger.Debug("Attempting get green lake users at: %v", c.Host)
 
-	cvc := NewGLClientFromAPIKey(c.Host, c.TenantID, c.APIKey)
+	glc := NewGLClientFromAPIKey(c.Host, c.TenantID, c.APIKey)
 
-	jsonResult, err := cvc.GetUsers()
+	jsonResult, err := glc.GetUsers()
 	if err != nil {
 		return err
 	}

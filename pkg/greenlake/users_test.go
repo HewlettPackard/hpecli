@@ -8,15 +8,14 @@ import (
 	"testing"
 )
 
-func TestAPIKeyInjectedIntoRequest(t *testing.T) {
-	const authValue = "someAuthHeaderValue"
+func TestGLAPIKeyInjectedIntoRequest(t *testing.T) {
+	const authValue = "someAuthorizationHeaderValue"
 
 	const tenantID = "someTenantID"
 
 	uriPath := fmt.Sprintf("/scim/v1/tenant/" + tenantID + "/" + "Users")
 
 	server := newTestServer(uriPath, func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("auth header", r.Header.Get("Authorization"))
 		if r.Header.Get("Authorization") != "Bearer "+authValue {
 			t.Fatal("Expected to find \"Authorization\" header in request")
 		}
@@ -28,5 +27,5 @@ func TestAPIKeyInjectedIntoRequest(t *testing.T) {
 	// set context to the test server host
 	storeContext(server.URL, tenantID, authValue)
 
-	_ = runGLGetUsers(nil, nil)
+	 _ = runGLGetUsers(nil, nil)
 }
