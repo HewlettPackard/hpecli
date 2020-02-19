@@ -30,7 +30,7 @@ func runGLGetUsers(_ *cobra.Command, _ []string) error {
 
 	cvc := NewGLClientFromAPIKey(c.Host, c.TenantID, c.APIKey)
 
-	jsonResult, err := cvc.GetCloudVolumes()
+	jsonResult, err := cvc.GetUsers()
 	if err != nil {
 		return err
 	}

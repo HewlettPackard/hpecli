@@ -3,94 +3,17 @@
 package greenlake
 
 import (
-	"fmt"
-
-	"github.com/HewlettPackard/hpecli/pkg/logger"
-	"github.com/HewlettPackard/hpecli/pkg/store"
 	"github.com/spf13/cobra"
 )
 
-const greenLakeAPIKeyPrefix = "hpecli_greenlake_token_"
-const greenLakeTenantIDPrefix = "hpecli_greenlake_tenantid_"
-const greenLakeContextKey = "hpecli_greenlake_context"
-
 func init() {
-	Cmd.AddCommand(glGetCmd)
-	Cmd.AddCommand(glLoginCmd)
+	Cmd.AddCommand(cmdGLContext)
+	Cmd.AddCommand(cmdGLGet)
+	Cmd.AddCommand(cmdGLLogin)
 }
 
-// Cmd represents the ilo command
+// Cmd represents the greenlake command
 var Cmd = &cobra.Command{
 	Use:   "greenlake",
-	Short: "Access to HPE GreenLake commands",
-}
-
-func getTokenTenantID() (host, tenantID, accessToken string) {
-	db, err := store.Open()
-	if err != nil {
-		logger.Debug("unable to open keystore: %v", err)
-		return "", "", ""
-	}
-
-	defer db.Close()
-
-	var contextValue string
-	if err := db.Get(greenLakeContextKey, &contextValue); err != nil {
-		logger.Debug("Unable to retrieve current context.")
-		return "", "", ""
-	}
-
-	accessToken = makeAccessToken(contextValue)
-
-	var accessTokenValue string
-	if err := db.Get(accessToken, &accessTokenValue); err != nil {
-		logger.Debug("Unable to retrieve access token from current context.")
-		return "", "", ""
-	}
-
-	tenantID = makeTenantID(contextValue)
-
-	var tenantIDValue string
-	if err := db.Get(tenantID, &tenantIDValue); err != nil {
-		logger.Debug("Unable to retrieve tenant ID from current context.")
-		return "", "", ""
-	}
-
-	return contextValue, tenantIDValue, accessTokenValue
-}
-
-func setTokenTenantID(host, glTenantID, glAccessToken string) error {
-	db, e := store.Open()
-	if e != nil {
-		return fmt.Errorf("unable to open keystore: %w", e)
-	}
-
-	defer db.Close()
-
-	// Save context key
-	if e := db.Put(greenLakeContextKey, host); e != nil {
-		return fmt.Errorf("unable to retrieve current context because of %w", e)
-	}
-
-	// Save API Key
-	accessToken := makeAccessToken(host)
-	if e := db.Put(accessToken, glAccessToken); e != nil {
-		return fmt.Errorf("unable to save accessToken for %s because of %w", host, e)
-	}
-
-	// Save TeantID Key
-	tenantID := makeTenantID(host)
-	if e := db.Put(tenantID, glTenantID); e != nil {
-		return fmt.Errorf("unable to save tenantID for %s because of %w", host, e)
-	}
-
-	return nil
-}
-
-func makeAccessToken(host string) string {
-	return fmt.Sprintf("%s%s", greenLakeAPIKeyPrefix, host)
-}
-
-func makeTenantID(host string) string {
-	return fmt.Sprintf("%s%s", greenLakeTenantIDPrefix, host)
+	Short: "Access to HPE Green Lake commands",
 }

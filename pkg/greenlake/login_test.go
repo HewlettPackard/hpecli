@@ -5,7 +5,6 @@ package greenlake
 import (
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -27,12 +26,12 @@ func TestGlHostPrefixAdded(t *testing.T) {
 	}
 }
 
-func TestAccessTokenIsStored(t *testing.T) {
+func TestGLAccessTokenIsStored(t *testing.T) {
 	const accessToken = "GreenLake_Access_Token"
 
 	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"access_token":"%s"}`, accessToken)
+		w.WriteHeader(http.StatusOK)
 	})
 
 	defer server.Close()
@@ -44,17 +43,8 @@ func TestAccessTokenIsStored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// sessionId is stored - so get it and verify it
-	_, _, got := getTokenTenantID()
-	if got != accessToken {
-		t.Fatal(errTempl, got, accessToken)
+	c, _ := getContext()
+	if c.APIKey != accessToken {
+		t.Fatalf(errTempl, c.APIKey, accessToken)
 	}
-}
-
-func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
-	mux := http.NewServeMux()
-	server := httptest.NewServer(mux)
-	mux.HandleFunc(path, h)
-
-	return server
 }

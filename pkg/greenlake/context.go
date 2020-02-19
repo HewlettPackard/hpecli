@@ -9,31 +9,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Cmd represents the ilo command
-var glContextCmd = &cobra.Command{
+// cmdGLContext represents the green lake command
+var cmdGLContext = &cobra.Command{
 	Use:   "context",
-	Short: "Chagne context to different GreenLake host",
-	RunE:  runChangeContext,
+	Short: "Change context to different GreenLake host",
+	RunE:  runSetContext,
 }
 
-var glContextData struct {
+var glContextHostTenant struct {
 	host     string
 	tenantID string
 }
 
 func init() {
-	glContextCmd.Flags().StringVar(&glContextData.host, "host", "", "greenlake host/ip address")
-	glLoginCmd.Flags().StringVar(&glContextData.tenantID, "tenantid", "t", "", "greenlake tenantid")
-	_ = glContextCmd.MarkFlagRequired("host")
-	_ = glContextCmd.MarkFlagRequired("tenantid")
+	cmdGLContext.Flags().StringVar(&glContextHostTenant.host, "host", "", "greenlake host/ip address")
+	cmdGLContext.Flags().StringVar(&glContextHostTenant.tenantID, "tenantid", "t", "greenlake tenantid")
+	_ = cmdGLContext.MarkFlagRequired("host")
+	_ = cmdGLContext.MarkFlagRequired("tenantid")
 }
 
-func runChangeContext(_ *cobra.Command, _ []string) error {
-	if !strings.HasPrefix(glContextData.host, "http") {
-		glContextData.host = fmt.Sprintf("https://%s", glContextData.host)
+func runSetContext(_ *cobra.Command, _ []string) error {
+	if !strings.HasPrefix(glContextHostTenant.host, "http") {
+		glContextHostTenant.host = fmt.Sprintf("https://%s", glContextHostTenant.host)
 	}
 
-	c := glContext()
-
-	return changeContext(glContextData.host)
+	return changeContext(glContextHostTenant.host)
 }

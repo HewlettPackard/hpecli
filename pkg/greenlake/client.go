@@ -4,6 +4,7 @@ package greenlake
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
@@ -17,6 +18,7 @@ type GLClient struct {
 	TenantID     string
 	Host         string
 	APIKey       string
+	*rest.Request
 }
 
 // Token structure
@@ -27,20 +29,6 @@ type Token struct {
 	Expiry          string `json:"expiry"`
 	ExpiresIn       int    `json:"expires_in"`
 	AccessTokenOnly bool   `json:"accessTokenOnly"`
-}
-
-// User structure
-type User struct {
-	Active      bool   `json:"active"`
-	DisplayName string `json:"displayName"`
-	UserName    string `json:"userName"`
-	Name        Name   `json:"name"`
-}
-
-// Name structure
-type Name struct {
-	FamilyName string `json:"familyName"`
-	GivenName  string `json:"givenName"`
 }
 
 // NewGLClient create
@@ -60,22 +48,28 @@ func NewGLClientFromAPIKey(host, tenantID, apikey string) *GLClient {
 	return &GLClient{
 		GrantType:    "client_credentials",
 		ClientID:     "",
-		ClientSecret: "LOCAL",
+		ClientSecret: "",
 		APIKey:       apikey,
 		TenantID:     tenantID,
 		Host:         host,
 	}
 }
 
-// GetToken api
-func (c *GLClient) GetToken() (Token, error) {
+// Login api
+func (c *GLClient) Login() (string, error) {
 	const uriPath = "/identity/v1/token"
 
-	postBody := fmt.Sprintf(`{"grant_type":"%s", "client_id":"%s", "client_secret":"%s", "tenant_id":"%s"}`, c.GrantType, c.Password, c.ClientSecret, c.TenantID)
+	loginJSON := fmt.Sprintf(`{"grant_type":"%s", "client_id":"%s", 
+	"client_secret":"%s", "tenant_id":"%s"}`,
+		c.GrantType, c.ClientID, c.ClientSecret, c.TenantID)
 
-	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(postBody), AddJSONMimeType())
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), AddJSONMimeType())
 	if err != nil {
 		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unable to create login sessions to Green Lake.  Repsponse was: %+v", resp.Status)
 	}
 
 	var result Token
@@ -89,8 +83,8 @@ func (c *GLClient) GetToken() (Token, error) {
 }
 
 // GetUsers to list users
-func (c *GLClient) GetUsers(path string) ([]byte, error) {
-	uriPath := fmt.Sprintf("/scim/v1/tenant/" + c.TenantID + "/" + path)
+func (c *GLClient) GetUsers() ([]byte, error) {
+	uriPath := fmt.Sprintf("/scim/v1/tenant/" + c.TenantID + "/" + "Users")
 
 	resp, err := rest.Get(c.Host+uriPath, c.AddAuth())
 	if err != nil {
@@ -103,7 +97,7 @@ func (c *GLClient) GetUsers(path string) ([]byte, error) {
 // AddAuth func
 func (c *GLClient) AddAuth() func(*rest.Request) {
 	return func(r *rest.Request) {
-		r.Request.SetBasicAuth("username", c.APIKey)
+		r.Header.Add("Authorization", "Bearer "+c.APIKey)
 	}
 }
 
@@ -111,6 +105,5 @@ func (c *GLClient) AddAuth() func(*rest.Request) {
 func AddJSONMimeType() func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Header.Set("Content-Type", "application/json")
-		r.Header.Set("Accept", "pplication/scim+json")
 	}
 }
