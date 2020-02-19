@@ -39,11 +39,11 @@ func TestNewGLCClient(t *testing.T) {
 	}
 
 	if clientTenantID != c.TenantID {
-		t.Fatal("clientPassword doesn't match")
+		t.Fatal("clientTenantID doesn't match")
 	}
 
 	if clientHost != c.Host {
-		t.Fatal("clientPassword doesn't match")
+		t.Fatal("clientHost doesn't match")
 	}
 }
 
