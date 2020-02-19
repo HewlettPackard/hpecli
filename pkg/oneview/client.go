@@ -53,7 +53,13 @@ func Login(host, username, password string) (string, error) {
 	loginJSON := fmt.Sprintf(`{"userName":"%s", "password":"%s", "authLoginDomain":"LOCAL", "loginMsgAck":"true"}`,
 		username, password)
 
-	resp, err := rest.Post(host+uriPath, strings.NewReader(loginJSON), rest.AddJSONMimeType(), AddAPIHeaders())
+	opts := func(r *rest.Request) {
+		rest.AddJSONMimeType()(r)
+		rest.AllowSelfSignedCerts()(r)
+		AddAPIHeaders()(r)
+	}
+
+	resp, err := rest.Post(host+uriPath, strings.NewReader(loginJSON), opts)
 	if err != nil {
 		return "", err
 	}

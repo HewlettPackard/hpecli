@@ -38,7 +38,8 @@ func (c *Client) Login() (string, error) {
 
 	loginJSON := fmt.Sprintf(`{"UserName":"%s", "Password":"%s"}`, c.Username, c.Password)
 
-	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), rest.AddJSONMimeType())
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON),
+		rest.AddJSONMimeType(), rest.AllowSelfSignedCerts())
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +60,7 @@ func (c *Client) Login() (string, error) {
 func (c *Client) GetServiceRoot() ([]byte, error) {
 	const uriPath = "/redfish/v1/"
 
-	resp, err := rest.Get(c.Host+uriPath, c.AddAuth())
+	resp, err := rest.Get(c.Host+uriPath, AddAuth(c.APIKey), rest.AllowSelfSignedCerts())
 	if err != nil {
 		return []byte{}, err
 	}
@@ -67,8 +68,8 @@ func (c *Client) GetServiceRoot() ([]byte, error) {
 	return resp.JSON(), nil
 }
 
-func (c *Client) AddAuth() func(*rest.Request) {
+func AddAuth(apiKey string) func(*rest.Request) {
 	return func(r *rest.Request) {
-		r.Header.Add("X-Auth-Token", c.APIKey)
+		r.Header.Add("X-Auth-Token", apiKey)
 	}
 }

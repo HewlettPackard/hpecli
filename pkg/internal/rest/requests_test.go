@@ -53,7 +53,7 @@ func TestOptionsExecuted(t *testing.T) {
 	}
 
 	if r.Request.Header.Get("someKey") != "someValue" {
-		t.Fatal("didn't get header someKey value after set")
+		t.Fatal("didn't get header someKey  value after set")
 	}
 }
 
