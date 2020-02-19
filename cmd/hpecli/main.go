@@ -12,10 +12,17 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/HewlettPackard/hpecli/pkg/oneview"
 	"github.com/HewlettPackard/hpecli/pkg/update"
+	"github.com/HewlettPackard/hpecli/pkg/version"
 	"github.com/spf13/cobra"
 )
 
 func main() {
+	updateAvailableChan := make(chan bool)
+
+	go func() {
+		updateAvailableChan <- update.IsUpdateAvailable()
+	}()
+
 	var rootCmd = &cobra.Command{
 		Use:   "hpecli",
 		Short: "hpe cli for accessing various services",
@@ -23,15 +30,14 @@ func main() {
 
 	addCommands(rootCmd)
 
+	rootCmd.SetVersionTemplate("something out")
+
 	logLevel := rootCmd.PersistentFlags().StringP("loglevel", "l", "warning",
 		"set log level.  Possible values are: debug, info, warning, critical")
 
 	cobra.OnInitialize(func() {
 		logger.Color = true
 		logger.SetLogLevel(*logLevel)
-		if update.IsUpdateAvailable() {
-			logger.Always("  An updated version of the CLI is available")
-		}
 	})
 
 	const exitError = 1
@@ -40,6 +46,11 @@ func main() {
 		fmt.Println(err)
 		os.Exit(exitError)
 	}
+
+	newRelease := <-updateAvailableChan
+	if newRelease {
+		logger.Always("  An updated version of the CLI is available")
+	}
 }
 
 func addCommands(rootCmd *cobra.Command) {
@@ -47,6 +58,6 @@ func addCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(ilo.Cmd)
 	rootCmd.AddCommand(oneview.Cmd)
 	rootCmd.AddCommand(update.Cmd)
-	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(greenlake.Cmd)
+	rootCmd.AddCommand(version.Cmd)
 }

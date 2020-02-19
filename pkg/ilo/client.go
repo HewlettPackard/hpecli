@@ -38,7 +38,7 @@ func (c *Client) Login() (string, error) {
 
 	loginJSON := fmt.Sprintf(`{"UserName":"%s", "Password":"%s"}`, c.Username, c.Password)
 
-	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), AddJSONMimeType())
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), rest.AddJSONMimeType())
 	if err != nil {
 		return "", err
 	}
@@ -70,11 +70,5 @@ func (c *Client) GetServiceRoot() ([]byte, error) {
 func (c *Client) AddAuth() func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Header.Add("X-Auth-Token", c.APIKey)
-	}
-}
-
-func AddJSONMimeType() func(*rest.Request) {
-	return func(r *rest.Request) {
-		r.Header.Set("Content-Type", "application/json")
 	}
 }
