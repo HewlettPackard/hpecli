@@ -30,8 +30,8 @@ func TestGLAccessTokenIsStored(t *testing.T) {
 	const accessToken = "GreenLake_Access_Token"
 
 	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"access_token":"%s"}`, accessToken)
 		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"access_token":"%s"}`, accessToken)
 	})
 
 	defer server.Close()
