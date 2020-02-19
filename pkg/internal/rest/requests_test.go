@@ -32,13 +32,15 @@ func TestOptionsExecuted(t *testing.T) {
 
 	fn3 := AddHeaders("someKey", "someValue")
 
+	fn4 := AllowSelfSignedCerts()
+
 	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
 	defer ts.Close()
 
-	r, err := Get(ts.URL, fn1, fn2, fn3)
+	r, err := Get(ts.URL, fn1, fn2, fn3, fn4)
 	if err != nil {
 		t.Fatal(err)
 	}
