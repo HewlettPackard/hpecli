@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const (
@@ -18,6 +20,10 @@ const (
 	clientTenantID  = "someTenantID"
 	errTempl        = "got=%s, want=%s"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestNewGLCClient(t *testing.T) {
 	c := NewGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, clientHost)

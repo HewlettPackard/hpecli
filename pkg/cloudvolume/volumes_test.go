@@ -8,8 +8,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/HewlettPackard/hpecli/pkg/context"
 	"github.com/HewlettPackard/hpecli/pkg/db"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestRunCVGetVolumesWithMissingAPIKey(t *testing.T) {
 	f := db.KeystoreLocation()

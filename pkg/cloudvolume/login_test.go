@@ -7,7 +7,13 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestLoginWorks(t *testing.T) {
 	const want = "e826d2b3-4925-4f49-86ab-e7f1462c0511"

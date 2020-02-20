@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const (
@@ -17,6 +19,10 @@ const (
 	clientToken    = "lkjsdfjka;sdfjlasdjkf"
 	errTempl       = "got=%s, want=%s"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
 	mux := http.NewServeMux()

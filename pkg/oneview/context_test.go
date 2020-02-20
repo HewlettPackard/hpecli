@@ -10,6 +10,10 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
+
 func TestHostPrefixAddedForContext(t *testing.T) {
 	ovContextHost.host = "127.0.0.1"
 
