@@ -7,10 +7,14 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const shURL = "/rest/server-hardware"
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestAPIKeyPutInServerRequest(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
@@ -68,16 +72,5 @@ func TestServerJSONMarshallFails(t *testing.T) {
 	// check is above in the http request handler side
 	if err := getServerHardware(); err == nil {
 		t.Fatal("expected to get an error")
-	}
-}
-
-func TestMissingAPIKey(t *testing.T) {
-	// when the db is open, the get apikey will fail
-	d, _ := db.Open()
-	defer d.Close()
-
-	err := getServerHardware()
-	if err == nil {
-		t.Fatal("should have retrieved error")
 	}
 }

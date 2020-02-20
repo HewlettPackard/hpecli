@@ -7,7 +7,13 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestGlHostPrefixAdded(t *testing.T) {
 	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {

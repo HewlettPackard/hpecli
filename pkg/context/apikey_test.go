@@ -20,7 +20,7 @@ const (
 )
 
 func TestNewContext(t *testing.T) {
-	c := New(contextKey, apiKeyPrefix, MockOpen)
+	c := NewWithDB(contextKey, apiKeyPrefix, MockOpen)
 
 	if c.(*APIContext).ContextKey != contextKey {
 		t.Fatal("ContextKey value not set as expected")

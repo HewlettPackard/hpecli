@@ -8,9 +8,15 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const errTempl = "got: %s, wanted: %s"
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestHostPrefixAdded(t *testing.T) {
 	server := newTestServer("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {

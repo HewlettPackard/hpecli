@@ -3,7 +3,12 @@ package cloudvolume
 import (
 	"testing"
 
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestStoreContext(t *testing.T) {
 	if err := storeContext("host1", "blahKey"); err != nil {
