@@ -1,46 +1,48 @@
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
-version: 2.1
-
+version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.13.6
+    - image: circleci/golang:1.13.6
     working_directory: /go/src/github.com/HewlettPackard/hpecli
     steps:
-      - run:
-          name: Install SonarScanner
-          command: |
-            export SONAR_SCANNER_VERSION=4.2.0.1873
-            export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-            rm -rf $SONAR_SCANNER_HOME
-            mkdir -p $SONAR_SCANNER_HOME
-            curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
-            unzip $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-            rm $HOME/.sonar/sonar-scanner.zip
-            export PATH=$SONAR_SCANNER_HOME/bin:$PATH
-            export SONAR_SCANNER_OPTS="-server"
-      - checkout
-#      - setup_remote_docker
-      - run: mkdir -p coverage/go/
-      - run: go get -v -t -d ./...
-      - run: go test ./... -short -coverprofile=coverage/go/coverage.out
-      - run: ./build.sh
-#      - run: docker run -e SONAR_HOST_URL=http://sonarcloud.io --user="$(id -u):$(id -g)" -it -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli
-      - run:
-          name: Scan code
-          command: |
-            pr_branch_args=
-            if [[ -v CIRCLE_PULL_REQUEST ]]; then
-                pr_num=${CIRCLE_PULL_REQUEST##*/}
-                pr_repo=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-                pr_branch_args="-Dsonar.pullrequest.base=master \
-                  -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
-                  -Dsonar.pullrequest.key=$pr_num \
-                  -Dsonar.pullrequest.provider=GitHub \
-                  -Dsonar.pullrequest.github.repository=$pr_repo"
-            fi
-            export SONAR_SCANNER_VERSION=4.2.0.1873
-            export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-            $SONAR_SCANNER_HOME/bin/sonar-scanner $pr_branch_args "$@"
+    - checkout
+    - run:
+        command: mkdir -p coverage/go/
+    - run:
+        command: go get -v -t -d ./...
+    - run:
+        command: go test ./... -short -coverprofile=coverage/go/coverage.out
+    - run:
+        command: ./build.sh
+    - run:
+        name: Install sonnar & scan code
+        command: |-
+          export SONAR_SCANNER_VERSION=4.2.0.1873
+          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+          rm -rf $SONAR_SCANNER_HOME
+          mkdir -p $SONAR_SCANNER_HOME
+          curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+          unzip $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          rm $HOME/.sonar/sonar-scanner.zip
+          export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+          export SONAR_SCANNER_OPTS="-server"
+
+          pr_branch_args=
+          if [[ -v CIRCLE_PULL_REQUEST ]]; then
+              pr_num=${CIRCLE_PULL_REQUEST##*/}
+              pr_repo=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+              pr_branch_args="-Dsonar.pullrequest.base=master \
+                -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
+                -Dsonar.pullrequest.key=$pr_num \
+                -Dsonar.pullrequest.provider=GitHub \
+                -Dsonar.pullrequest.github.repository=$pr_repo"
+          fi
+          $SONAR_SCANNER_HOME/bin/sonar-scanner $pr_branch_args "$@"
+workflows:
+  version: 2
+  workflow:
+    jobs:
+    - build
