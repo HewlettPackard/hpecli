@@ -16,22 +16,20 @@ var cmdGLContext = &cobra.Command{
 	RunE:  runSetContext,
 }
 
-var glContextHostTenant struct {
-	host     string
-	tenantID string
+var glContextHost struct {
+	host string
 }
 
 func init() {
-	cmdGLContext.Flags().StringVar(&glContextHostTenant.host, "host", "", "greenlake host/ip address")
-	cmdGLContext.Flags().StringVar(&glContextHostTenant.tenantID, "tenantid", "t", "greenlake tenantid")
+	cmdGLContext.Flags().StringVar(&glContextHost.host, "host", "", "greenlake host/ip address")
 	_ = cmdGLContext.MarkFlagRequired("host")
 	_ = cmdGLContext.MarkFlagRequired("tenantid")
 }
 
 func runSetContext(_ *cobra.Command, _ []string) error {
-	if !strings.HasPrefix(glContextHostTenant.host, "http") {
-		glContextHostTenant.host = fmt.Sprintf("https://%s", glContextHostTenant.host)
+	if !strings.HasPrefix(glContextHost.host, "http") {
+		glContextHost.host = fmt.Sprintf("https://%s", glContextHost.host)
 	}
 
-	return changeContext(glContextHostTenant.host)
+	return changeContext(glContextHost.host)
 }

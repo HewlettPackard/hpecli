@@ -11,18 +11,18 @@ import (
 )
 
 func TestGLHostPrefixAddedForContext(t *testing.T) {
-	glContextHostTenant.host = "127.0.0.1"
+	glContextHost.host = "127.0.0.2"
 
 	// run it and then check the variable after
 	_ = runSetContext(nil, nil)
 
-	if !strings.HasPrefix(glContextHostTenant.host, "https://") {
+	if !strings.HasPrefix(glContextHost.host, "https://") {
 		t.Fatalf("host should be prefixed with http scheme")
 	}
 }
 
 func TestGLContextIsSetInDB(t *testing.T) {
-	glContextHostTenant.host = "127.0.0.1"
+	glContextHost.host = "127.0.0.3"
 
 	// sets the context in the DB
 	_ = runSetContext(nil, nil)
