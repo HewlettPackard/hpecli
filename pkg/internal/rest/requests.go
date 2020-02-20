@@ -2,6 +2,7 @@
 package rest
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 )
@@ -80,7 +81,6 @@ func do(method, urlStr string, body io.Reader, options ...func(*Request)) (*Resp
 	return &Response{Response: resp}, nil
 }
 
-
 func AddHeaders(key, value string) func(*Request) {
 	return func(r *Request) {
 		r.Header.Set(key, value)
@@ -89,4 +89,15 @@ func AddHeaders(key, value string) func(*Request) {
 
 func AddJSONMimeType() func(*Request) {
 	return AddHeaders("Content-Type", "application/json")
+}
+
+func AllowSelfSignedCerts() func(*Request) {
+	return func(r *Request) {
+		r.Client.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				//nolint:gosec // since oneview and ilo have self-signed certs
+				InsecureSkipVerify: true,
+			},
+		}
+	}
 }
