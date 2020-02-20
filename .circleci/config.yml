@@ -1,48 +1,81 @@
-# Golang CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  checkout_code:
     docker:
-    - image: circleci/golang:1.13.6
+      - image: 'circleci/golang:1.13.6'
     working_directory: /go/src/github.com/HewlettPackard/hpecli
     steps:
-    - checkout
-    - run:
-        command: mkdir -p coverage/go/
-    - run:
-        command: go get -v -t -d ./...
-    - run:
-        command: go test ./... -short -coverprofile=coverage/go/coverage.out
-    - run:
-        command: ./build.sh
-    - run:
-        name: Install sonnar & scan code
-        command: |-
-          export SONAR_SCANNER_VERSION=4.2.0.1873
-          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-          rm -rf $SONAR_SCANNER_HOME
-          mkdir -p $SONAR_SCANNER_HOME
-          curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
-          unzip $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-          rm $HOME/.sonar/sonar-scanner.zip
-          export PATH=$SONAR_SCANNER_HOME/bin:$PATH
-          export SONAR_SCANNER_OPTS="-server"
+      - checkout
+      - persist_to_workspace:
+          # The root of the workspace, here just the CWD
+          root: .
+          # The sub-paths of the workspace to persist
+          paths:
+            - .
+  build:
+    docker:
+      - image: 'circleci/golang:1.13.6'
+    working_directory: /go/src/github.com/HewlettPackard/hpecli
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          command: go get -v -t -d ./...
+      - run:
+          command: ./build.sh
+  test:
+    docker:
+      - image: 'circleci/golang:1.13.6'
+    working_directory: /go/src/github.com/HewlettPackard/hpecli
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          command: mkdir -p coverage/go/
+      - run:
+          command: go test ./... -short -coverprofile=coverage/go/coverage.out
+  scan:
+    docker:
+      - image: 'circleci/golang:1.13.6'
+    working_directory: /go/src/github.com/HewlettPackard/hpecli
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install sonnar & scan code
+          command: |-
+            export SONAR_SCANNER_VERSION=4.2.0.1873
+            export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+            rm -rf $SONAR_SCANNER_HOME
+            mkdir -p $SONAR_SCANNER_HOME
+            curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+            unzip $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+            rm $HOME/.sonar/sonar-scanner.zip
+            export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+            export SONAR_SCANNER_OPTS="-server"
 
-          pr_branch_args=
-          if [[ -v CIRCLE_PULL_REQUEST ]]; then
-              pr_num=${CIRCLE_PULL_REQUEST##*/}
-              pr_repo=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-              pr_branch_args="-Dsonar.pullrequest.base=master \
-                -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
-                -Dsonar.pullrequest.key=$pr_num \
-                -Dsonar.pullrequest.provider=GitHub \
-                -Dsonar.pullrequest.github.repository=$pr_repo"
-          fi
-          $SONAR_SCANNER_HOME/bin/sonar-scanner $pr_branch_args "$@"
+            pr_branch_args=
+            if [[ -v CIRCLE_PULL_REQUEST ]]; then
+                pr_num=${CIRCLE_PULL_REQUEST##*/}
+                pr_repo=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+                pr_branch_args="-Dsonar.pullrequest.base=master \
+                  -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
+                  -Dsonar.pullrequest.key=$pr_num \
+                  -Dsonar.pullrequest.provider=GitHub \
+                  -Dsonar.pullrequest.github.repository=$pr_repo"
+            fi
+            $SONAR_SCANNER_HOME/bin/sonar-scanner $pr_branch_args "$@"
 workflows:
   version: 2
-  workflow:
+  build_and_test_and_scan:
     jobs:
-    - build
+      - checkout_code
+      - build:
+          requires:
+            - checkout_code
+      - test:
+          requires:
+            - build
+      - scan:
+          requires:
+            - checkout_code
