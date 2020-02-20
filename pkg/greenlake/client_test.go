@@ -87,7 +87,6 @@ func TestGLTokenResponseForLogin(t *testing.T) {
 
 	ts := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, `{"access_token":"%s"}`, want)
-		w.WriteHeader(http.StatusOK)
 	})
 
 	defer ts.Close()
