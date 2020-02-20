@@ -10,6 +10,10 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
+
 func TestGLHostPrefixAddedForContext(t *testing.T) {
 	glContextHost.host = "127.0.0.2"
 

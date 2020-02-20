@@ -4,7 +4,6 @@ package ilo
 
 import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const iloAPIKeyPrefix = "hpecli_ilo_token_"
@@ -16,12 +15,12 @@ type iloContextData struct {
 }
 
 func storeContext(key, token string) error {
-	c := context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+	c := context.New(iloContextKey, iloAPIKeyPrefix)
 	return c.SetAPIKey(key, &iloContextData{key, token})
 }
 
 func getContext() (*iloContextData, error) {
-	c := context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+	c := context.New(iloContextKey, iloAPIKeyPrefix)
 
 	var d iloContextData
 	err := c.APIKey(&d)
@@ -30,6 +29,6 @@ func getContext() (*iloContextData, error) {
 }
 
 func changeContext(key string) error {
-	c := context.New(iloContextKey, iloAPIKeyPrefix, db.Open)
+	c := context.New(iloContextKey, iloAPIKeyPrefix)
 	return c.ChangeContext(key)
 }

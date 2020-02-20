@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const (
@@ -17,6 +19,10 @@ const (
 	clientToken    = "ljwer;lkjl23j4lk3l;jlk"
 	errTempl       = "got=%s, want=%s"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestNewILOCClient(t *testing.T) {
 	c := NewILOClient(clientHost, clientUsername, clientPassword)

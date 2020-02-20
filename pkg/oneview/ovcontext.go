@@ -4,7 +4,6 @@ package oneview
 
 import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const oneViewAPIKeyPrefix = "hpecli_oneview_token_"
@@ -16,12 +15,12 @@ type ovContextData struct {
 }
 
 func storeContext(key, token string) error {
-	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
+	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
 	return c.SetAPIKey(key, &ovContextData{key, token})
 }
 
 func getContext() (*ovContextData, error) {
-	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
+	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
 
 	var d ovContextData
 	err := c.APIKey(&d)
@@ -30,6 +29,6 @@ func getContext() (*ovContextData, error) {
 }
 
 func changeContext(key string) error {
-	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix, db.Open)
+	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
 	return c.ChangeContext(key)
 }

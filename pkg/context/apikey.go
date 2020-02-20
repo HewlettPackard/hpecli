@@ -13,12 +13,14 @@ type Context interface {
 	ChangeContext(key string) error
 }
 
-type DBOpen func() (db.Store, error)
+type DBOpenFunc func() (db.Store, error)
+
+var DefaultDBOpenFunc = db.Open
 
 type APIContext struct {
 	ContextKey   string
 	APIKeyPrefix string
-	DBOpen       DBOpen
+	DBOpen       DBOpenFunc
 }
 
 var (
@@ -27,12 +29,16 @@ var (
 	ErrorInvalidKey      = errors.New("invalid key specified.  Key can not be empty")
 )
 
-func New(contextKey, apiKeyPrefix string, dbOpen DBOpen) Context {
+func NewWithDB(contextKey, apiKeyPrefix string, dbOpen DBOpenFunc) Context {
 	return &APIContext{
 		ContextKey:   contextKey,
 		APIKeyPrefix: apiKeyPrefix,
 		DBOpen:       dbOpen,
 	}
+}
+
+func New(contextKey, apiKeyPrefix string) Context {
+	return NewWithDB(contextKey, apiKeyPrefix, DefaultDBOpenFunc)
 }
 
 func (c APIContext) APIKey(value interface{}) error {

@@ -4,7 +4,6 @@ package cloudvolume
 
 import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const cvAPIKeyPrefix = "hpecli_cloudvolume_token_"
@@ -16,12 +15,12 @@ type cvContextData struct {
 }
 
 func storeContext(key, token string) error {
-	c := context.New(cvContextKey, cvAPIKeyPrefix, db.Open)
+	c := context.New(cvContextKey, cvAPIKeyPrefix)
 	return c.SetAPIKey(key, &cvContextData{key, token})
 }
 
 func getContext() (*cvContextData, error) {
-	c := context.New(cvContextKey, cvAPIKeyPrefix, db.Open)
+	c := context.New(cvContextKey, cvAPIKeyPrefix)
 
 	var d cvContextData
 	err := c.APIKey(&d)

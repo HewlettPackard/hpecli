@@ -5,9 +5,15 @@ package ilo
 import (
 	"net/http"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const rootURL = "/redfish/v1/"
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestAPIKeyInjectedIntoRequest(t *testing.T) {
 	const authValue = "someAuthHeaderValue"

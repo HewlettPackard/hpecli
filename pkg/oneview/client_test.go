@@ -2,11 +2,17 @@ package oneview
 
 import (
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const testHost = "host1"
 const testUser = "someUser"
 const testPass = "somePass"
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestUserPassConstructor(t *testing.T) {
 	ovc := NewOVClient(testHost, testUser, testPass)

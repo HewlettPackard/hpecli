@@ -7,10 +7,14 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const encURL = "/rest/enclosures"
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestAPIKeyPutInEnclosureRequest(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
@@ -68,17 +72,6 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 	// check is above in the http request handler side
 	if err := getEnclosuresData(); err == nil {
 		t.Fatal("expected to get an error")
-	}
-}
-
-func TestEnclosuresMissingAPIKey(t *testing.T) {
-	// when the db is open, the get apikey will fail
-	d, _ := db.Open()
-	defer d.Close()
-
-	err := getEnclosuresData()
-	if err == nil {
-		t.Fatal("should have retrieved error")
 	}
 }
 

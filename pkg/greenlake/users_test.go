@@ -6,7 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
 
 func TestGLAPIKeyInjectedIntoRequest(t *testing.T) {
 	const authValue = "someAuthorizationHeaderValue"
@@ -27,5 +33,5 @@ func TestGLAPIKeyInjectedIntoRequest(t *testing.T) {
 	// set context to the test server host
 	storeContext(server.URL, tenantID, authValue)
 
-	 _ = runGLGetUsers(nil, nil)
+	_ = runGLGetUsers(nil, nil)
 }

@@ -4,7 +4,6 @@ package greenlake
 
 import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
 const glAPIKeyPrefix = "hpecli_greenlake_token_"
@@ -17,12 +16,12 @@ type glContextData struct {
 }
 
 func storeContext(key, tenantID, token string) error {
-	c := context.New(glContextKey, glAPIKeyPrefix, db.Open)
+	c := context.New(glContextKey, glAPIKeyPrefix)
 	return c.SetAPIKey(key, &glContextData{key, token, tenantID})
 }
 
 func getContext() (*glContextData, error) {
-	c := context.New(glContextKey, glAPIKeyPrefix, db.Open)
+	c := context.New(glContextKey, glAPIKeyPrefix)
 
 	var d glContextData
 	err := c.APIKey(&d)
@@ -31,6 +30,6 @@ func getContext() (*glContextData, error) {
 }
 
 func changeContext(key string) error {
-	c := context.New(glContextKey, glAPIKeyPrefix, db.Open)
+	c := context.New(glContextKey, glAPIKeyPrefix)
 	return c.ChangeContext(key)
 }
