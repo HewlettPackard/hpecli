@@ -17,5 +17,4 @@ func init() {
 	Cmd.AddCommand(ovGetCmd)
 	Cmd.AddCommand(ovLoginCmd)
 	Cmd.AddCommand(ovLogoutCmd)
-	
 }
