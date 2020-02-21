@@ -119,7 +119,7 @@ func (c APIContext) RemoveContext(key string) error {
 	defer d.Close()
 
 	// Delete context key
-	if err := d.Delete(c.ContextKey); err != nil {
+	if err := d.Delete(key); err != nil {
 		return fmt.Errorf("unable to delete context because of %#v", err)
 	}
 
