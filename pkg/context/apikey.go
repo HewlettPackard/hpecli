@@ -11,6 +11,7 @@ type Context interface {
 	APIKey(value interface{}) error
 	SetAPIKey(key string, value interface{}) error
 	ChangeContext(key string) error
+	RemoveContext(key string) error
 }
 
 type DBOpenFunc func() (db.Store, error)
@@ -101,6 +102,25 @@ func (c APIContext) ChangeContext(key string) error {
 	// Save context key
 	if err := d.Put(c.ContextKey, key); err != nil {
 		return fmt.Errorf("unable to save current context because of %#v", err)
+	}
+
+	return nil
+}
+
+func (c APIContext) RemoveContext(key string) error {
+	if key == "" {
+		return ErrorInvalidKey
+	}
+
+	d, err := c.DBOpen()
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+
+	// Delete context key
+	if err := d.Delete(c.ContextKey); err != nil {
+		return fmt.Errorf("unable to delete context because of %#v", err)
 	}
 
 	return nil

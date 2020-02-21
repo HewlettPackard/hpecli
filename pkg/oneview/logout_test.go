@@ -5,13 +5,7 @@ package oneview
 import (
 	"net/http"
 	"testing"
-
-	"github.com/HewlettPackard/hpecli/pkg/context"
 )
-
-func init() {
-	context.DefaultDBOpenFunc = context.MockOpen
-}
 
 func TestClientLogoutRequestFails(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"

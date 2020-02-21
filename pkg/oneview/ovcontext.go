@@ -32,3 +32,8 @@ func changeContext(key string) error {
 	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
 	return c.ChangeContext(key)
 }
+
+func removeContext(key string) error {
+	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
+	return c.RemoveContext(key)
+}

@@ -17,6 +17,7 @@ var ovLogoutCmd = &cobra.Command{
 }
 
 func init() {
+	ovContextCmd.Flags().StringVar(&ovContextHost.host, "host", "", "oneview host/ip address")
 }
 
 func runOVLogout(_ *cobra.Command, _ []string) error {
@@ -37,14 +38,13 @@ func runOVLogout(_ *cobra.Command, _ []string) error {
 		logger.Warning("Unable to logout from OneView at: %s", d.Host)
 		return err
 	}
-	/*
+	
 	// Cleanup context
-	if err = removeContext(d.host); err != nil {
-		logger.Warning("Successfully logged off OneView, but was unable to cleanup the session data")
-	} else {
-		logger.Debug("Successfully logged off OneView: %s", d.host)
-	}
-	*/
+	err = removeContext(d.Host)
+	if err != nil {
+		logger.Warning("Unable to cleanup the session data")
+		return err
+	} 
 
 	return nil
 }
