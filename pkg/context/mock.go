@@ -47,7 +47,11 @@ func (ms *MockStore) Put(key string, value interface{}) error {
 }
 
 func (ms *MockStore) Delete(key string) error {
+	if strings.Contains(key, "fail") {
+		return errors.New("expected error")
+	}
 	delete(ms.m, key)
+
 	return nil
 }
 
