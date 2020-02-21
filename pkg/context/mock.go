@@ -50,6 +50,9 @@ func (ms *MockStore) Delete(key string) error {
 	if strings.Contains(key, "fail") {
 		return errors.New("expected error")
 	}
+	if _, ok := ms.m[key]; !ok {
+		return db.ErrNotFound
+	}
 	delete(ms.m, key)
 
 	return nil

@@ -33,7 +33,7 @@ func changeContext(key string) error {
 	return c.ChangeContext(key)
 }
 
-func removeContext(key string) error {
+func removeContext() error {
 	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
-	return c.RemoveContext(key)
+	return c.RemoveContext(oneViewContextKey)
 }

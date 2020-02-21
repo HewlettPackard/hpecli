@@ -12,6 +12,7 @@ import (
 var ovLogoutHost struct {
 	host string
 }
+
 // ovLogoutCmd represents the oneview ovLoginCmd command
 var ovLogoutCmd = &cobra.Command{
 	Use:   "logout",
@@ -41,13 +42,13 @@ func runOVLogout(_ *cobra.Command, _ []string) error {
 		logger.Warning("Unable to logout from OneView at: %s", d.Host)
 		return err
 	}
-	
+
 	// Cleanup context
-	err = removeContext(d.Host)
+	err = removeContext()
 	if err != nil {
 		logger.Warning("Unable to cleanup the session data")
 		return err
-	} 
+	}
 
 	return nil
 }
