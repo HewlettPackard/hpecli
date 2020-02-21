@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var ovLogoutHost struct {
+	host string
+}
 // ovLogoutCmd represents the oneview ovLoginCmd command
 var ovLogoutCmd = &cobra.Command{
 	Use:   "logout",
@@ -17,7 +20,7 @@ var ovLogoutCmd = &cobra.Command{
 }
 
 func init() {
-	ovContextCmd.Flags().StringVar(&ovContextHost.host, "host", "", "oneview host/ip address")
+	ovLogoutCmd.Flags().StringVar(&ovLogoutHost.host, "host", "", "oneview host/ip address")
 }
 
 func runOVLogout(_ *cobra.Command, _ []string) error {
