@@ -161,6 +161,14 @@ func TestSetAPIFailsOnDBOpen(t *testing.T) {
 	}
 }
 
+func TestRemoveContextDeleteFails(t *testing.T) {
+	c := withMockStore()
+
+	if err := c.RemoveContext("fail"); err == nil {
+		t.Fatalf(errExpected)
+	}
+}
+
 func TestChangeContextPutFails(t *testing.T) {
 	c := withMockStore()
 
