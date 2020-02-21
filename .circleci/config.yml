@@ -78,4 +78,4 @@ workflows:
             - build
       - scan:
           requires:
-            - checkout_code
+            - test
