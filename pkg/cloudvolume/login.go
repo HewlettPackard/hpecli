@@ -52,7 +52,7 @@ func runCVLogin(_ *cobra.Command, _ []string) error {
 
 	// change context to current host and save the token as the API key
 	// for subsequent requests
-	if err := storeContext(cvLoginData.host, token); err != nil {
+	if err := saveData(cvLoginData.host, token); err != nil {
 		logger.Warning("Successfully logged into CloudVolumes, but was unable to save the session data")
 		logger.Debug("%+v", err)
 	} else {

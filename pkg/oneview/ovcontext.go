@@ -6,34 +6,52 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
-const oneViewAPIKeyPrefix = "hpecli_oneview_token_"
-const oneViewContextKey = "hpecli_oneview_context"
+const ovAPIKeyPrefix = "hpecli_oneview_token_"
+const ovContextKey = "hpecli_oneview_context"
 
-type ovContextData struct {
-	Host   string
-	APIKey string
+func hostAndToken() (host, token string, err error) {
+	c := context.New(ovContextKey)
+
+	host, err = c.ModuleContext()
+	if err != nil {
+		return "", "", err
+	}
+
+	if err = c.HostData(dataKey(host), &token); err != nil {
+		return "", "", err
+	}
+
+	return host, token, nil
 }
 
-func storeContext(key, token string) error {
-	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
-	return c.SetAPIKey(key, &ovContextData{key, token})
+func saveContextAndHostData(host, token string) error {
+	c := context.New(ovContextKey)
+	if err := c.SetModuleContext(host); err != nil {
+		return err
+	}
+
+	return c.SetHostData(dataKey(host), token)
 }
 
-func getContext() (*ovContextData, error) {
-	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
+func hostData(host string) (token string, err error) {
+	c := context.New(ovContextKey)
+	if err = c.HostData(dataKey(host), &token); err != nil {
+		return "", err
+	}
 
-	var d ovContextData
-	err := c.APIKey(&d)
-
-	return &d, err
+	return token, nil
 }
 
-func changeContext(key string) error {
-	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
-	return c.ChangeContext(key)
+func setContext(host string) error {
+	c := context.New(ovContextKey)
+	return c.SetModuleContext(host)
 }
 
-func removeContext() error {
-	c := context.New(oneViewContextKey, oneViewAPIKeyPrefix)
-	return c.RemoveContext(oneViewContextKey)
+func deleteSavedHostData(host string) error {
+	c := context.New(ovContextKey)
+	return c.DeleteHostData(dataKey(host))
+}
+
+func dataKey(apiEndpoint string) string {
+	return ovAPIKeyPrefix + apiEndpoint
 }

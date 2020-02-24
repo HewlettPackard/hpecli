@@ -49,7 +49,7 @@ func TestGLAccessTokenIsStored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c, _ := getContext()
+	c, _ := getData()
 	if c.APIKey != accessToken {
 		t.Fatalf(errTempl, c.APIKey, accessToken)
 	}

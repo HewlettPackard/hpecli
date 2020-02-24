@@ -3,8 +3,11 @@
 package oneview
 
 import (
+	"errors"
 	"net/http"
 	"testing"
+
+	"github.com/HewlettPackard/hpecli/pkg/context"
 )
 
 const logoutURI = "/rest/login-sessions"
@@ -21,7 +24,7 @@ func TestLogoutRequestFails(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	_ = storeContext(server.URL, sessionID)
+	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := runOVLogout(nil, nil); err == nil {
@@ -29,30 +32,60 @@ func TestLogoutRequestFails(t *testing.T) {
 	}
 }
 
-func TestLogoutRemovesContext(t *testing.T) {
+func TestLogoutRemovesAPIKeyFromContext(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
 
 	server := newTestServer(logoutURI, func(w http.ResponseWriter, r *http.Request) {
-		// cause the request to fail
-		w.WriteHeader(http.StatusOK)
 	})
 
 	defer server.Close()
 
 	// set context to the test server host
-	_ = storeContext(server.URL, sessionID)
+	_ = saveContextAndHostData(server.URL, sessionID)
 
-	// check is above in the http request handler side
 	_ = runOVLogout(nil, nil)
 
-	if _, err := getContext(); err == nil {
-		t.Fatal(expectedErrMsg)
+	// verify the data is gone
+	var token string
+
+	c := context.New(ovContextKey)
+
+	err := c.HostData(dataKey(server.URL), &token)
+	if !errors.Is(err, context.ErrorKeyNotFound) {
+		t.Fatal("expected ErrorKeyNotFound error")
+	}
+}
+
+func TestLogoutRemovesAPIKeyFromParameter(t *testing.T) {
+	const sessionID = "HERE_IS_A_ID"
+
+	server := newTestServer(logoutURI, func(w http.ResponseWriter, r *http.Request) {
+	})
+
+	defer server.Close()
+
+	_ = saveContextAndHostData(server.URL, sessionID)
+	// erase the context .. just to make sure that it doesn't pickup the host from the context
+	_ = setContext("")
+
+	// specify the param like it was passed on the command line
+	ovLogoutHost.host = server.URL
+	_ = runOVLogout(nil, nil)
+
+	// verify the data is gone
+	var token string
+
+	c := context.New(ovContextKey)
+
+	err := c.HostData(dataKey(server.URL), &token)
+	if !errors.Is(err, context.ErrorKeyNotFound) {
+		t.Fatal("expected ErrorKeyNotFound error")
 	}
 }
 
 func TestLogoutFailsWhenItCantGetContext(t *testing.T) {
 	// erase context for runnig the command
-	_ = removeContext()
+	_ = setContext("")
 
 	// run the command that will fail because of the missing context
 	if err := runOVLogout(nil, nil); err == nil {

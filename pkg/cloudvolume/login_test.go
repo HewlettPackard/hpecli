@@ -29,22 +29,24 @@ func TestLoginWorks(t *testing.T) {
 	cvLoginData.host = ts.URL
 
 	// erase value from db - so we know it is empty
-	storeContext(ts.URL, "")
+	saveData(ts.URL, "")
 
 	err := runCVLogin(nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	d, err := getContext()
+	gotHost, gotToken, err := hostAndToken()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	got := d.APIKey
+	if gotHost != ts.URL {
+		t.Fatalf(errTempl, gotHost, want)
+	}
 
-	if got != want {
-		t.Fatalf(errTempl, got, want)
+	if gotToken != want {
+		t.Fatalf(errTempl, gotHost, want)
 	}
 }
 

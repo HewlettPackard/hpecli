@@ -3,7 +3,6 @@
 package ilo
 
 import (
-	"errors"
 	"strings"
 	"testing"
 
@@ -25,14 +24,25 @@ func TestHostPrefixAddedForContext(t *testing.T) {
 	}
 }
 
-func TestContextIsSetInDB(t *testing.T) {
-	iloContextHost.host = "127.0.0.1"
+func TestGetWorks(t *testing.T) {
+	const h1 = "host1"
 
-	// sets the context in the DB
-	_ = runSetContext(nil, nil)
+	const v1 = "value1"
 
-	_, err := getContext()
-	if !errors.Is(err, context.ErrorKeyNotFound) {
-		t.Fatal("expected to find the context but not the key")
+	if err := saveData(h1, v1); err != nil {
+		t.Fatal(err)
+	}
+
+	gotHost, gotToken, err := hostAndToken()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if gotHost != h1 {
+		t.Fatal("didn't retrieve matching host")
+	}
+
+	if gotToken != v1 {
+		t.Fatal("didn't retrieve matching value")
 	}
 }

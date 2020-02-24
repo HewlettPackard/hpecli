@@ -1,8 +1,7 @@
 package context
 
 import (
-	"fmt"
-	"strings"
+	"errors"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/pkg/db"
@@ -19,193 +18,242 @@ const (
 	errUnexpected = "unexpected error: %v"
 )
 
-func TestNewContext(t *testing.T) {
-	c := NewWithDB(contextKey, apiKeyPrefix, MockOpen)
+var ErrorDBOpen = errors.New("expected failure to open db")
 
-	if c.(*APIContext).ContextKey != contextKey {
+func failOpenDB() (db.Store, error) {
+	return nil, ErrorDBOpen
+}
+
+func TestNew(t *testing.T) {
+	c := New(contextKey)
+
+	if c.(*APIContext).contextKey != contextKey {
 		t.Fatal("ContextKey value not set as expected")
 	}
 
-	if c.(*APIContext).APIKeyPrefix != apiKeyPrefix {
+	if c.(*APIContext).dbOpenFunc == nil {
+		t.Fatal("DB open func not set")
+	}
+}
+func TestNewWithDB(t *testing.T) {
+	c := NewWithDB(contextKey, MockOpen)
+
+	if c.(*APIContext).contextKey != contextKey {
 		t.Fatal("ContextKey value not set as expected")
+	}
+
+	if c.(*APIContext).dbOpenFunc == nil {
+		t.Fatal("DB open func not set")
 	}
 }
 
-func TestSetAPIKey(t *testing.T) {
-	c := withMockStore()
+func TestSetModuleContextDBOpenError(t *testing.T) {
+	c := NewWithDB(contextKey, failOpenDB)
 
-	if err := c.SetAPIKey(host, key); err != nil {
+	err := c.SetModuleContext(host)
+	if err != ErrorDBOpen {
+		t.Fatal(errExpected)
+	}
+}
+
+func TestSetModuleContextPutError(t *testing.T) {
+	c := NewWithDB(contextKey, MockOpen)
+
+	err := c.SetModuleContext("fail-host")
+	if err == nil {
+		t.Fatal(errExpected)
+	}
+}
+
+func TestSetModuleContext(t *testing.T) {
+	c := NewWithDB(contextKey, MockOpen)
+
+	if err := c.SetModuleContext(host); err != nil {
 		t.Fatalf(errUnexpected, err)
 	}
 }
 
-func TestGetAPIKey(t *testing.T) {
-	c := withMockStore()
+func TestModuleContext(t *testing.T) {
+	c := NewWithDB(contextKey, MockOpen)
 
-	if err := c.SetAPIKey(host, key); err != nil {
+	if err := c.SetModuleContext(host); err != nil {
 		t.Fatalf(errUnexpected, err)
 	}
 
-	var got string
-
-	err := c.APIKey(&got)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if got != key {
-		t.Fatal("wrong host returned")
-	}
-}
-
-func TestSetContextFails(t *testing.T) {
-	c := withMockStore()
-	c.(*APIContext).ContextKey = fail
-
-	err := c.SetAPIKey(host, key)
-	if err == nil {
-		t.Fatal(errExpected)
-	}
-}
-
-func TestGetContextFails(t *testing.T) {
-	c := withMockStore()
-	c.(*APIContext).ContextKey = fail
-
-	var v string
-
-	err := c.APIKey(&v)
-	if err == nil {
-		t.Fatal(errExpected)
-	}
-}
-
-func TestSetSessionKeyFails(t *testing.T) {
-	c := withMockStore()
-	err := c.SetAPIKey(host, fail)
-
-	if err == nil {
-		t.Fatal(errExpected)
-	}
-}
-
-func TestWhenAPIKeyFails(t *testing.T) {
-	d, err := MockOpen()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer d.Close()
-
-	s := d.(*MockStore)
-	s.Put(contextKey, fail)
-
-	c := withMockStore()
-
-	var key string
-
-	err = c.APIKey(&key)
-	if err == nil {
-		t.Fatal(errExpected)
-	}
-
-	err = c.SetAPIKey(host, fail)
-	if err == nil {
-		t.Fatal(errExpected)
-	}
-}
-
-func TestMakeAPIKey(t *testing.T) {
-	got := makeAPIKey(apiKeyPrefix, "")
-	if !strings.HasPrefix(got, apiKeyPrefix) {
-		t.Fatalf(errTempl, got, apiKeyPrefix)
-	}
-
-	got = makeAPIKey("", host)
-	if !strings.HasSuffix(got, host) {
-		t.Fatalf(errTempl, got, apiKeyPrefix)
-	}
-
-	got = makeAPIKey(apiKeyPrefix, host)
-	if !strings.HasPrefix(got, apiKeyPrefix) {
-		t.Fatalf(errTempl, got, apiKeyPrefix+host)
-	}
-
-	if !strings.HasSuffix(got, host) {
-		t.Fatalf(errTempl, got, apiKeyPrefix+host)
-	}
-}
-
-func TestGetAPIFailsOnDBOpen(t *testing.T) {
-	var c Context = &APIContext{
-		APIKeyPrefix: apiKeyPrefix,
-		ContextKey:   contextKey,
-		DBOpen:       FailOpen,
-	}
-
-	err := c.APIKey(nil)
-	if err == nil {
-		t.Fatal(errExpected)
-	}
-}
-
-func TestSetAPIFailsOnDBOpen(t *testing.T) {
-	var c Context = &APIContext{
-		APIKeyPrefix: apiKeyPrefix,
-		ContextKey:   contextKey,
-		DBOpen:       FailOpen,
-	}
-
-	err := c.SetAPIKey(host, apiKeyPrefix)
-	if err == nil {
-		t.Fatal(errExpected)
-	}
-}
-
-func TestRemoveContextDeleteFails(t *testing.T) {
-	c := withMockStore()
-
-	if err := c.RemoveContext("fail"); err == nil {
-		t.Fatalf(errExpected)
-	}
-}
-
-func TestChangeContextPutFails(t *testing.T) {
-	c := withMockStore()
-
-	if err := c.ChangeContext("fail"); err == nil {
-		t.Fatalf(errExpected)
-	}
-}
-
-func TestChangeContextWritesValue(t *testing.T) {
-	c := withMockStore()
-
-	if err := c.ChangeContext(host); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	var got string
-
-	err := ms.Get(contextKey, &got)
+	got, err := c.ModuleContext()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if got != host {
-		t.Fatal("didn't retrieve expected value after ChangeContext")
+		t.Fatal("wrong host returned")
 	}
 }
 
-func FailOpen() (db.Store, error) {
-	return nil, fmt.Errorf(errExpected)
-}
-
-func withMockStore() Context {
-	var c Context = &APIContext{
-		APIKeyPrefix: apiKeyPrefix,
-		ContextKey:   contextKey,
-		DBOpen:       MockOpen,
+func TestHostData(t *testing.T) {
+	cases := []struct {
+		name        string
+		dbOpen      DBOpenFunc
+		key         string
+		value       interface{}
+		wantErr     bool
+		expectedErr error
+	}{
+		{
+			name:        "Invalid Key",
+			dbOpen:      MockOpen,
+			key:         "",
+			value:       "",
+			expectedErr: ErrorInvalidKey,
+		},
+		{
+			name:        "DB Open Failure",
+			dbOpen:      failOpenDB,
+			key:         key,
+			value:       "",
+			expectedErr: ErrorDBOpen,
+		},
+		{
+			name:        "Get Failure",
+			dbOpen:      MockOpen,
+			key:         "fail-host-key",
+			value:       "",
+			expectedErr: ErrorKeyNotFound,
+		},
+		{
+			name:        "Get Works",
+			dbOpen:      MockOpen,
+			key:         key,
+			value:       "some specific value",
+			expectedErr: nil,
+		},
 	}
 
-	return c
+	// save some data so we have something to delete
+	c := NewWithDB(contextKey, MockOpen)
+	c.SetHostData(key, "some specific value")
+
+	for _, test := range cases {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			con := NewWithDB(contextKey, test.dbOpen)
+			var value string
+
+			got := con.HostData(test.key, &value)
+			if !errors.Is(got, test.expectedErr) {
+				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", got, test.expectedErr)
+			}
+
+			if value != test.value {
+				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", value, test.value)
+			}
+		})
+	}
+}
+
+func TestSetHostData(t *testing.T) {
+	cases := []struct {
+		name        string
+		dbOpen      DBOpenFunc
+		key         string
+		value       interface{}
+		wantErr     bool
+		expectedErr error
+	}{
+		{
+			name:        "Invalid Key",
+			dbOpen:      MockOpen,
+			key:         "",
+			expectedErr: ErrorInvalidKey,
+		},
+		{
+			name:        "Invalid Value",
+			dbOpen:      MockOpen,
+			key:         key,
+			value:       nil,
+			expectedErr: ErrorInvalidValue,
+		},
+		{
+			name:        "DB Open Failure",
+			dbOpen:      failOpenDB,
+			key:         key,
+			value:       "value doesn't matter",
+			expectedErr: ErrorDBOpen,
+		},
+		{
+			name:        "Set Failure",
+			dbOpen:      MockOpen,
+			key:         "fail-host-key",
+			value:       "value doesn't matter",
+			expectedErr: ErrorExpected,
+		},
+		{
+			name:        "Set Works",
+			dbOpen:      MockOpen,
+			key:         key,
+			value:       "value stored",
+			expectedErr: nil,
+		},
+	}
+
+	for _, test := range cases {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			con := NewWithDB(contextKey, test.dbOpen)
+			got := con.SetHostData(test.key, test.value)
+			if !errors.Is(got, test.expectedErr) {
+				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", got, test.expectedErr)
+			}
+		})
+	}
+}
+
+func TestDeleteHostData(t *testing.T) {
+	cases := []struct {
+		name        string
+		dbOpen      DBOpenFunc
+		key         string
+		wantErr     bool
+		expectedErr error
+	}{
+		{
+			name:        "Invalid Key",
+			dbOpen:      MockOpen,
+			key:         "",
+			expectedErr: ErrorInvalidKey,
+		},
+		{
+			name:        "DB Open Failure",
+			dbOpen:      failOpenDB,
+			key:         "somekey",
+			expectedErr: ErrorDBOpen,
+		},
+		{
+			name:        "Delete Failure",
+			dbOpen:      MockOpen,
+			key:         "fail-host-key",
+			expectedErr: ErrorExpected,
+		},
+		{
+			name:        "Delete Works",
+			dbOpen:      MockOpen,
+			key:         key,
+			expectedErr: nil,
+		},
+	}
+
+	// save some data so we have something to delete
+	c := NewWithDB(contextKey, MockOpen)
+	c.SetHostData(key, "data doesn't matter")
+
+	for _, test := range cases {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			con := NewWithDB(contextKey, test.dbOpen)
+			got := con.DeleteHostData(test.key)
+			if !errors.Is(got, test.expectedErr) {
+				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", got, test.expectedErr)
+			}
+		})
+	}
 }

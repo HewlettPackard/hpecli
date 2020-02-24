@@ -19,16 +19,16 @@ var cmdILOServiceRoot = &cobra.Command{
 func runILOServiceRoot(_ *cobra.Command, _ []string) error {
 	logger.Debug("Beginning runILOServiceRoot")
 
-	c, err := getContext()
+	host, token, err := hostAndToken()
 	if err != nil {
 		logger.Debug("unable to retrieve apiKey because of: %#v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO." +
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	logger.Debug("Attempting get ilo service root at: %v", c.Host)
+	logger.Debug("Attempting get ilo service root at: %v", host)
 
-	client := NewILOClientFromAPIKey(c.Host, c.APIKey)
+	client := NewILOClientFromAPIKey(host, token)
 
 	jsonResult, err := client.GetServiceRoot()
 	if err != nil {

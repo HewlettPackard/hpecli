@@ -10,37 +10,31 @@ func init() {
 	context.DefaultDBOpenFunc = context.MockOpen
 }
 
-func TestStoreContext(t *testing.T) {
-	if err := storeContext("host1", "blahKey"); err != nil {
+func TestSaveData(t *testing.T) {
+	if err := saveData("host1.cloud", "blah-token-value"); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestStoreContextFailsEmptyKey(t *testing.T) {
-	if err := storeContext("", "blahKey"); err == nil {
-		t.Fatal("expected failure no empty key")
-	}
-}
-
-func TestStoreGetWorks(t *testing.T) {
+func TestGetWorks(t *testing.T) {
 	const h1 = "host1"
 
 	const v1 = "value1"
 
-	if err := storeContext(h1, v1); err != nil {
+	if err := saveData(h1, v1); err != nil {
 		t.Fatal(err)
 	}
 
-	d, err := getContext()
+	gotHost, gotToken, err := hostAndToken()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if d.Host != h1 {
-		t.Fatal("didn't retrieve matching host value")
+	if gotHost != h1 {
+		t.Fatal("didn't retrieve matching host")
 	}
 
-	if d.APIKey != v1 {
-		t.Fatal("didn't retrieve matching apikey value")
+	if gotToken != v1 {
+		t.Fatal("didn't retrieve matching value")
 	}
 }

@@ -53,7 +53,7 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 
 	// change context to current host and save the access token as the API key
 	// for subsequent requests
-	if err = storeContext(glLoginData.host, glLoginData.tenantID, token); err != nil {
+	if err = saveData(glLoginData.host, glLoginData.tenantID, token); err != nil {
 		logger.Warning("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
 		logger.Debug("Successfully logged into GreenLake: %s", glLoginData.host)

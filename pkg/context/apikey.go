@@ -8,10 +8,11 @@ import (
 )
 
 type Context interface {
-	APIKey(value interface{}) error
-	SetAPIKey(key string, value interface{}) error
-	ChangeContext(key string) error
-	RemoveContext(key string) error
+	ModuleContext() (string, error)
+	SetModuleContext(value string) error
+	HostData(hostKey string, value interface{}) error
+	SetHostData(hostKey string, data interface{}) error
+	DeleteHostData(hostKey string) error
 }
 
 type DBOpenFunc func() (db.Store, error)
@@ -19,113 +20,119 @@ type DBOpenFunc func() (db.Store, error)
 var DefaultDBOpenFunc = db.Open
 
 type APIContext struct {
-	ContextKey   string
-	APIKeyPrefix string
-	DBOpen       DBOpenFunc
+	contextKey string
+	dbOpenFunc DBOpenFunc
 }
 
 var (
 	ErrorContextNotFound = errors.New("unable to find specified context")
-	ErrorKeyNotFound     = errors.New("unable to find key for specified host")
+	ErrorKeyNotFound     = errors.New("unable to find the specified key")
 	ErrorInvalidKey      = errors.New("invalid key specified.  Key can not be empty")
+	ErrorInvalidValue    = errors.New("invalid value specified.  Value can not be nil")
 )
 
-func NewWithDB(contextKey, apiKeyPrefix string, dbOpen DBOpenFunc) Context {
+func NewWithDB(contextKey string, dbOpen DBOpenFunc) Context {
 	return &APIContext{
-		ContextKey:   contextKey,
-		APIKeyPrefix: apiKeyPrefix,
-		DBOpen:       dbOpen,
+		contextKey: contextKey,
+		dbOpenFunc: dbOpen,
 	}
 }
 
-func New(contextKey, apiKeyPrefix string) Context {
-	return NewWithDB(contextKey, apiKeyPrefix, DefaultDBOpenFunc)
+func New(contextKey string) Context {
+	return NewWithDB(contextKey, DefaultDBOpenFunc)
 }
 
-func (c APIContext) APIKey(value interface{}) error {
-	d, err := c.DBOpen()
+func (c APIContext) ModuleContext() (string, error) {
+	d, err := c.dbOpenFunc()
+	if err != nil {
+		return "", err
+	}
+
+	defer d.Close()
+
+	var value string
+	if err := d.Get(c.contextKey, &value); err != nil {
+		return "", ErrorContextNotFound
+	}
+
+	return value, nil
+}
+
+func (c APIContext) SetModuleContext(value string) error {
+	d, err := c.dbOpenFunc()
 	if err != nil {
 		return err
 	}
+
 	defer d.Close()
 
-	var host string
-	if err := d.Get(c.ContextKey, &host); err != nil {
-		return ErrorContextNotFound
+	// Save context key
+	if err := d.Put(c.contextKey, value); err != nil {
+		return fmt.Errorf("unable to save the context: %w", err)
 	}
 
-	apiKey := makeAPIKey(c.APIKeyPrefix, host)
+	return nil
+}
 
-	if err := d.Get(apiKey, value); err != nil {
+func (c APIContext) HostData(hostKey string, value interface{}) error {
+	if hostKey == "" {
+		return ErrorInvalidKey
+	}
+
+	d, err := c.dbOpenFunc()
+	if err != nil {
+		return err
+	}
+
+	defer d.Close()
+
+	if err := d.Get(hostKey, value); err != nil {
 		return ErrorKeyNotFound
 	}
 
 	return nil
 }
 
-func (c APIContext) SetAPIKey(key string, value interface{}) error {
-	if key == "" {
+func (c APIContext) SetHostData(hostKey string, value interface{}) error {
+	if hostKey == "" {
 		return ErrorInvalidKey
 	}
 
-	d, err := c.DBOpen()
+	if value == nil {
+		return ErrorInvalidValue
+	}
+
+	d, err := c.dbOpenFunc()
 	if err != nil {
 		return err
 	}
+
 	defer d.Close()
 
 	// Save context key
-	if e := d.Put(c.ContextKey, key); e != nil {
-		return fmt.Errorf("unable to save current context because of %#v", e)
-	}
-
-	// Save API Key
-	apiKey := makeAPIKey(c.APIKeyPrefix, key)
-	if err := d.Put(apiKey, value); err != nil {
-		return fmt.Errorf("unable to save apiKey for %s because of %#v", key, err)
+	if err := d.Put(hostKey, value); err != nil {
+		return fmt.Errorf("unable to save host value: %w", err)
 	}
 
 	return nil
 }
 
-func (c APIContext) ChangeContext(key string) error {
-	if key == "" {
+func (c APIContext) DeleteHostData(hostKey string) error {
+	if hostKey == "" {
 		return ErrorInvalidKey
 	}
 
-	d, err := c.DBOpen()
+	d, err := c.dbOpenFunc()
 	if err != nil {
 		return err
 	}
+
 	defer d.Close()
 
-	// Save context key
-	if err := d.Put(c.ContextKey, key); err != nil {
-		return fmt.Errorf("unable to save current context because of %#v", err)
+	// delete the data
+	if err := d.Delete(hostKey); err != nil {
+		return fmt.Errorf("unable to delete host data: %w", err)
 	}
 
 	return nil
-}
-
-func (c APIContext) RemoveContext(key string) error {
-	if key == "" {
-		return ErrorInvalidKey
-	}
-
-	d, err := c.DBOpen()
-	if err != nil {
-		return err
-	}
-	defer d.Close()
-
-	// Delete context key
-	if err := d.Delete(key); err != nil {
-		return fmt.Errorf("unable to delete context because of %#v", err)
-	}
-
-	return nil
-}
-
-func makeAPIKey(apiKeyPrefix, host string) string {
-	return apiKeyPrefix + host
 }

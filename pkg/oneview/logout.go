@@ -4,6 +4,7 @@ package oneview
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/spf13/cobra"
@@ -25,30 +26,56 @@ func init() {
 }
 
 func runOVLogout(_ *cobra.Command, _ []string) error {
-	d, err := getContext()
+	host, token, err := hostToLogout()
 	if err != nil {
 		logger.Debug("unable to retrieve apiKey because of: %#v", err)
 		return fmt.Errorf("unable to retrieve the last login for OneView." +
 			"Please login to OneView using: hpecli oneview login")
 	}
 
-	ovc := NewOVClientFromAPIKey(d.Host, d.APIKey)
+	ovc := NewOVClientFromAPIKey(host, token)
 
-	logger.Always("Retrieving data from: %s", d.Host)
+	logger.Always("Retrieving data from: %s", host)
 
 	// Use OVClient to logout
 	err = ovc.SessionLogout()
 	if err != nil {
-		logger.Warning("Unable to logout from OneView at: %s", d.Host)
+		logger.Warning("Unable to logout from OneView at: %s", host)
 		return err
 	}
 
 	// Cleanup context
-	err = removeContext()
+	err = deleteSavedHostData(host)
 	if err != nil {
 		logger.Warning("Unable to cleanup the session data")
 		return err
 	}
 
 	return nil
+}
+
+func hostToLogout() (host, token string, err error) {
+	if ovLogoutHost.host == "" {
+		// they didn't specify a host.. so use the context to find one
+		h, t, e := hostAndToken()
+		if e != nil {
+			logger.Debug("unable to retrieve apiKey because of: %#v", e)
+			return "", "", fmt.Errorf("unable to retrieve the last login for OneView." +
+				"Please login to OneView using: hpecli oneview login")
+		}
+
+		return h, t, nil
+	}
+
+	// they specified a host to logout.  get the token for that host
+	if !strings.HasPrefix(ovLogoutHost.host, "http") {
+		ovLogoutHost.host = fmt.Sprintf("https://%s", ovLogoutHost.host)
+	}
+
+	token, err = hostData(ovLogoutHost.host)
+	if err != nil {
+		return "", "", err
+	}
+
+	return ovLogoutHost.host, token, nil
 }

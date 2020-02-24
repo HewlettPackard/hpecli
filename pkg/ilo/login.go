@@ -49,7 +49,7 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
-	if err = storeContext(iloLoginData.host, token); err != nil {
+	if err = saveData(iloLoginData.host, token); err != nil {
 		logger.Warning("Successfully logged into ilo, but was unable to save the session data")
 	} else {
 		logger.Debug("Successfully logged into ilo: %s", iloLoginData.host)
