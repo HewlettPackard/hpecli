@@ -47,7 +47,7 @@ func wrapRequest(method, urlStr string, body io.Reader, options []func(*Request)
 //     fmt.Println(resp.StatusCode)
 //
 func Get(urlStr string, options ...func(*Request)) (*Response, error) {
-	return do("GET", urlStr, nil, options...)
+	return do(http.MethodGet, urlStr, nil, options...)
 }
 
 // Post sends a HTTP POST request to the provided url.
@@ -63,7 +63,7 @@ func Get(urlStr string, options ...func(*Request)) (*Response, error) {
 // fmt.Println(resp.JSON())
 //
 func Post(urlStr string, body io.Reader, options ...func(*Request)) (*Response, error) {
-	return do("POST", urlStr, body, options...)
+	return do(http.MethodPost, urlStr, body, options...)
 }
 
 func do(method, urlStr string, body io.Reader, options ...func(*Request)) (*Response, error) {

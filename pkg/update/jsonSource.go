@@ -41,7 +41,7 @@ func (j *jsonSource) validate() error {
 func (j *jsonSource) get() (*remoteResponse, error) {
 	client := &http.Client{}
 	// Create a new GET request
-	req, err := http.NewRequest("GET", j.url, nil)
+	req, err := http.NewRequest(http.MethodGet, j.url, nil)
 	if err != nil {
 		return nil, err
 	}
