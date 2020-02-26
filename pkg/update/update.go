@@ -59,7 +59,7 @@ func downloadUpdate(cr *CheckResponse) error {
 func getResponseBody(url string) (io.ReadCloser, error) {
 	client := &http.Client{}
 	// Create a new GET request
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
