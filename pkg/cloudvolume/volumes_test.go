@@ -42,7 +42,7 @@ func TestRunCVGetVolumes(t *testing.T) {
 	// delete the default store
 	_ = os.Remove(f)
 
-	storeContext(ts.URL, "someAPIKey")
+	saveData(ts.URL, "someAPIKey")
 
 	err := runCVGetVolumes(nil, nil)
 	if err != nil {

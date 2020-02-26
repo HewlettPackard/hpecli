@@ -30,5 +30,5 @@ func runChangeContext(_ *cobra.Command, _ []string) error {
 		ovContextHost.host = fmt.Sprintf("https://%s", ovContextHost.host)
 	}
 
-	return changeContext(ovContextHost.host)
+	return setContext(ovContextHost.host)
 }

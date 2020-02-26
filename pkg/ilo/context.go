@@ -30,5 +30,5 @@ func runSetContext(_ *cobra.Command, _ []string) error {
 		iloContextHost.host = fmt.Sprintf("https://%s", iloContextHost.host)
 	}
 
-	return changeContext(iloContextHost.host)
+	return setContext(iloContextHost.host)
 }

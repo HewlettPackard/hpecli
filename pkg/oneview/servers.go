@@ -31,16 +31,16 @@ func getServers(_ *cobra.Command, _ []string) error {
 }
 
 func getServerHardware() error {
-	d, err := getContext()
+	host, token, err := hostAndToken()
 	if err != nil {
 		logger.Debug("unable to retrieve apiKey because of: %#v", err)
 		return fmt.Errorf("unable to retrieve the last login for OneView." +
 			"Please login to OneView using: hpecli oneview login")
 	}
 
-	ovc := NewOVClientFromAPIKey(d.Host, d.APIKey)
+	ovc := NewOVClientFromAPIKey(host, token)
 
-	logger.Always("Retrieving data from: %s", d.Host)
+	logger.Always("Retrieving data from: %s", host)
 
 	var sh interface{}
 	if ovServersData.name != "" {
@@ -50,7 +50,7 @@ func getServerHardware() error {
 	}
 
 	if err != nil {
-		logger.Warning("Unable to login with supplied credentials to OneView at: %s", d.Host)
+		logger.Warning("Unable to login with supplied credentials to OneView at: %s", host)
 		return err
 	}
 

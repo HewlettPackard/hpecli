@@ -30,7 +30,7 @@ func TestAPIKeyPutInEnclosureRequest(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	storeContext(server.URL, sessionID)
+	saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	_ = getEnclosuresData()
@@ -47,7 +47,7 @@ func TestEnclosureClientRequestFails(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	storeContext(server.URL, sessionID)
+	saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getEnclosures(nil, nil); err == nil {
@@ -67,7 +67,7 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	storeContext(server.URL, sessionID)
+	saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getEnclosuresData(); err == nil {
@@ -87,7 +87,7 @@ func TestGetEnclosureByName(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	storeContext(server.URL, "sessionID")
+	saveContextAndHostData(server.URL, "sessionID")
 
 	if err := getEnclosuresData(); err != nil {
 		t.Fatal(err)

@@ -31,5 +31,5 @@ func runSetContext(_ *cobra.Command, _ []string) error {
 		glContextHost.host = fmt.Sprintf("https://%s", glContextHost.host)
 	}
 
-	return changeContext(glContextHost.host)
+	return setContext(glContextHost.host)
 }

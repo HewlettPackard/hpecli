@@ -31,7 +31,7 @@ func TestGLContextIsSetInDB(t *testing.T) {
 	// sets the context in the DB
 	_ = runSetContext(nil, nil)
 
-	_, err := getContext()
+	_, err := getData()
 	if !errors.Is(err, context.ErrorKeyNotFound) {
 		t.Fatal("expected to find the context but not the key")
 	}

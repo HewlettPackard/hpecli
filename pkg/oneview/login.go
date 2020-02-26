@@ -48,7 +48,7 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
-	if err = storeContext(ovLoginData.host, token); err != nil {
+	if err = saveContextAndHostData(ovLoginData.host, token); err != nil {
 		logger.Warning("Successfully logged into OneView, but was unable to save the session data")
 	} else {
 		logger.Debug("Successfully logged into OneView: %s", ovLoginData.host)

@@ -30,7 +30,7 @@ func TestAPIKeyPutInServerRequest(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	_ = storeContext(server.URL, sessionID)
+	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	_ = getServerHardware()
@@ -47,7 +47,7 @@ func TestClientServerRequestFails(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	_ = storeContext(server.URL, sessionID)
+	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getServers(nil, nil); err == nil {
@@ -67,7 +67,7 @@ func TestServerJSONMarshallFails(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	_ = storeContext(server.URL, sessionID)
+	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
 	if err := getServerHardware(); err == nil {

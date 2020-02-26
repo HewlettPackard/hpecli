@@ -31,7 +31,7 @@ func TestContextIsSetInDB(t *testing.T) {
 	// sets the context in the DB
 	_ = runChangeContext(nil, nil)
 
-	_, err := getContext()
+	_, _, err := hostAndToken()
 	// we have set the context but not the apikey value
 	// so we should get a ErrorKeyNotFound
 	if !errors.Is(err, context.ErrorKeyNotFound) {

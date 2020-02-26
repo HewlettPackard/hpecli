@@ -28,7 +28,7 @@ func TestAPIKeyInjectedIntoRequest(t *testing.T) {
 	defer server.Close()
 
 	// set context to the test server host
-	storeContext(server.URL, authValue)
+	saveData(server.URL, authValue)
 
 	_ = runILOServiceRoot(nil, nil)
 }

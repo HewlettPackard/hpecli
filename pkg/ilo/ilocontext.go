@@ -9,26 +9,40 @@ import (
 const iloAPIKeyPrefix = "hpecli_ilo_token_"
 const iloContextKey = "hpecli_ilo_context"
 
-type iloContextData struct {
-	Host   string
-	APIKey string
+func hostAndToken() (host, token string, err error) {
+	c := context.New(iloContextKey)
+
+	host, err = c.ModuleContext()
+	if err != nil {
+		return "", "", err
+	}
+
+	if err = c.HostData(dataKey(host), &token); err != nil {
+		return "", "", err
+	}
+
+	return host, token, nil
 }
 
-func storeContext(key, token string) error {
-	c := context.New(iloContextKey, iloAPIKeyPrefix)
-	return c.SetAPIKey(key, &iloContextData{key, token})
+func saveData(host, token string) error {
+	c := context.New(iloContextKey)
+	if err := c.SetModuleContext(host); err != nil {
+		return err
+	}
+
+	return c.SetHostData(dataKey(host), token)
 }
 
-func getContext() (*iloContextData, error) {
-	c := context.New(iloContextKey, iloAPIKeyPrefix)
-
-	var d iloContextData
-	err := c.APIKey(&d)
-
-	return &d, err
+func setContext(host string) error {
+	c := context.New(iloContextKey)
+	return c.SetModuleContext(host)
 }
 
-func changeContext(key string) error {
-	c := context.New(iloContextKey, iloAPIKeyPrefix)
-	return c.ChangeContext(key)
+func deleteSavedData(host string) error {
+	c := context.New(iloContextKey)
+	return c.DeleteHostData(dataKey(host))
+}
+
+func dataKey(apiEndpoint string) string {
+	return iloAPIKeyPrefix + apiEndpoint
 }

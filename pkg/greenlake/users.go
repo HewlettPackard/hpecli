@@ -19,7 +19,7 @@ var cmdGetUsers = &cobra.Command{
 func runGLGetUsers(_ *cobra.Command, _ []string) error {
 	logger.Debug("Beginning runGLGetUsers")
 
-	c, err := getContext()
+	c, err := getData()
 	if err != nil {
 		logger.Debug("unable to retrieve apiKey because of: %#v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake." +

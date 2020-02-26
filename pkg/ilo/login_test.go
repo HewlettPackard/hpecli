@@ -48,8 +48,12 @@ func TestAPIKeyIsStored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c, _ := getContext()
-	if c.APIKey != sessionID {
-		t.Fatalf(errTempl, c.APIKey, sessionID)
+	h, k, _ := hostAndToken()
+	if h != iloLoginData.host {
+		t.Fatalf(errTempl, h, iloLoginData.host)
+	}
+
+	if k != sessionID {
+		t.Fatalf(errTempl, k, sessionID)
 	}
 }

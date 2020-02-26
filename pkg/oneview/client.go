@@ -47,6 +47,7 @@ func NewOVClientFromAPIKey(host, apikey string) *ov.OVClient {
 	}
 }
 
+// Login creates a OneView session
 func Login(host, username, password string) (string, error) {
 	const uriPath = "/rest/login-sessions"
 
@@ -78,6 +79,7 @@ func Login(host, username, password string) (string, error) {
 	return "", fmt.Errorf("unable to session Token from login request")
 }
 
+// AddAPIHeaders sets OneView API version
 func AddAPIHeaders() func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Header.Set("X-API-Version", "800")

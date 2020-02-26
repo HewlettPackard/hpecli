@@ -10,6 +10,8 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/db"
 )
 
+var ErrorExpected = errors.New("expected error")
+
 type MockStore struct {
 	m map[string][]byte
 }
@@ -22,7 +24,7 @@ func MockOpen() (db.Store, error) {
 
 func (ms *MockStore) Get(key string, value interface{}) error {
 	if strings.Contains(key, "fail") {
-		return errors.New("expected error")
+		return ErrorExpected
 	}
 
 	d := gob.NewDecoder(bytes.NewReader(ms.m[key]))
@@ -40,14 +42,23 @@ func (ms *MockStore) Put(key string, value interface{}) error {
 	v := fmt.Sprintf("%s", value)
 
 	if strings.Contains(key, "fail") || strings.Contains(v, "fail") {
-		return errors.New("expected error")
+		return ErrorExpected
 	}
 
 	return nil
 }
 
 func (ms *MockStore) Delete(key string) error {
+	if strings.Contains(key, "fail") {
+		return ErrorExpected
+	}
+
+	if _, ok := ms.m[key]; !ok {
+		return db.ErrNotFound
+	}
+
 	delete(ms.m, key)
+
 	return nil
 }
 

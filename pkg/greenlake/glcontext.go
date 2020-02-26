@@ -15,21 +15,40 @@ type glContextData struct {
 	TenantID string
 }
 
-func storeContext(key, tenantID, token string) error {
-	c := context.New(glContextKey, glAPIKeyPrefix)
-	return c.SetAPIKey(key, &glContextData{key, token, tenantID})
+func saveData(apiEndpoint, tenantID, token string) error {
+	c := context.New(glContextKey)
+	if err := c.SetModuleContext(apiEndpoint); err != nil {
+		return err
+	}
+
+	key := dataKey(apiEndpoint)
+
+	return c.SetHostData(key, &glContextData{key, token, tenantID})
 }
 
-func getContext() (*glContextData, error) {
-	c := context.New(glContextKey, glAPIKeyPrefix)
+func getData() (*glContextData, error) {
+	c := context.New(glContextKey)
 
-	var d glContextData
-	err := c.APIKey(&d)
+	apiEndpoint, err := c.ModuleContext()
+	if err != nil {
+		return nil, err
+	}
 
-	return &d, err
+	key := dataKey(apiEndpoint)
+
+	var value glContextData
+	if err = c.HostData(key, &value); err != nil {
+		return nil, err
+	}
+
+	return &value, nil
 }
 
-func changeContext(key string) error {
-	c := context.New(glContextKey, glAPIKeyPrefix)
-	return c.ChangeContext(key)
+func setContext(key string) error {
+	c := context.New(glContextKey)
+	return c.SetModuleContext(key)
+}
+
+func dataKey(apiEndpoint string) string {
+	return glAPIKeyPrefix + apiEndpoint
 }
