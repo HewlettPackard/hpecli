@@ -39,7 +39,7 @@ func runILOLogout(_ *cobra.Command, _ []string) error {
 
 	client := NewILOClientFromAPIKey(sessionData.Host, sessionData.Token)
 
-	err = client.Logout(sessionData.Location)
+	err = client.logout(sessionData.Location)
 	if err != nil {
 		logger.Warning("Unable to logout from iLO at: %s", sessionData.Host)
 		return err

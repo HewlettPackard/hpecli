@@ -41,16 +41,15 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 
 	cl := NewILOClient(iloLoginData.host, iloLoginData.username, iloLoginData.password)
 
-	token, location, err := cl.Login()
+	sd, err := cl.login()
 	if err != nil {
 		logger.Warning("Unable to login with supplied credentials to ilo at: %s", iloLoginData.host)
 		return err
 	}
 
-	d := &sessionData{iloLoginData.host, token, location}
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
-	if err = saveContextAndSessionData(d); err != nil {
+	if err = saveContextAndSessionData(sd); err != nil {
 		logger.Warning("Successfully logged into ilo, but was unable to save the session data")
 	} else {
 		logger.Debug("Successfully logged into ilo: %s", iloLoginData.host)

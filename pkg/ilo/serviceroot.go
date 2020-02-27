@@ -30,7 +30,7 @@ func runILOServiceRoot(_ *cobra.Command, _ []string) error {
 
 	client := NewILOClientFromAPIKey(sd.Host, sd.Token)
 
-	jsonResult, err := client.GetServiceRoot()
+	jsonResult, err := client.getServiceRoot()
 	if err != nil {
 		return err
 	}

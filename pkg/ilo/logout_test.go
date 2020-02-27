@@ -34,6 +34,7 @@ func TestLogoutHostPrefixAdded(t *testing.T) {
 
 func TestLogoutSessionDataDeleted(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
+
 	pathURI := "/redfish/v1/sessionservice/sessions/fooSession"
 
 	server := newTestServer(pathURI, func(w http.ResponseWriter, r *http.Request) {
@@ -59,6 +60,7 @@ func TestLogoutSessionDataDeleted(t *testing.T) {
 
 func TestLogoutDefaultSessionDataDeleted(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
+
 	pathURI := "/redfish/v1/sessionservice/sessions/fooSession"
 
 	server := newTestServer(pathURI, func(w http.ResponseWriter, r *http.Request) {
