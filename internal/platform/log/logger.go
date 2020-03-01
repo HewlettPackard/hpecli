@@ -9,7 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// setup the default logger
+// Logger is the default logger configured to log
+// info messages to stdout and everything else to stderr
 var Logger = New()
 
 func New() *logrus.Logger {
@@ -28,6 +29,7 @@ func New() *logrus.Logger {
 func addHook() logrus.LevelHooks {
 	hook := make(logrus.LevelHooks)
 	hook.Add(&CopyHook{})
+
 	return hook
 }
 
@@ -49,6 +51,7 @@ func (h *CopyHook) Fire(entry *logrus.Entry) error {
 	if entry.Logger.GetLevel() == logrus.DebugLevel {
 		line, _ := entry.String()
 		os.Stderr.Write([]byte(line))
+
 		return nil
 	}
 

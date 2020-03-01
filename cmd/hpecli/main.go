@@ -22,6 +22,7 @@ import (
 func main() {
 	if err := run(); err != nil {
 		fmt.Println("Error :", err)
+		//nolint:gomnd // magic number ok here on exit
 		os.Exit(1)
 	}
 }
@@ -40,7 +41,9 @@ func run() error {
 	// async check if an update is available
 	go func() {
 		log.Logger.Debug("update : starting async check to see if an update is available")
+
 		isUpdate := update.IsUpdateAvailable()
+
 		log.Logger.Debugf("update : IsUpdateAvailable=%v", isUpdate)
 		isUpdateChan <- isUpdate
 	}()
@@ -91,9 +94,10 @@ func addSubCommands(rootCmd *cobra.Command) {
 // debug logging very early
 func isDebugLogging() bool {
 	for _, arg := range os.Args {
-		if strings.ToLower(arg) == "--debug" {
+		if strings.EqualFold(arg, "--debug") {
 			return true
 		}
 	}
+
 	return false
 }

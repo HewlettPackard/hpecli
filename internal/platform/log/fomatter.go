@@ -5,6 +5,7 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"path"
 	"sort"
 	"strings"
@@ -61,7 +62,7 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func (f *Formatter) writeFields(b *bytes.Buffer, entry *logrus.Entry) {
+func (f *Formatter) writeFields(b io.Writer, entry *logrus.Entry) {
 	if len(entry.Data) != 0 {
 		fields := make([]string, 0, len(entry.Data))
 		for field := range entry.Data {
@@ -76,7 +77,7 @@ func (f *Formatter) writeFields(b *bytes.Buffer, entry *logrus.Entry) {
 	}
 }
 
-func (f *Formatter) writeField(b *bytes.Buffer, entry *logrus.Entry, field string) {
+func (f *Formatter) writeField(b io.Writer, entry *logrus.Entry, field string) {
 	fmt.Fprintf(b, "[%v] ", entry.Data[field])
 }
 

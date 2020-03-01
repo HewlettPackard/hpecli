@@ -75,6 +75,7 @@ func IsUpdateAvailable() bool {
 	}
 
 	log.Logger.Debugf("%#v", res)
+
 	return res.UpdateAvailable
 }
 
