@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/spf13/cobra"
 )
 
@@ -37,21 +37,21 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 		ovLoginData.host = fmt.Sprintf("https://%s", ovLoginData.host)
 	}
 
-	logger.Debug("Attempting login with user: %v, at: %v", ovLoginData.username, ovLoginData.host)
+	log.Logger.Debugf("Attempting login with user: %v, at: %v", ovLoginData.username, ovLoginData.host)
 
 	// OneView Login currently doesn't support forced login message acknowledgement - so we roll our own
 	token, err := Login(ovLoginData.host, ovLoginData.username, ovLoginData.password)
 	if err != nil {
-		logger.Warning("Unable to login with supplied credentials to OneView at: %s", ovLoginData.host)
+		log.Logger.Warningf("Unable to login with supplied credentials to OneView at: %s", ovLoginData.host)
 		return err
 	}
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
 	if err = saveContextAndHostData(ovLoginData.host, token); err != nil {
-		logger.Warning("Successfully logged into OneView, but was unable to save the session data")
+		log.Logger.Warning("Successfully logged into OneView, but was unable to save the session data")
 	} else {
-		logger.Debug("Successfully logged into OneView: %s", ovLoginData.host)
+		log.Logger.Debugf("Successfully logged into OneView: %s", ovLoginData.host)
 	}
 
 	return nil

@@ -5,59 +5,95 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/cloudvolume"
 	"github.com/HewlettPackard/hpecli/pkg/greenlake"
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
-	"github.com/HewlettPackard/hpecli/pkg/logger"
 	"github.com/HewlettPackard/hpecli/pkg/oneview"
 	"github.com/HewlettPackard/hpecli/pkg/update"
 	"github.com/HewlettPackard/hpecli/pkg/version"
+	"github.com/sirupsen/logrus"
+
 	"github.com/spf13/cobra"
 )
 
 func main() {
-	updateAvailableChan := make(chan bool)
-
-	go func() {
-		updateAvailableChan <- update.IsUpdateAvailable()
-	}()
-
-	var rootCmd = &cobra.Command{
-		Use:   "hpecli",
-		Short: "hpe cli for accessing various services",
-	}
-
-	addCommands(rootCmd)
-
-	rootCmd.SetVersionTemplate("something out")
-
-	logLevel := rootCmd.PersistentFlags().StringP("loglevel", "l", "warning",
-		"set log level.  Possible values are: debug, info, warning, critical")
-
-	cobra.OnInitialize(func() {
-		logger.Color = true
-		logger.SetLogLevel(*logLevel)
-	})
-
-	const exitError = 1
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(exitError)
-	}
-
-	newRelease := <-updateAvailableChan
-	if newRelease {
-		logger.Always("  An updated version of the CLI is available")
+	if err := run(); err != nil {
+		fmt.Println("Error :", err)
+		os.Exit(1)
 	}
 }
 
-func addCommands(rootCmd *cobra.Command) {
+func run() error {
+	if isDebugLogging() {
+		log.Logger.SetLevel(logrus.DebugLevel)
+	}
+
+	log.Logger.Debug("Started : Application initializing")
+	defer log.Logger.Debug("Completed : Application shutdown")
+
+	// channel to get async update
+	isUpdateChan := make(chan bool)
+
+	// async check if an update is available
+	go func() {
+		log.Logger.Debug("update : starting async check to see if an update is available")
+		isUpdate := update.IsUpdateAvailable()
+		log.Logger.Debugf("update : IsUpdateAvailable=%v", isUpdate)
+		isUpdateChan <- isUpdate
+	}()
+
+	// create the root command.  It doesn't do anything, but used to hold
+	// all of the other top level commands
+	rootCmd := &cobra.Command{
+		Use:           "hpecli",
+		Short:         "hpe cli for accessing various services",
+		SilenceErrors: true,
+		SilenceUsage:  true,
+	}
+
+	// this isn't acutually used.  It needs to be here so that when the
+	// command line args are parsed, it won't complain that it is present
+	// we already figured out if we are debugging via isDebugLogging
+	_ = rootCmd.PersistentFlags().Bool("debug", false, "enable debug logging")
+
+	// add all of the commands get added to this root one
+	addSubCommands(rootCmd)
+
+	// execute the root command
+	if err := rootCmd.Execute(); err != nil {
+		return err
+	}
+
+	// check status from async method
+	newRelease := <-isUpdateChan
+	if newRelease {
+		log.Logger.Warn("An update is available.  You can update by running \"hpecli update\"")
+	}
+
+	return nil
+}
+
+func addSubCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cloudvolume.Cmd)
 	rootCmd.AddCommand(ilo.Cmd)
 	rootCmd.AddCommand(oneview.Cmd)
 	rootCmd.AddCommand(update.Cmd)
 	rootCmd.AddCommand(greenlake.Cmd)
 	rootCmd.AddCommand(version.Cmd)
+}
+
+// cobra doesn't parse the command line arguments until cmd.Execute is called
+// that is very late in the application initialization, so we have this simple
+// check to see if they are requesting debug logging.  This allows us to set
+// debug logging very early
+func isDebugLogging() bool {
+	for _, arg := range os.Args {
+		if strings.ToLower(arg) == "--debug" {
+			return true
+		}
+	}
+	return false
 }

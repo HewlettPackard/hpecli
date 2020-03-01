@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/version"
 	gover "github.com/hashicorp/go-version"
 )
@@ -63,24 +63,18 @@ var cacheResponse *CheckResponse
 // IsUpdateAvailable checks if a later version is avaialbe of the CLI binary
 func IsUpdateAvailable() bool {
 	cliVer := version.Get()
-	logger.Debug("Local version is: " + cliVer)
-	logger.Debug("Checking for a newer version at: " + versionURL)
+	log.Logger.Debugf("Local version is: " + cliVer)
+	log.Logger.Debugf("Checking for a newer version at: " + versionURL)
 
 	res, err := checkUpdate(&jsonSource{url: versionURL}, cliVer)
 	if err != nil {
-		logger.Debug("Unable to determine if a new version of the CLI is available")
-		logger.Debug("Error: %v", err)
+		log.Logger.Debug("Unable to determine if a new version of the CLI is available")
+		log.Logger.Debugf("Error: %v", err)
 
 		return false
 	}
 
-	logger.Debug("json.UpdateAvailable = %v", res.UpdateAvailable)
-	logger.Debug("json.RemoteVersion   = %v", res.RemoteVersion)
-	logger.Debug("json.Message         = %v", res.Message)
-	logger.Debug("json.URL             = %v", res.URL)
-	logger.Debug("json.PublicKey       = %v", res.PublicKey)
-	logger.Debug("json.CheckSum        = %v", res.CheckSum)
-
+	log.Logger.Debugf("%#v", res)
 	return res.UpdateAvailable
 }
 
@@ -89,7 +83,7 @@ func IsUpdateAvailable() bool {
 func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 	// don't check if env var is setup to skip
 	if os.Getenv(EnvDisableUpdateCheck) != "" {
-		logger.Debug("%s set.  Not performing remote check", EnvDisableUpdateCheck)
+		log.Logger.Debugf("%s set.  Not performing remote check", EnvDisableUpdateCheck)
 		return &CheckResponse{}, nil
 	}
 
@@ -97,7 +91,7 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 	// return the cached copy if we have already retrieved the
 	// results this session.
 	if cacheResponse != nil {
-		logger.Debug("cacheResponse present.  Not making additional remote check")
+		log.Logger.Debug("cacheResponse present.  Not making additional remote check")
 		return cacheResponse, nil
 	}
 

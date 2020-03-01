@@ -5,37 +5,38 @@ package ilo
 import (
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/spf13/cobra"
 )
 
 // cmdIloLogin represents the get command
 var cmdILOServiceRoot = &cobra.Command{
-	Use:   "serviceroot",
-	Short: "Get service root details",
-	RunE:  runILOServiceRoot,
+	Use:           "serviceroot",
+	Short:         "Get service root details",
+	SilenceErrors: true,
+	RunE:          runILOServiceRoot,
 }
 
-func runILOServiceRoot(_ *cobra.Command, _ []string) error {
-	logger.Debug("Beginning runILOServiceRoot")
+func runILOServiceRoot(cmd *cobra.Command, _ []string) error {
+	log.Logger.Debug("Beginning runILOServiceRoot")
 
-	host, token, err := hostAndToken()
+	sd, err := defaultSessionData()
 	if err != nil {
-		logger.Debug("unable to retrieve apiKey because of: %#v", err)
-		return fmt.Errorf("unable to retrieve the last login for HPE iLO." +
+		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	logger.Debug("Attempting get ilo service root at: %v", host)
+	log.Logger.Debugf("Attempting get ilo service root at: %v", sd.Host)
 
-	client := NewILOClientFromAPIKey(host, token)
+	client := NewILOClientFromAPIKey(sd.Host, sd.Token)
 
-	jsonResult, err := client.GetServiceRoot()
+	jsonResult, err := client.getServiceRoot()
 	if err != nil {
 		return err
 	}
 
-	logger.Always("%s", jsonResult)
+	log.Logger.Infof("%s", jsonResult)
 
 	return nil
 }

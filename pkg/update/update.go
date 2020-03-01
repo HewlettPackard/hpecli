@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/version"
 	goupdate "github.com/inconshreveable/go-update"
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ func runUpdate(_ *cobra.Command, _ []string) error {
 	}
 
 	if !resp.UpdateAvailable {
-		logger.Always("No update available.  No action taken")
+		log.Logger.Info("No update available.  No action taken")
 		return nil
 	}
 
@@ -49,7 +49,7 @@ func downloadUpdate(cr *CheckResponse) error {
 
 	err = goupdate.Apply(body, goupdate.Options{Checksum: cr.CheckSum})
 	if err != nil {
-		logger.Warning("Unable to update to new version of the application: %v", err)
+		log.Logger.Warningf("Unable to update to new version of the application: %v", err)
 		return err
 	}
 

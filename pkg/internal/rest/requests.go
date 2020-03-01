@@ -66,6 +66,11 @@ func Post(urlStr string, body io.Reader, options ...func(*Request)) (*Response, 
 	return do(http.MethodPost, urlStr, body, options...)
 }
 
+// Delete sends a HTTP DELETE request to the provided URL.
+func Delete(urlStr string, options ...func(*Request)) (*Response, error) {
+	return do(http.MethodDelete, urlStr, nil, options...)
+}
+
 func do(method, urlStr string, body io.Reader, options ...func(*Request)) (*Response, error) {
 	request, err := wrapRequest(method, urlStr, body, options)
 	if err != nil {

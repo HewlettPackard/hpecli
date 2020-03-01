@@ -8,7 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 )
 
 // StorageEngine defines the backend storage engine to be used
@@ -102,7 +102,7 @@ func KeystoreLocation() string {
 	result := filename
 
 	if dir, err := os.UserHomeDir(); err != nil {
-		logger.Warning("Unable to retrieve users home directory: %v", err)
+		log.Logger.Warningf("Unable to retrieve users home directory: %v", err)
 	} else {
 		result = filepath.ToSlash(path.Join(dir, filename))
 	}
