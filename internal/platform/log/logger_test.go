@@ -11,6 +11,7 @@ import (
 
 //nolint:funlen // yes.. it is a long test method
 func TestHookWritesToCorrectOutput(t *testing.T) {
+	const msg = "some Message"
 	cases := []struct {
 		name       string
 		level      logrus.Level
@@ -26,14 +27,14 @@ func TestHookWritesToCorrectOutput(t *testing.T) {
 		{
 			name:       "Info",
 			level:      logrus.InfoLevel,
-			stdOutWant: "some Message",
+			stdOutWant: msg,
 			stdErrWant: "",
 		},
 		{
 			name:       "Warn",
 			level:      logrus.WarnLevel,
 			stdOutWant: "",
-			stdErrWant: "some Message",
+			stdErrWant: msg,
 		},
 	}
 
@@ -46,7 +47,7 @@ func TestHookWritesToCorrectOutput(t *testing.T) {
 			entry := &logrus.Entry{}
 			entry.Logger = logrus.New()
 			entry.Logger.Level = test.level
-			entry.Message = "some Message"
+			entry.Message = msg
 			entry.Level = test.level
 
 			ch := &copyHook{
