@@ -26,6 +26,7 @@ func init() {
 }
 
 func runILOLogout(_ *cobra.Command, _ []string) error {
+
 	log.Logger.Debug("Beginning runILOLogout")
 
 	sessionData, err := sessionDataToLogout()
@@ -41,6 +42,7 @@ func runILOLogout(_ *cobra.Command, _ []string) error {
 
 	err = client.logout(sessionData.Location)
 	if err != nil {
+
 		log.Logger.Warningf("Unable to logout from iLO at: %s", sessionData.Host)
 		return err
 	}
