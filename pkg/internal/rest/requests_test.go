@@ -72,6 +72,23 @@ func TestPost(t *testing.T) {
 	}
 
 	if r.StatusCode != http.StatusCreated {
-		t.Fatal("expected ")
+		t.Fatalf("expected status: %v", http.StatusCreated)
+	}
+}
+
+func TestDelete(t *testing.T) {
+	ts := newTestServer("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	defer ts.Close()
+
+	r, err := Delete(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if r.StatusCode != http.StatusOK {
+		t.Fatalf("expected status: %v", http.StatusOK)
 	}
 }

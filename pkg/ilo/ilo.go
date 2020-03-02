@@ -10,6 +10,7 @@ func init() {
 	Cmd.AddCommand(cmdILOContext)
 	Cmd.AddCommand(cmdILOGet)
 	Cmd.AddCommand(cmdILOLogin)
+	Cmd.AddCommand(iloLogoutCmd)
 }
 
 // Cmd represents the ilo command

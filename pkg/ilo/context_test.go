@@ -25,24 +25,28 @@ func TestHostPrefixAddedForContext(t *testing.T) {
 }
 
 func TestGetWorks(t *testing.T) {
-	const h1 = "host1"
+	const h1, t1, l1 = "host1", "token1", "location1"
 
-	const v1 = "value1"
+	d := &sessionData{h1, t1, l1}
 
-	if err := saveData(h1, v1); err != nil {
+	if err := saveContextAndSessionData(d); err != nil {
 		t.Fatal(err)
 	}
 
-	gotHost, gotToken, err := hostAndToken()
+	got, err := defaultSessionData()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if gotHost != h1 {
+	if got.Host != h1 {
 		t.Fatal("didn't retrieve matching host")
 	}
 
-	if gotToken != v1 {
+	if got.Token != t1 {
+		t.Fatal("didn't retrieve matching token")
+	}
+
+	if got.Location != l1 {
 		t.Fatal("didn't retrieve matching value")
 	}
 }

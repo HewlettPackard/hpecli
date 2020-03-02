@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
+	"github.com/HewlettPackard/hpecli/pkg/logger"
 )
 
 type Client struct {
@@ -33,31 +34,53 @@ func NewILOClientFromAPIKey(host, token string) *Client {
 	}
 }
 
-func (c *Client) Login() (string, error) {
+func (c *Client) login() (*sessionData, error) {
 	const uriPath = "/redfish/v1/sessionservice/sessions/"
+
+	sd := &sessionData{}
 
 	loginJSON := fmt.Sprintf(`{"UserName":"%s", "Password":"%s"}`, c.Username, c.Password)
 
 	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON),
 		rest.AddJSONMimeType(), rest.AllowSelfSignedCerts())
 	if err != nil {
-		return "", err
+		return sd, err
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("unable to create login sessions to ilo.  Repsponse was: %+v", resp.Status)
+		return sd, fmt.Errorf("unable to create login sessions to ilo.  Repsponse was: %+v", resp.Status)
 	}
 
 	token := resp.Header.Get("X-Auth-Token")
+	location := resp.Header.Get("Location")
 
 	if token == "" {
-		return "", fmt.Errorf("unable to create login toekn from session")
+		return sd, fmt.Errorf("unable to create login toekn from session")
 	}
 
-	return token, nil
+	sd.Host = c.Host
+	sd.Token = token
+	sd.Location = location
+
+	return sd, nil
 }
 
-func (c *Client) GetServiceRoot() ([]byte, error) {
+func (c *Client) logout(sessionLocation string) error {
+	resp, err := rest.Delete(sessionLocation, AddAuth(c.APIKey), rest.AllowSelfSignedCerts())
+	if err != nil {
+		return err
+	}
+
+	// 2xx status codes are OK
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		logger.Debug("logout failed:  %+v", resp.Status)
+		return fmt.Errorf("unable to successfully logout of iLO: %s", c.Host)
+	}
+
+	return nil
+}
+
+func (c *Client) getServiceRoot() ([]byte, error) {
 	const uriPath = "/redfish/v1/"
 
 	resp, err := rest.Get(c.Host+uriPath, AddAuth(c.APIKey), rest.AllowSelfSignedCerts())
