@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/HewlettPackard/hpecli/pkg/bashcompletion"
 	"github.com/HewlettPackard/hpecli/pkg/cloudvolume"
 	"github.com/HewlettPackard/hpecli/pkg/greenlake"
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
@@ -51,6 +52,8 @@ func main() {
 	if newRelease {
 		logger.Always("  An updated version of the CLI is available")
 	}
+
+	//rootCmd.GenBashCompletion(os.Stdout)
 }
 
 func addCommands(rootCmd *cobra.Command) {
@@ -60,4 +63,5 @@ func addCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(update.Cmd)
 	rootCmd.AddCommand(greenlake.Cmd)
 	rootCmd.AddCommand(version.Cmd)
+	rootCmd.AddCommand(bashcompletion.Cmd)
 }
