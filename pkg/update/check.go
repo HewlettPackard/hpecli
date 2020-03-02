@@ -54,7 +54,7 @@ const EnvDisableUpdateCheck = "HPECLI_DISABLE_UPDATE_CHECK"
 // json file that describes the latest release version.  Should be updated when new versions are published
 // can alternatively change to using github tags once we real releases
 const versionHost = "raw.githubusercontent.com"
-const versionPath = "/HewlettPackard/hpecli/master/site/published-version.json"
+const versionPath = "/HewlettPackard/hpecli/bsoutham/test-update/site/published-version.json"
 
 var versionURL = fmt.Sprintf("https://%s%s", versionHost, versionPath)
 
