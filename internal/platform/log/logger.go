@@ -3,6 +3,7 @@
 package log
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -28,35 +29,41 @@ func New() *logrus.Logger {
 
 func addHook() logrus.LevelHooks {
 	hook := make(logrus.LevelHooks)
-	hook.Add(&CopyHook{})
+	hook.Add(&copyHook{
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	})
 
 	return hook
 }
 
-type CopyHook struct {
+type copyHook struct {
+	Stdout io.Writer
+	Stderr io.Writer
 }
 
-func (h *CopyHook) Levels() []logrus.Level {
+func (h *copyHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-func (h *CopyHook) Fire(entry *logrus.Entry) error {
+func (h *copyHook) Fire(entry *logrus.Entry) error {
 	// if it info message, write it to stdout
 	if entry.Level == logrus.InfoLevel {
-		os.Stdout.Write([]byte(entry.Message))
+		_, _ = h.Stdout.Write([]byte(entry.Message))
+
 		return nil
 	}
 
 	// if we are set for debug logging, write timestamp, level, etc. with msg
 	if entry.Logger.GetLevel() == logrus.DebugLevel {
 		line, _ := entry.String()
-		os.Stderr.Write([]byte(line))
+		_, _ = h.Stderr.Write([]byte(line))
 
 		return nil
 	}
 
 	// just write message
-	os.Stderr.Write([]byte(entry.Message))
+	_, _ = h.Stderr.Write([]byte(entry.Message))
 
 	return nil
 }

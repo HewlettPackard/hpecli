@@ -21,13 +21,13 @@ type Formatter struct {
 
 // Format an log entry
 func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
-	levelColor := getColorByLevel(entry.Level)
+	levelColor := colorForLevel(entry.Level)
 
 	// output buffer
 	b := &bytes.Buffer{}
 
 	// write time
-	fmt.Fprintf(b, "[%s]", entry.Time.Format(time.RFC3339))
+	fmt.Fprintf(b, "[%s] ", entry.Time.Format(time.RFC3339))
 
 	// write level
 	level := strings.ToUpper(entry.Level.String())
@@ -37,7 +37,7 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	}
 
 	// write log level (only first 4 char)
-	fmt.Fprintf(b, " [%s]", level[:4])
+	fmt.Fprintf(b, "[%s] ", level[:4])
 
 	if !f.NoColors {
 		b.WriteString("\x1b[0m")
@@ -47,7 +47,7 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	f.writeFields(b, entry)
 
 	if entry.HasCaller() {
-		fmt.Fprintf(b, " [%s():%d] - ", path.Base(entry.Caller.Function), entry.Caller.Line)
+		fmt.Fprintf(b, "[%s():%d] - ", path.Base(entry.Caller.Function), entry.Caller.Line)
 	}
 
 	if !f.NoColors {
@@ -88,7 +88,7 @@ const (
 	colorGray   = 37
 )
 
-func getColorByLevel(level logrus.Level) int {
+func colorForLevel(level logrus.Level) int {
 	switch level {
 	case logrus.DebugLevel:
 		return colorGray
