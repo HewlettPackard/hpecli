@@ -9,28 +9,46 @@ import (
 const iloAPIKeyPrefix = "hpecli_ilo_token_"
 const iloContextKey = "hpecli_ilo_context"
 
-func hostAndToken() (host, token string, err error) {
-	c := context.New(iloContextKey)
-
-	host, err = c.ModuleContext()
-	if err != nil {
-		return "", "", err
-	}
-
-	if err = c.HostData(dataKey(host), &token); err != nil {
-		return "", "", err
-	}
-
-	return host, token, nil
+type sessionData struct {
+	Host     string
+	Token    string
+	Location string
 }
 
-func saveData(host, token string) error {
+func defaultSessionData() (data *sessionData, err error) {
+	data = &sessionData{}
 	c := context.New(iloContextKey)
-	if err := c.SetModuleContext(host); err != nil {
+
+	host, err := c.ModuleContext()
+	if err != nil {
+		return data, err
+	}
+
+	if err = c.HostData(dataKey(host), &data); err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+func saveContextAndSessionData(data *sessionData) error {
+	c := context.New(iloContextKey)
+	if err := c.SetModuleContext(data.Host); err != nil {
 		return err
 	}
 
-	return c.SetHostData(dataKey(host), token)
+	return c.SetHostData(dataKey(data.Host), data)
+}
+
+func getSessionData(host string) (data *sessionData, err error) {
+	data = &sessionData{}
+	c := context.New(iloContextKey)
+
+	if err = c.HostData(dataKey(host), &data); err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
 func setContext(host string) error {
@@ -38,7 +56,7 @@ func setContext(host string) error {
 	return c.SetModuleContext(host)
 }
 
-func deleteSavedData(host string) error {
+func deleteSessionData(host string) error {
 	c := context.New(iloContextKey)
 	return c.DeleteHostData(dataKey(host))
 }

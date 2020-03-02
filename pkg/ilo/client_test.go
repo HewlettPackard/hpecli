@@ -69,17 +69,20 @@ func TestMalformedResponseForLogin(t *testing.T) {
 
 	c := NewILOClient(ts.URL, clientUsername, clientPassword)
 
-	_, err := c.Login()
+	_, err := c.login()
 	if err == nil {
 		t.Fatalf("Didn't get expected error on not json response")
 	}
 }
 
 func TestTokenResponseForLogin(t *testing.T) {
-	const want = "74dc0153-6daa-49ae-905e-cc59bff3225e"
+	const wantToken = "74dc0153-6daa-49ae-905e-cc59bff3225e"
+
+	const wantLocation = "/redfish/v1/sessionservice/sessions/demouser23380123"
 
 	ts := newTestServer("/redfish/v1/sessionservice/sessions/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("x-auth-token", want)
+		w.Header().Add("x-auth-token", wantToken)
+		w.Header().Add("Location", wantLocation)
 		w.WriteHeader(http.StatusCreated)
 	})
 
@@ -87,13 +90,17 @@ func TestTokenResponseForLogin(t *testing.T) {
 
 	c := NewILOClient(ts.URL, clientUsername, clientPassword)
 
-	got, err := c.Login()
+	got, err := c.login()
 	if err != nil {
 		t.Fatalf("unexpected error in login attempt")
 	}
 
-	if got != want {
-		t.Fatalf(errTempl, got, want)
+	if got.Token != wantToken {
+		t.Fatalf(errTempl, got.Token, wantToken)
+	}
+
+	if got.Location != wantLocation {
+		t.Fatalf(errTempl, got.Location, wantLocation)
 	}
 }
 
@@ -112,7 +119,7 @@ func TestAPIKeyInjected(t *testing.T) {
 	c := NewILOClientFromAPIKey(ts.URL, want)
 
 	// checks are done on server side above
-	_, _ = c.GetServiceRoot()
+	_, _ = c.getServiceRoot()
 }
 
 func TestGetServiceRoot(t *testing.T) {
@@ -130,7 +137,7 @@ func TestGetServiceRoot(t *testing.T) {
 
 	c := NewILOClientFromAPIKey(ts.URL, "someAPIKey")
 
-	got, err := c.GetServiceRoot()
+	got, err := c.getServiceRoot()
 	if err != nil {
 		t.Fatalf("unexpected error in GetServiceRoot attempt")
 	}
@@ -139,6 +146,48 @@ func TestGetServiceRoot(t *testing.T) {
 	// validate starts with with correct formatting
 	if !strings.HasPrefix(s, want) {
 		t.Fatalf(errTempl, got, want)
+	}
+}
+
+func TestLogoutRestCallFails(t *testing.T) {
+	const sessionURL = "/redfish/v1/sessionservice/sessions/fooo"
+	ts := newTestServer(sessionURL, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	defer ts.Close()
+
+	c := NewILOClientFromAPIKey(ts.URL, "someAPIKey")
+
+	err := c.logout(ts.URL + sessionURL)
+	if err == nil {
+		t.Fatalf("expected error as reply")
+	}
+}
+
+func TestLogoutRestCallError(t *testing.T) {
+	c := NewILOClientFromAPIKey("someHOst", "someAPIKey")
+
+	// control char in the URL will cause failure
+	err := c.logout("/someurl/0x7f")
+	if err == nil {
+		t.Fatalf("expected error as reply")
+	}
+}
+
+func TestLogoutWorks(t *testing.T) {
+	const sessionURL = "/redfish/v1/sessionservice/sessions/fooob"
+	ts := newTestServer(sessionURL, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	defer ts.Close()
+
+	c := NewILOClientFromAPIKey(ts.URL, "someAPIKey")
+
+	err := c.logout(ts.URL + sessionURL)
+	if err != nil {
+		t.Fatalf("expected logout to work without error")
 	}
 }
 
