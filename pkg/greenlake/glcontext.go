@@ -9,44 +9,56 @@ import (
 const glAPIKeyPrefix = "hpecli_greenlake_token_"
 const glContextKey = "hpecli_greenlake_context"
 
-type glContextData struct {
+type sessionData struct {
 	Host     string
-	APIKey   string
+	Token    string
 	TenantID string
 }
 
-func saveData(apiEndpoint, tenantID, token string) error {
+func defaultSessionData() (data *sessionData, err error) {
+	data = &sessionData{}
 	c := context.New(glContextKey)
-	if err := c.SetModuleContext(apiEndpoint); err != nil {
+
+	host, err := c.ModuleContext()
+	if err != nil {
+		return data, err
+	}
+
+	if err = c.HostData(dataKey(host), &data); err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+func saveContextAndSessionData(data *sessionData) error {
+	c := context.New(glContextKey)
+	if err := c.SetModuleContext(data.Host); err != nil {
 		return err
 	}
 
-	key := dataKey(apiEndpoint)
-
-	return c.SetHostData(key, &glContextData{key, token, tenantID})
+	return c.SetHostData(dataKey(data.Host), data)
 }
 
-func getData() (*glContextData, error) {
+func getSessionData(host string) (data *sessionData, err error) {
+	data = &sessionData{}
 	c := context.New(glContextKey)
 
-	apiEndpoint, err := c.ModuleContext()
-	if err != nil {
-		return nil, err
+	if err = c.HostData(dataKey(host), &data); err != nil {
+		return data, err
 	}
 
-	key := dataKey(apiEndpoint)
-
-	var value glContextData
-	if err = c.HostData(key, &value); err != nil {
-		return nil, err
-	}
-
-	return &value, nil
+	return data, nil
 }
 
-func setContext(key string) error {
+func setContext(host string) error {
 	c := context.New(glContextKey)
-	return c.SetModuleContext(key)
+	return c.SetModuleContext(host)
+}
+
+func deleteSessionData(host string) error {
+	c := context.New(glContextKey)
+	return c.DeleteHostData(dataKey(host))
 }
 
 func dataKey(apiEndpoint string) string {

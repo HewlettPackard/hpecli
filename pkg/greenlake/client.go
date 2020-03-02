@@ -44,49 +44,60 @@ func NewGLClient(grantType, clientID, secretKey, tenantID, host string) *GLClien
 }
 
 // NewGLClientFromAPIKey creates a new GreenLake GLClient from existing API sessions key
-func NewGLClientFromAPIKey(host, tenantID, apikey string) *GLClient {
+func NewGLClientFromAPIKey(host, tenantID, token string) *GLClient {
 	return &GLClient{
 		GrantType:    "client_credentials",
 		ClientID:     "",
 		ClientSecret: "",
-		APIKey:       apikey,
+		APIKey:       token,
 		TenantID:     tenantID,
 		Host:         host,
 	}
 }
 
 // Login api
-func (c *GLClient) Login() (string, error) {
+func (c *GLClient) login() (*sessionData, error) {
 	const uriPath = "/identity/v1/token"
+
+	sd := &sessionData{}
 
 	loginJSON := fmt.Sprintf(`{"grant_type":"%s", "client_id":"%s", 
 	"client_secret":"%s", "tenant_id":"%s"}`,
 		c.GrantType, c.ClientID, c.ClientSecret, c.TenantID)
 
-	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON), rest.AddJSONMimeType())
+	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(loginJSON),
+		rest.AddJSONMimeType(), rest.AllowSelfSignedCerts())
 	if err != nil {
-		return "", err
+		return sd, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unable to create login sessions to Green Lake.  Repsponse was: %+v", resp.Status)
+		return sd, fmt.Errorf("unable to create login sessions to Green Lake.  Repsponse was: %+v", resp.Status)
 	}
 
 	var result Token
 
 	err = resp.Unmarshall(&result)
-	if err == nil {
-		return result.AccessToken, nil
+	if err != nil {
+		return sd, fmt.Errorf("nable to create login token from session")
 	}
 
-	return "", fmt.Errorf("unable to get response from login command")
+	if result.AccessToken == "" {
+		return sd, fmt.Errorf("nable to create login token from session")
+	}
+
+	sd.Host = c.Host
+	sd.Token = result.AccessToken
+	sd.TenantID = c.TenantID
+
+	return sd, nil
 }
 
 // GetUsers to list users
 func (c *GLClient) GetUsers() ([]byte, error) {
 	uriPath := fmt.Sprintf("/scim/v1/tenant/" + c.TenantID + "/" + "Users")
 
-	resp, err := rest.Get(c.Host+uriPath, c.AddAuth())
+	resp, err := rest.Get(c.Host+uriPath, c.AddAuth(c.APIKey), rest.AllowSelfSignedCerts())
 	if err != nil {
 		return []byte{}, err
 	}
@@ -95,8 +106,8 @@ func (c *GLClient) GetUsers() ([]byte, error) {
 }
 
 // AddAuth func
-func (c *GLClient) AddAuth() func(*rest.Request) {
+func (c *GLClient) AddAuth(apiKey string) func(*rest.Request) {
 	return func(r *rest.Request) {
-		r.Header.Add("Authorization", "Bearer "+c.APIKey)
+		r.Header.Add("Authorization", "Bearer "+apiKey)
 	}
 }

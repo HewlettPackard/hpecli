@@ -30,8 +30,10 @@ func TestGLAPIKeyInjectedIntoRequest(t *testing.T) {
 
 	defer server.Close()
 
+	d := &sessionData{server.URL, authValue, tenantID}
+
 	// set context to the test server host
-	saveData(server.URL, tenantID, authValue)
+	saveContextAndSessionData(d)
 
 	_ = runGLGetUsers(nil, nil)
 }

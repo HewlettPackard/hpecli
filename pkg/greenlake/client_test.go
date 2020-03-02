@@ -82,30 +82,30 @@ func TestGLMalformedResponseForLogin(t *testing.T) {
 
 	c := NewGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, ts.URL)
 
-	_, err := c.Login()
+	_, err := c.login()
 	if err == nil {
 		t.Fatalf("Didn't get expected error on not json response")
 	}
 }
 
 func TestGLTokenResponseForLogin(t *testing.T) {
-	const want = "74dc0153-6daa-49ae-905e-cc59bff3225e-e"
+	const wantToken = "74dc0153-6daa-49ae-905e-cc59bff3225e-e"
 
 	ts := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"access_token":"%s"}`, want)
+		fmt.Fprintf(w, `{"access_token":"%s"}`, wantToken)
 	})
 
 	defer ts.Close()
 
 	c := NewGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, ts.URL)
 
-	got, err := c.Login()
+	got, err := c.login()
 	if err != nil {
 		t.Fatalf("unexpected error in login attempt")
 	}
 
-	if got != want {
-		t.Fatalf(errTempl, got, want)
+	if got.Token != wantToken {
+		t.Fatalf(errTempl, got.Token, wantToken)
 	}
 }
 
