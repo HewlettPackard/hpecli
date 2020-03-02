@@ -40,25 +40,9 @@ func saveContextAndSessionData(data *sessionData) error {
 	return c.SetHostData(dataKey(data.Host), data)
 }
 
-func getSessionData(host string) (data *sessionData, err error) {
-	data = &sessionData{}
-	c := context.New(glContextKey)
-
-	if err = c.HostData(dataKey(host), &data); err != nil {
-		return data, err
-	}
-
-	return data, nil
-}
-
 func setContext(host string) error {
 	c := context.New(glContextKey)
 	return c.SetModuleContext(host)
-}
-
-func deleteSessionData(host string) error {
-	c := context.New(glContextKey)
-	return c.DeleteHostData(dataKey(host))
 }
 
 func dataKey(apiEndpoint string) string {
