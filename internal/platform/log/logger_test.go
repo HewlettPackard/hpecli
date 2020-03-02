@@ -12,6 +12,7 @@ import (
 //nolint:funlen // yes.. it is a long test method
 func TestHookWritesToCorrectOutput(t *testing.T) {
 	const msg = "some Message"
+
 	cases := []struct {
 		name       string
 		level      logrus.Level
