@@ -9,7 +9,6 @@ import (
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
-	"github.com/HewlettPackard/hpecli/pkg/logger"
 )
 
 type Client struct {
