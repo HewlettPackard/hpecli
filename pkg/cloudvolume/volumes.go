@@ -5,7 +5,7 @@ package cloudvolume
 import (
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,16 +17,16 @@ var cmdGetVolumes = &cobra.Command{
 }
 
 func runCVGetVolumes(_ *cobra.Command, _ []string) error {
-	logger.Debug("Beginning runCVGetVolumes")
+	log.Logger.Debug("Beginning runCVGetVolumes")
 
 	host, token, err := hostAndToken()
 	if err != nil {
-		logger.Debug("unable to retrieve apiKey because of: %#v", err)
-		return fmt.Errorf("unable to retrieve the last login for HPE CloudVolumes." +
+		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		return fmt.Errorf("unable to retrieve the last login for HPE CloudVolumes.  " +
 			"Please login to CloudVolumes using: hpecli cloudvolume login")
 	}
 
-	logger.Debug("Attempting get cloud volumes at: %v", host)
+	log.Logger.Debugf("Attempting get cloud volumes at: %v", host)
 
 	cvc := NewCVClientFromAPIKey(host, token)
 
@@ -35,7 +35,7 @@ func runCVGetVolumes(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	logger.Always("%s", jsonResult)
+	log.Logger.Infof("%s", jsonResult)
 
 	return nil
 }

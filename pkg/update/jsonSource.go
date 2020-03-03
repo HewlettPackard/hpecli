@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/hashicorp/go-version"
 )
 
@@ -110,9 +110,9 @@ func decodeField(name, value string) []byte {
 
 	result, err := hex.DecodeString(value)
 	if err != nil {
-		logger.Warning("Unable to decode remote %s field. "+
+		log.Logger.Warningf("Unable to decode remote %s field. "+
 			"It will be ignored and not used to verify the remote content", name)
-		logger.Debug("Problem Field: %s=%v", name, value)
+		log.Logger.Debugf("Problem Field: %s=%v", name, value)
 
 		return nil
 	}

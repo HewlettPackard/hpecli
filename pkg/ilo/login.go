@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/spf13/cobra"
 )
 
@@ -37,22 +37,22 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 		iloLoginData.host = fmt.Sprintf("https://%s", iloLoginData.host)
 	}
 
-	logger.Debug("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
+	log.Logger.Debugf("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
 
 	cl := NewILOClient(iloLoginData.host, iloLoginData.username, iloLoginData.password)
 
 	sd, err := cl.login()
 	if err != nil {
-		logger.Warning("Unable to login with supplied credentials to ilo at: %s", iloLoginData.host)
+		log.Logger.Warningf("Unable to login with supplied credentials to ilo at: %s", iloLoginData.host)
 		return err
 	}
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
 	if err = saveContextAndSessionData(sd); err != nil {
-		logger.Warning("Successfully logged into ilo, but was unable to save the session data")
+		log.Logger.Warning("Successfully logged into ilo, but was unable to save the session data")
 	} else {
-		logger.Debug("Successfully logged into ilo: %s", iloLoginData.host)
+		log.Logger.Debugf("Successfully logged into ilo: %s", iloLoginData.host)
 	}
 
 	return nil
