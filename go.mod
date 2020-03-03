@@ -11,4 +11,5 @@ require (
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/rapidloop/skv v0.0.0-20180909015525-9def2caac4cc
 	github.com/spf13/cobra v0.0.6
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 )
