@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/HewlettPackard/hpecli/internal/platform/password"
 	"github.com/spf13/cobra"
 )
 
@@ -29,12 +30,21 @@ func init() {
 	ovLoginCmd.Flags().StringVarP(&ovLoginData.password, "password", "p", "", "oneview passowrd")
 	_ = ovLoginCmd.MarkFlagRequired("host")
 	_ = ovLoginCmd.MarkFlagRequired("username")
-	_ = ovLoginCmd.MarkFlagRequired("password")
 }
 
 func runOVLogin(_ *cobra.Command, _ []string) error {
 	if !strings.HasPrefix(ovLoginData.host, "http") {
 		ovLoginData.host = fmt.Sprintf("https://%s", ovLoginData.host)
+	}
+
+	if ovLoginData.password == "" {
+		p, err := password.ReadFromConsole("oneview password: ")
+		if err != nil {
+			log.Logger.Errorln("\nUnable to read password from console!")
+			return err
+		}
+
+		ovLoginData.password = p
 	}
 
 	log.Logger.Debugf("Attempting login with user: %v, at: %v", ovLoginData.username, ovLoginData.host)

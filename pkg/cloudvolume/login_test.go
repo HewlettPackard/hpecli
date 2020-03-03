@@ -27,6 +27,7 @@ func TestLoginWorks(t *testing.T) {
 
 	// setup login details.  would normally be populated by cobra
 	cvLoginData.host = ts.URL
+	cvLoginData.password = "arbitrary - so we don't promp"
 
 	// erase value from db - so we know it is empty
 	saveData(ts.URL, "")

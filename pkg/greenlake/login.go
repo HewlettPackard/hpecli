@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/HewlettPackard/hpecli/internal/platform/password"
 	"github.com/spf13/cobra"
 )
 
@@ -31,13 +32,22 @@ func init() {
 	cmdGLLogin.Flags().StringVarP(&glLoginData.tenantID, "tenantid", "t", "", "greenlake tenantid")
 	_ = cmdGLLogin.MarkFlagRequired("host")
 	_ = cmdGLLogin.MarkFlagRequired("userid")
-	_ = cmdGLLogin.MarkFlagRequired("secretkey")
 	_ = cmdGLLogin.MarkFlagRequired("tenantid")
 }
 
 func runGLLogin(_ *cobra.Command, _ []string) error {
 	if !strings.HasPrefix(glLoginData.host, "http") {
 		glLoginData.host = fmt.Sprintf("http://%s", glLoginData.host)
+	}
+
+	if glLoginData.secretKey == "" {
+		p, err := password.ReadFromConsole("greenlake secret key: ")
+		if err != nil {
+			log.Logger.Errorln("\nUnable to read password from console!")
+			return err
+		}
+
+		glLoginData.secretKey = p
 	}
 
 	log.Logger.Debugf("Attempting login with user: %v, at: %v", glLoginData.userID, glLoginData.host)
