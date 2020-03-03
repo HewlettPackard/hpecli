@@ -35,7 +35,7 @@ func runOVLogout(_ *cobra.Command, _ []string) error {
 
 	ovc := NewOVClientFromAPIKey(host, token)
 
-	log.Logger.Infof("Retrieving data from: %s", host)
+	log.Logger.Infof("Loging out from: %s\n", host)
 
 	// Use OVClient to logout
 	err = ovc.SessionLogout()
