@@ -44,6 +44,7 @@ func runILOLogout(_ *cobra.Command, _ []string) error {
 		log.Logger.Warningf("Unable to logout from iLO at: %s", sessionData.Host)
 		return err
 	}
+
 	log.Logger.Warningf("Successfully logged out of remote ilo: %s", sessionData.Host)
 
 	// Cleanup context

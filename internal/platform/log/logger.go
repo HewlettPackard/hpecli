@@ -49,9 +49,11 @@ func (h *copyHook) Levels() []logrus.Level {
 func (h *copyHook) Fire(entry *logrus.Entry) error {
 	// if it info message, write it to stdout
 	if entry.Level == logrus.InfoLevel {
-		_, _ = h.Stdout.Write([]byte(entry.Message))
-		// write \n to match what happens when entry is formatted by entry.String()
-		h.Stdout.Write([]byte("\n"))
+		n, _ := h.Stdout.Write([]byte(entry.Message))
+		if n > 0 {
+			// write \n to match what happens when entry is formatted by entry.String()
+			_, _ = h.Stdout.Write([]byte("\n"))
+		}
 
 		return nil
 	}
@@ -66,9 +68,11 @@ func (h *copyHook) Fire(entry *logrus.Entry) error {
 	}
 
 	// just write message
-	_, _ = h.Stderr.Write([]byte(entry.Message))
-	// write \n to match what happens when entry is formatted by entry.String()
-	h.Stdout.Write([]byte("\n"))
+	n, _ := h.Stderr.Write([]byte(entry.Message))
+	if n > 0 {
+		// write \n to match what happens when entry is formatted by entry.String()
+		_, _ = h.Stdout.Write([]byte("\n"))
+	}
 
 	return nil
 }
