@@ -34,6 +34,7 @@ func init() {
 }
 
 func runILOLogin(_ *cobra.Command, _ []string) error {
+	fmt.Println("in ilo login")
 	if !strings.HasPrefix(iloLoginData.host, "http") {
 		iloLoginData.host = fmt.Sprintf("https://%s", iloLoginData.host)
 	}
