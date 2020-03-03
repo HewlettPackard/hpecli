@@ -35,7 +35,7 @@ func runILOLogout(_ *cobra.Command, _ []string) error {
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	log.Logger.Debugf("Attempting get ilo service root at: %v", sessionData.Host)
+	log.Logger.Warningf("Using iLO: %s", sessionData.Host)
 
 	client := NewILOClientFromAPIKey(sessionData.Host, sessionData.Token)
 
@@ -44,6 +44,7 @@ func runILOLogout(_ *cobra.Command, _ []string) error {
 		log.Logger.Warningf("Unable to logout from iLO at: %s", sessionData.Host)
 		return err
 	}
+	log.Logger.Warningf("Successfully logged out of remote ilo: %s", sessionData.Host)
 
 	// Cleanup context
 	err = deleteSessionData(sessionData.Host)

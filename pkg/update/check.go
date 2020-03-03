@@ -63,8 +63,8 @@ var cacheResponse *CheckResponse
 // IsUpdateAvailable checks if a later version is avaialbe of the CLI binary
 func IsUpdateAvailable() bool {
 	cliVer := version.Get()
-	log.Logger.Debugf("Local version is: " + cliVer)
-	log.Logger.Debugf("Checking for a newer version at: " + versionURL)
+	log.Logger.Debug("Local version is: " + cliVer)
+	log.Logger.Debug("Checking for a newer version at: " + versionURL)
 
 	res, err := checkUpdate(&jsonSource{url: versionURL}, cliVer)
 	if err != nil {

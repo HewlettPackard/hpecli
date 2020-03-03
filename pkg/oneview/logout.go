@@ -35,7 +35,7 @@ func runOVLogout(_ *cobra.Command, _ []string) error {
 
 	ovc := NewOVClientFromAPIKey(host, token)
 
-	log.Logger.Infof("Retrieving data from: %s", host)
+	log.Logger.Warningf("Using OneView: %s", host)
 
 	// Use OVClient to logout
 	err = ovc.SessionLogout()
@@ -43,6 +43,8 @@ func runOVLogout(_ *cobra.Command, _ []string) error {
 		log.Logger.Warningf("Unable to logout from OneView at: %s", host)
 		return err
 	}
+
+	log.Logger.Warningf("Successfully logged out of OneView: %s", host)
 
 	// Cleanup context
 	err = deleteSavedHostData(host)

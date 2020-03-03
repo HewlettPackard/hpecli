@@ -43,7 +43,7 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 	if glLoginData.secretKey == "" {
 		p, err := password.ReadFromConsole("greenlake secret key: ")
 		if err != nil {
-			log.Logger.Errorln("\nUnable to read password from console!")
+			log.Logger.Error("Unable to read password from console!")
 			return err
 		}
 
@@ -64,9 +64,9 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 	// change context to current host and save the access token as the API key
 	// for subsequent requests
 	if err = saveContextAndSessionData(sd); err != nil {
-		log.Logger.Debugf("Successfully logged into GreenLake, but was unable to save the session data")
+		log.Logger.Debug("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
-		log.Logger.Debugf("Successfully logged into GreenLake: %s", glLoginData.host)
+		log.Logger.Warningf("Successfully logged into GreenLake: %s", glLoginData.host)
 	}
 
 	return nil

@@ -20,5 +20,9 @@ func ReadFromConsole(prompt string) (string, error) {
 		return "", err
 	}
 
+	// rather than force everyone to do a linefeed after reading
+	// we'll just do it here
+	fmt.Fprint(os.Stdout, "\n")
+
 	return string(p), nil
 }
