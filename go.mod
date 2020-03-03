@@ -11,5 +11,6 @@ require (
 	github.com/rapidloop/skv v0.0.0-20180909015525-9def2caac4cc
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.6
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 // indirect
 )

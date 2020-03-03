@@ -25,6 +25,7 @@ func TestHostPrefixAdded(t *testing.T) {
 	defer server.Close()
 
 	ovLoginData.host = strings.Replace(server.URL, "http://", "", 1)
+	ovLoginData.password = "blah blah"
 
 	// this will fail with a remote call.. ignore the failure and
 	// check the host string to ensure prefix addded
@@ -46,6 +47,7 @@ func TestAPIKeyIsStored(t *testing.T) {
 	defer server.Close()
 
 	ovLoginData.host = server.URL
+	ovLoginData.password = "blah blah"
 
 	err := runOVLogin(nil, nil)
 	if err != nil {
