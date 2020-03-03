@@ -14,6 +14,7 @@ import (
 func ReadFromConsole(prompt string) (string, error) {
 	fmt.Fprint(os.Stdout, prompt)
 
+	//nolint:unconvert  // false positive lint err
 	p, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		return "", err
