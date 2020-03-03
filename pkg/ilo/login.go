@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/HewlettPackard/hpecli/internal/platform/password"
 	"github.com/spf13/cobra"
 )
 
@@ -29,12 +30,21 @@ func init() {
 	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo passowrd")
 	_ = cmdILOLogin.MarkFlagRequired("host")
 	_ = cmdILOLogin.MarkFlagRequired("username")
-	_ = cmdILOLogin.MarkFlagRequired("password")
+	//_ = cmdILOLogin.MarkFlagRequired("password")
 }
 
 func runILOLogin(_ *cobra.Command, _ []string) error {
 	if !strings.HasPrefix(iloLoginData.host, "http") {
 		iloLoginData.host = fmt.Sprintf("https://%s", iloLoginData.host)
+	}
+
+	if iloLoginData.password == "" {
+		p, err := password.Read("ilo password: ")
+		if err != nil {
+			log.Logger.Errorln("\nUnable to read password from console!")
+			return err
+		}
+		iloLoginData.password = p
 	}
 
 	log.Logger.Debugf("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
