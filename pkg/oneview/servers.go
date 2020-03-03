@@ -40,7 +40,7 @@ func getServerHardware() error {
 
 	ovc := NewOVClientFromAPIKey(host, token)
 
-	log.Logger.Infof("Retrieving data from: %s", host)
+	log.Logger.Warningf("Using OneView: %s", host)
 
 	var sh interface{}
 	if ovServersData.name != "" {

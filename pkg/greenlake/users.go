@@ -26,7 +26,7 @@ func runGLGetUsers(_ *cobra.Command, _ []string) error {
 			"Please login to GreenLake using: hpecli greenlake login")
 	}
 
-  log.Logger.Debugf("Attempting get green lake users at: %v", sd.Host)
+	log.Logger.Debugf("Attempting get green lake users at: %v", sd.Host)
 
 	glc := NewGLClientFromAPIKey(sd.Host, sd.TenantID, sd.Token)
 

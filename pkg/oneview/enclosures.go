@@ -40,9 +40,7 @@ func getEnclosuresData() error {
 
 	ovc := NewOVClientFromAPIKey(host, token)
 
-	// not sure we want to show the host we are retieving from.
-	// it's good to know - but then breaks json data format being returned
-	log.Logger.Warningf("Retrieving data from: %s", host)
+	log.Logger.Warningf("Using OneView: %s", host)
 
 	var el interface{}
 

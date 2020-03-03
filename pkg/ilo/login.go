@@ -40,7 +40,7 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 	if iloLoginData.password == "" {
 		p, err := password.ReadFromConsole("ilo password: ")
 		if err != nil {
-			log.Logger.Errorln("\nUnable to read password from console!")
+			log.Logger.Error("Unable to read password from console!")
 			return err
 		}
 
@@ -62,7 +62,7 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 	if err = saveContextAndSessionData(sd); err != nil {
 		log.Logger.Warning("Successfully logged into ilo, but was unable to save the session data")
 	} else {
-		log.Logger.Debugf("Successfully logged into ilo: %s", iloLoginData.host)
+		log.Logger.Warningf("Successfully logged into ilo: %s", iloLoginData.host)
 	}
 
 	return nil

@@ -42,7 +42,7 @@ func runCVLogin(_ *cobra.Command, _ []string) error {
 	if cvLoginData.password == "" {
 		p, err := password.ReadFromConsole("cloudvolumes password: ")
 		if err != nil {
-			log.Logger.Errorln("\nUnable to read password from console!")
+			log.Logger.Error("Unable to read password from console!")
 			return err
 		}
 
@@ -65,7 +65,7 @@ func runCVLogin(_ *cobra.Command, _ []string) error {
 		log.Logger.Warning("Successfully logged into CloudVolumes, but was unable to save the session data")
 		log.Logger.Debugf("%+v", err)
 	} else {
-		log.Logger.Debugf("Successfully logged into CloudVolumes: %s", cvLoginData.host)
+		log.Logger.Warningf("Successfully logged into CloudVolumes: %s", cvLoginData.host)
 	}
 
 	return nil

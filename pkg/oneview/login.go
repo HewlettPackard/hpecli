@@ -40,7 +40,7 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 	if ovLoginData.password == "" {
 		p, err := password.ReadFromConsole("oneview password: ")
 		if err != nil {
-			log.Logger.Errorln("\nUnable to read password from console!")
+			log.Logger.Error("Unable to read password from console!")
 			return err
 		}
 
@@ -61,7 +61,7 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 	if err = saveContextAndHostData(ovLoginData.host, token); err != nil {
 		log.Logger.Warning("Successfully logged into OneView, but was unable to save the session data")
 	} else {
-		log.Logger.Debugf("Successfully logged into OneView: %s", ovLoginData.host)
+		log.Logger.Warningf("Successfully logged into OneView: %s", ovLoginData.host)
 	}
 
 	return nil

@@ -27,7 +27,7 @@ func runILOServiceRoot(cmd *cobra.Command, _ []string) error {
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	log.Logger.Debugf("Attempting get ilo service root at: %v", sd.Host)
+	log.Logger.Warningf("Using iLO: %s", sd.Host)
 
 	client := NewILOClientFromAPIKey(sd.Host, sd.Token)
 

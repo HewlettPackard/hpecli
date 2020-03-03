@@ -49,7 +49,11 @@ func (h *copyHook) Levels() []logrus.Level {
 func (h *copyHook) Fire(entry *logrus.Entry) error {
 	// if it info message, write it to stdout
 	if entry.Level == logrus.InfoLevel {
-		_, _ = h.Stdout.Write([]byte(entry.Message))
+		n, _ := h.Stdout.Write([]byte(entry.Message))
+		if n > 0 {
+			// write \n to match what happens when entry is formatted by entry.String()
+			_, _ = h.Stdout.Write([]byte("\n"))
+		}
 
 		return nil
 	}
@@ -57,13 +61,18 @@ func (h *copyHook) Fire(entry *logrus.Entry) error {
 	// if we are set for debug logging, write timestamp, level, etc. with msg
 	if entry.Logger.GetLevel() == logrus.DebugLevel {
 		line, _ := entry.String()
+		// this causes formatter.format to be called, which appends \n
 		_, _ = h.Stderr.Write([]byte(line))
 
 		return nil
 	}
 
 	// just write message
-	_, _ = h.Stderr.Write([]byte(entry.Message))
+	n, _ := h.Stderr.Write([]byte(entry.Message))
+	if n > 0 {
+		// write \n to match what happens when entry is formatted by entry.String()
+		_, _ = h.Stdout.Write([]byte("\n"))
+	}
 
 	return nil
 }
