@@ -7,14 +7,14 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/HewlettPackard/hpecli/internal/platform/password"
 	"github.com/spf13/cobra"
 )
 
 var cvLoginData struct {
 	host,
 	username,
-	password,
-	token string
+	password string
 }
 
 // Cmd represents the cloudvolume get command
@@ -30,7 +30,6 @@ func init() {
 	cmdLogin.Flags().StringVarP(&cvLoginData.password, "password", "p", "", "cloudvolume passowrd")
 	_ = cmdLogin.MarkFlagRequired("host")
 	_ = cmdLogin.MarkFlagRequired("username")
-	_ = cmdLogin.MarkFlagRequired("password")
 }
 
 func runCVLogin(_ *cobra.Command, _ []string) error {
@@ -38,6 +37,16 @@ func runCVLogin(_ *cobra.Command, _ []string) error {
 
 	if !strings.HasPrefix(cvLoginData.host, "http") {
 		cvLoginData.host = fmt.Sprintf("https://%s", cvLoginData.host)
+	}
+
+	if cvLoginData.password == "" {
+		p, err := password.ReadFromConsole("cloudvolumes password: ")
+		if err != nil {
+			log.Logger.Errorln("\nUnable to read password from console!")
+			return err
+		}
+
+		cvLoginData.password = p
 	}
 
 	log.Logger.Debugf("Attempting login with user: %v, at: %v", cvLoginData.username, cvLoginData.host)

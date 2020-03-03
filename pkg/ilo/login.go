@@ -30,21 +30,20 @@ func init() {
 	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo passowrd")
 	_ = cmdILOLogin.MarkFlagRequired("host")
 	_ = cmdILOLogin.MarkFlagRequired("username")
-	//_ = cmdILOLogin.MarkFlagRequired("password")
 }
 
 func runILOLogin(_ *cobra.Command, _ []string) error {
-	fmt.Println("in ilo login")
 	if !strings.HasPrefix(iloLoginData.host, "http") {
 		iloLoginData.host = fmt.Sprintf("https://%s", iloLoginData.host)
 	}
 
 	if iloLoginData.password == "" {
-		p, err := password.Read("ilo password: ")
+		p, err := password.ReadFromConsole("ilo password: ")
 		if err != nil {
 			log.Logger.Errorln("\nUnable to read password from console!")
 			return err
 		}
+
 		iloLoginData.password = p
 	}
 

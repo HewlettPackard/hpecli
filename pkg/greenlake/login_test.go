@@ -22,6 +22,7 @@ func TestGlHostPrefixAdded(t *testing.T) {
 	defer server.Close()
 
 	glLoginData.host = strings.Replace(server.URL, "http://", "", 1)
+	glLoginData.secretKey = "blah"
 
 	// this will fail with a remote call.. ignore the failure and
 	// check the host string to ensure prefix addded
@@ -43,6 +44,7 @@ func TestGLAccessTokenIsStored(t *testing.T) {
 	defer server.Close()
 
 	glLoginData.host = server.URL
+	glLoginData.secretKey = "blah"
 
 	err := runGLLogin(nil, nil)
 	if err != nil {
