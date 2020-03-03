@@ -49,8 +49,12 @@ func TestGLAccessTokenIsStored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c, _ := getData()
-	if c.APIKey != accessToken {
-		t.Fatalf(errTempl, c.APIKey, accessToken)
+	d, _ := defaultSessionData()
+	if d.Host != glLoginData.host {
+		t.Fatalf(errTempl, d.Host, glLoginData.host)
+	}
+
+	if d.Token != accessToken {
+		t.Fatalf(errTempl, d.Token, accessToken)
 	}
 }

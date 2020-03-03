@@ -45,7 +45,7 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 	glc := NewGLClient("client_credentials", glLoginData.userID,
 		glLoginData.secretKey, glLoginData.tenantID, glLoginData.host)
 
-	token, err := glc.Login()
+	sd, err := glc.login()
 	if err != nil {
 		log.Logger.Warningf("Unable to login with supplied credentials to GreenLake at: %s", glLoginData.host)
 		return err
@@ -53,8 +53,8 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 
 	// change context to current host and save the access token as the API key
 	// for subsequent requests
-	if err = saveData(glLoginData.host, glLoginData.tenantID, token); err != nil {
-		log.Logger.Warning("Successfully logged into GreenLake, but was unable to save the session data")
+	if err = saveContextAndSessionData(sd); err != nil {
+		log.Logger.Debugf("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
 		log.Logger.Debugf("Successfully logged into GreenLake: %s", glLoginData.host)
 	}
