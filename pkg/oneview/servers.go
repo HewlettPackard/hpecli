@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/spf13/cobra"
 )
 
@@ -33,14 +33,14 @@ func getServers(_ *cobra.Command, _ []string) error {
 func getServerHardware() error {
 	host, token, err := hostAndToken()
 	if err != nil {
-		logger.Debug("unable to retrieve apiKey because of: %#v", err)
-		return fmt.Errorf("unable to retrieve the last login for OneView." +
+		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		return fmt.Errorf("unable to retrieve the last login for OneView.  " +
 			"Please login to OneView using: hpecli oneview login")
 	}
 
 	ovc := NewOVClientFromAPIKey(host, token)
 
-	logger.Always("Retrieving data from: %s", host)
+	log.Logger.Warningf("Using OneView: %s", host)
 
 	var sh interface{}
 	if ovServersData.name != "" {
@@ -50,16 +50,16 @@ func getServerHardware() error {
 	}
 
 	if err != nil {
-		logger.Warning("Unable to login with supplied credentials to OneView at: %s", host)
+		log.Logger.Warningf("Unable to login with supplied credentials to OneView at: %s", host)
 		return err
 	}
 
 	out, err := json.MarshalIndent(sh, "", "  ")
 	if err != nil {
-		logger.Warning("Unable to output data as JSON.  Please try the command again.")
+		log.Logger.Warning("Unable to output data as JSON.  Please try the command again.")
 	}
 
-	logger.Always("%s", out)
+	log.Logger.Infof("%s", out)
 
 	return nil
 }

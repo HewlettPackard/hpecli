@@ -21,6 +21,7 @@ func TestHostPrefixAdded(t *testing.T) {
 	defer server.Close()
 
 	iloLoginData.host = strings.Replace(server.URL, "http://", "", 1)
+	iloLoginData.password = "blah"
 
 	// this will fail with a remote call.. ignore the failure and
 	// check the host string to ensure prefix addded
@@ -42,6 +43,7 @@ func TestAPIKeyIsStored(t *testing.T) {
 	defer server.Close()
 
 	iloLoginData.host = server.URL
+	iloLoginData.password = "blah"
 
 	err := runILOLogin(nil, nil)
 	if err != nil {

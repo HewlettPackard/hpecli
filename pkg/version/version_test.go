@@ -5,7 +5,8 @@ package version
 import (
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 )
 
 const v1 = "0.0.1"
@@ -53,25 +54,25 @@ func TestIsFullVersion(t *testing.T) {
 	cases := []struct {
 		verbose  bool
 		want     bool
-		logLevel logger.LogLevel
+		logLevel logrus.Level
 		name     string
 	}{
 		{
 			name:     "Default short",
 			verbose:  false,
-			logLevel: logger.InfoLevel,
+			logLevel: logrus.InfoLevel,
 			want:     false,
 		},
 		{
 			name:     "verbose is True",
 			verbose:  true,
-			logLevel: logger.InfoLevel,
+			logLevel: logrus.InfoLevel,
 			want:     true,
 		},
 		{
 			name:     "Debug LogLevel is verbose",
 			verbose:  false,
-			logLevel: logger.DebugLevel,
+			logLevel: logrus.DebugLevel,
 			want:     true,
 		},
 	}
@@ -80,7 +81,7 @@ func TestIsFullVersion(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			verbose = c.verbose
-			logger.Level = c.logLevel
+			log.Logger.Level = c.logLevel
 			got := isFullVersion()
 			if got != c.want {
 				t.Fatalf(expectedError, got, c.want)
@@ -110,7 +111,7 @@ func TestVersionOutput(t *testing.T) {
 	// then everything just defaults to 0
 	want := v0
 	verbose = false
-	logger.Level = logger.InfoLevel
+	log.Logger.Level = logrus.InfoLevel
 
 	got := versionOutput()
 	if got != want {

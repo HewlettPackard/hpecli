@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
-	"github.com/HewlettPackard/hpecli/pkg/logger"
 )
 
 type Client struct {
@@ -73,7 +73,7 @@ func (c *Client) logout(sessionLocation string) error {
 
 	// 2xx status codes are OK
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		logger.Debug("logout failed:  %+v", resp.Status)
+		log.Logger.Debugf("logout failed: %+v", resp.Status)
 		return fmt.Errorf("unable to successfully logout of iLO: %s", c.Host)
 	}
 

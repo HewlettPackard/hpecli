@@ -3,7 +3,6 @@
 package greenlake
 
 import (
-	"errors"
 	"strings"
 	"testing"
 
@@ -25,14 +24,29 @@ func TestGLHostPrefixAddedForContext(t *testing.T) {
 	}
 }
 
-func TestGLContextIsSetInDB(t *testing.T) {
-	glContextHost.host = "127.0.0.3"
+func TestGLGetWorks(t *testing.T) {
+	const h1, t1, tn1 = "host1", "token1", "tenant1"
 
-	// sets the context in the DB
-	_ = runSetContext(nil, nil)
+	d := &sessionData{h1, t1, tn1}
 
-	_, err := getData()
-	if !errors.Is(err, context.ErrorKeyNotFound) {
-		t.Fatal("expected to find the context but not the key")
+	if err := saveContextAndSessionData(d); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := defaultSessionData()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got.Host != h1 {
+		t.Fatal("didn't retrieve matching host")
+	}
+
+	if got.Token != t1 {
+		t.Fatal("didn't retrieve matching token")
+	}
+
+	if got.TenantID != tn1 {
+		t.Fatal("didn't retrieve matching tenant")
 	}
 }

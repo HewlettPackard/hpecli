@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/HewlettPackard/hpecli/internal/platform/password"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +32,6 @@ func init() {
 	cmdGLLogin.Flags().StringVarP(&glLoginData.tenantID, "tenantid", "t", "", "greenlake tenantid")
 	_ = cmdGLLogin.MarkFlagRequired("host")
 	_ = cmdGLLogin.MarkFlagRequired("userid")
-	_ = cmdGLLogin.MarkFlagRequired("secretkey")
 	_ = cmdGLLogin.MarkFlagRequired("tenantid")
 }
 
@@ -40,23 +40,33 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 		glLoginData.host = fmt.Sprintf("http://%s", glLoginData.host)
 	}
 
-	logger.Debug("Attempting login with user: %v, at: %v", glLoginData.userID, glLoginData.host)
+	if glLoginData.secretKey == "" {
+		p, err := password.ReadFromConsole("greenlake secret key: ")
+		if err != nil {
+			log.Logger.Error("Unable to read password from console!")
+			return err
+		}
+
+		glLoginData.secretKey = p
+	}
+
+	log.Logger.Debugf("Attempting login with user: %v, at: %v", glLoginData.userID, glLoginData.host)
 
 	glc := NewGLClient("client_credentials", glLoginData.userID,
 		glLoginData.secretKey, glLoginData.tenantID, glLoginData.host)
 
-	token, err := glc.Login()
+	sd, err := glc.login()
 	if err != nil {
-		logger.Warning("Unable to login with supplied credentials to GreenLake at: %s", glLoginData.host)
+		log.Logger.Warningf("Unable to login with supplied credentials to GreenLake at: %s", glLoginData.host)
 		return err
 	}
 
 	// change context to current host and save the access token as the API key
 	// for subsequent requests
-	if err = saveData(glLoginData.host, glLoginData.tenantID, token); err != nil {
-		logger.Warning("Successfully logged into GreenLake, but was unable to save the session data")
+	if err = saveContextAndSessionData(sd); err != nil {
+		log.Logger.Debug("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
-		logger.Debug("Successfully logged into GreenLake: %s", glLoginData.host)
+		log.Logger.Warningf("Successfully logged into GreenLake: %s", glLoginData.host)
 	}
 
 	return nil

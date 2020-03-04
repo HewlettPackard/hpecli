@@ -5,7 +5,7 @@ package greenlake
 import (
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/pkg/logger"
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,25 +17,25 @@ var cmdGetUsers = &cobra.Command{
 }
 
 func runGLGetUsers(_ *cobra.Command, _ []string) error {
-	logger.Debug("Beginning runGLGetUsers")
+	log.Logger.Debug("Beginning runGLGetUsers")
 
-	c, err := getData()
+	sd, err := defaultSessionData()
 	if err != nil {
-		logger.Debug("unable to retrieve apiKey because of: %#v", err)
+		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake." +
 			"Please login to GreenLake using: hpecli greenlake login")
 	}
 
-	logger.Debug("Attempting get green lake users at: %v", c.Host)
+	log.Logger.Debugf("Attempting get green lake users at: %v", sd.Host)
 
-	glc := NewGLClientFromAPIKey(c.Host, c.TenantID, c.APIKey)
+	glc := NewGLClientFromAPIKey(sd.Host, sd.TenantID, sd.Token)
 
 	jsonResult, err := glc.GetUsers()
 	if err != nil {
 		return err
 	}
 
-	logger.Always("%s", jsonResult)
+	log.Logger.Infof("%s", jsonResult)
 
 	return nil
 }
