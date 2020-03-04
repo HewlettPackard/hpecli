@@ -8,14 +8,15 @@ import (
 )
 
 const (
-	apiKeyPrefix  = "somePrefix"
-	contextKey    = "someContext"
-	host          = "someHost"
-	key           = "someKey"
-	errTempl      = "got: %s, wanted: %s"
-	fail          = "fail"
-	errExpected   = "error was expected"
-	errUnexpected = "unexpected error: %v"
+	apiKeyPrefix         = "somePrefix"
+	contextKey           = "someContext"
+	host                 = "someHost"
+	key                  = "someKey"
+	errTempl             = "got: %s, wanted: %s"
+	fail                 = "fail"
+	errExpected          = "error was expected"
+	errExpectedWithValue = "Didn't get the expected result.  got=%s, want=%s"
+	errUnexpected        = "unexpected error: %v"
 )
 
 var ErrorDBOpen = errors.New("expected failure to open db")
@@ -100,7 +101,7 @@ func TestHostData(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			name:        "Invalid Key",
+			name:        "Invalid",
 			dbOpen:      MockOpen,
 			key:         "",
 			value:       "",
@@ -116,7 +117,7 @@ func TestHostData(t *testing.T) {
 		{
 			name:        "Get Failure",
 			dbOpen:      MockOpen,
-			key:         "fail-host-key",
+			key:         "fail-key",
 			value:       "",
 			expectedErr: ErrorKeyNotFound,
 		},
@@ -141,11 +142,11 @@ func TestHostData(t *testing.T) {
 
 			got := con.HostData(test.key, &value)
 			if !errors.Is(got, test.expectedErr) {
-				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", got, test.expectedErr)
+				t.Fatalf(errExpectedWithValue, got, test.expectedErr)
 			}
 
 			if value != test.value {
-				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", value, test.value)
+				t.Fatalf(errExpectedWithValue, value, test.value)
 			}
 		})
 	}
@@ -174,7 +175,7 @@ func TestSetHostData(t *testing.T) {
 			expectedErr: ErrorInvalidValue,
 		},
 		{
-			name:        "DB Open Failure",
+			name:        "DB Open Failure on Set",
 			dbOpen:      failOpenDB,
 			key:         key,
 			value:       "value doesn't matter",
@@ -202,7 +203,7 @@ func TestSetHostData(t *testing.T) {
 			con := NewWithDB(contextKey, test.dbOpen)
 			got := con.SetHostData(test.key, test.value)
 			if !errors.Is(got, test.expectedErr) {
-				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", got, test.expectedErr)
+				t.Fatalf(errExpectedWithValue, got, test.expectedErr)
 			}
 		})
 	}
@@ -223,7 +224,7 @@ func TestDeleteHostData(t *testing.T) {
 			expectedErr: ErrorInvalidKey,
 		},
 		{
-			name:        "DB Open Failure",
+			name:        "DB Open Failure Delete",
 			dbOpen:      failOpenDB,
 			key:         "somekey",
 			expectedErr: ErrorDBOpen,
@@ -252,7 +253,7 @@ func TestDeleteHostData(t *testing.T) {
 			con := NewWithDB(contextKey, test.dbOpen)
 			got := con.DeleteHostData(test.key)
 			if !errors.Is(got, test.expectedErr) {
-				t.Fatalf("Didn't get the expected result.  got=%s, want=%s", got, test.expectedErr)
+				t.Fatalf(errExpectedWithValue, got, test.expectedErr)
 			}
 		})
 	}
