@@ -3,6 +3,7 @@
 package ilo
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -15,6 +16,7 @@ var iloLoginData struct {
 	host,
 	username,
 	password string
+	passwordStdin bool
 }
 
 // cmdIloLogin represents the get command
@@ -27,7 +29,8 @@ var cmdILOLogin = &cobra.Command{
 func init() {
 	cmdILOLogin.Flags().StringVar(&iloLoginData.host, "host", "", "ilo ip address")
 	cmdILOLogin.Flags().StringVarP(&iloLoginData.username, "username", "u", "", "ilo username")
-	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo passowrd")
+	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo password")
+	cmdILOLogin.Flags().BoolVarP(&iloLoginData.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	_ = cmdILOLogin.MarkFlagRequired("host")
 	_ = cmdILOLogin.MarkFlagRequired("username")
 }
@@ -37,14 +40,8 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 		iloLoginData.host = fmt.Sprintf("https://%s", iloLoginData.host)
 	}
 
-	if iloLoginData.password == "" {
-		p, err := password.ReadFromConsole("ilo password: ")
-		if err != nil {
-			log.Logger.Error("Unable to read password from console!")
-			return err
-		}
-
-		iloLoginData.password = p
+	if err := handlePasswordOptions(); err != nil {
+		return err
 	}
 
 	log.Logger.Debugf("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
@@ -64,6 +61,38 @@ func runILOLogin(_ *cobra.Command, _ []string) error {
 	} else {
 		log.Logger.Warningf("Successfully logged into ilo: %s", iloLoginData.host)
 	}
+
+	return nil
+}
+
+func handlePasswordOptions() error {
+	if iloLoginData.password != "" {
+		if iloLoginData.passwordStdin {
+			return errors.New("--password and --password-stdin are mutually exclusive")
+		}
+		// if the password was set .. we don't need to get it from somewhere else
+		return nil
+	}
+
+	// asked to read from stdin
+	if iloLoginData.passwordStdin {
+		pswd, err := password.ReadFromStdIn()
+		if err != nil {
+			return err
+		}
+
+		iloLoginData.password = pswd
+
+		return nil
+	}
+
+	// password wasn't specified so we need to prompt them for it
+	pswd, err := password.ReadFromConsole("ilo password: ")
+	if err != nil {
+		return err
+	}
+
+	iloLoginData.password = pswd
 
 	return nil
 }
