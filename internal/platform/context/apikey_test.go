@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"github.com/HewlettPackard/hpecli/internal/platform/db"
 )
 
 const (

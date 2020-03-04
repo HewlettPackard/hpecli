@@ -3,7 +3,7 @@
 package cloudvolume
 
 import (
-	"github.com/HewlettPackard/hpecli/pkg/context"
+	"github.com/HewlettPackard/hpecli/internal/platform/context"
 )
 
 const cvAPIKeyPrefix = "hpecli_cloudvolume_token_"
