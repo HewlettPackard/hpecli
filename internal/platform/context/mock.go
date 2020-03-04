@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"github.com/HewlettPackard/hpecli/internal/platform/db"
 )
 
 var ErrorExpected = errors.New("expected error")

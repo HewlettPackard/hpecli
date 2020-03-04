@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
+	"github.com/HewlettPackard/hpecli/internal/platform/rest"
 	"github.com/HewlettPackard/oneview-golang/ov"
 	ovrest "github.com/HewlettPackard/oneview-golang/rest"
 )

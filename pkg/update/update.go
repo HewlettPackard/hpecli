@@ -29,13 +29,15 @@ func runUpdate(_ *cobra.Command, _ []string) error {
 	}
 
 	if !resp.UpdateAvailable {
-		log.Logger.Info("No update available.  No action taken")
+		log.Logger.Warning("No update available.  No action taken")
 		return nil
 	}
 
 	if err := downloadUpdate(resp); err != nil {
 		return err
 	}
+
+	log.Logger.Warningf("Successfully update the cli to version: %s", resp.RemoteVersion)
 
 	return nil
 }

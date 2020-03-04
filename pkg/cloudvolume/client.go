@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
+	"github.com/HewlettPackard/hpecli/internal/platform/rest"
 )
 
 type CVClient struct {

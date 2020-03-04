@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/pkg/internal/rest"
+	"github.com/HewlettPackard/hpecli/internal/platform/rest"
 )
 
 // GLClient - wrapper class for greenlake api's
@@ -61,7 +61,7 @@ func (c *GLClient) login() (*sessionData, error) {
 
 	sd := &sessionData{}
 
-	loginJSON := fmt.Sprintf(`{"grant_type":"%s", "client_id":"%s", 
+	loginJSON := fmt.Sprintf(`{"grant_type":"%s", "client_id":"%s",
 	"client_secret":"%s", "tenant_id":"%s"}`,
 		c.GrantType, c.ClientID, c.ClientSecret, c.TenantID)
 
