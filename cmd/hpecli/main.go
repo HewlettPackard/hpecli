@@ -77,7 +77,6 @@ func run() error {
 		log.Logger.Warn("An update is available.  You can update by running \"hpecli update\"")
 	}
 
-	//rootCmd.GenBashCompletion(os.Stdout)
 	return nil
 }
 

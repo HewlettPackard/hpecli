@@ -34,22 +34,25 @@ Add the autocomplete.sh content to user ~/bash_profile file and reload the termi
 }
 
 func run(cmd *cobra.Command, _ []string) error {
-
 	if genautocompleteCmd.autocompleteType != "bash" {
 		log.Logger.Warningf("Only Bash is supported for now")
 		return nil
 	}
+
 	err := cmd.Root().GenBashCompletionFile(genautocompleteCmd.autocompleteTarget)
 
 	if err != nil {
 		return err
 	}
+
 	log.Logger.Debugf("Bash completion file for hpecli saved to", genautocompleteCmd.autocompleteTarget)
 
 	return nil
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&genautocompleteCmd.autocompleteTarget, "completionfile", "", "autocomplete.sh", "autocompletion file")
-	Cmd.PersistentFlags().StringVarP(&genautocompleteCmd.autocompleteType, "type", "", "bash", "autocompletion type (currently only bash supported)")
+	Cmd.PersistentFlags().StringVarP(&genautocompleteCmd.autocompleteTarget, "completionfile",
+		"", "autocomplete.sh", "autocompletion file")
+	Cmd.PersistentFlags().StringVarP(&genautocompleteCmd.autocompleteType, "type",
+		"", "bash", "autocompletion type (currently only bash supported)")
 }
