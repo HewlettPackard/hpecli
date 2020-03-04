@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"github.com/HewlettPackard/hpecli/internal/platform/db"
 )
 
 type Context interface {

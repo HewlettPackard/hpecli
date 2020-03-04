@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/context"
-	"github.com/HewlettPackard/hpecli/pkg/db"
+	"github.com/HewlettPackard/hpecli/internal/platform/context"
+	"github.com/HewlettPackard/hpecli/internal/platform/db"
 )
 
 func init() {

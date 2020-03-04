@@ -3,7 +3,7 @@
 package ilo
 
 import (
-	"github.com/HewlettPackard/hpecli/pkg/context"
+	"github.com/HewlettPackard/hpecli/internal/platform/context"
 )
 
 const iloAPIKeyPrefix = "hpecli_ilo_token_"

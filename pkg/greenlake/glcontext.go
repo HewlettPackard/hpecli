@@ -3,7 +3,7 @@
 package greenlake
 
 import (
-	"github.com/HewlettPackard/hpecli/pkg/context"
+	"github.com/HewlettPackard/hpecli/internal/platform/context"
 )
 
 const glAPIKeyPrefix = "hpecli_greenlake_token_"

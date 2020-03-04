@@ -3,7 +3,7 @@
 package oneview
 
 import (
-	"github.com/HewlettPackard/hpecli/pkg/context"
+	"github.com/HewlettPackard/hpecli/internal/platform/context"
 )
 
 const ovAPIKeyPrefix = "hpecli_oneview_token_"

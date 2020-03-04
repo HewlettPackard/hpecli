@@ -3,7 +3,7 @@ package oneview
 import (
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/pkg/context"
+	"github.com/HewlettPackard/hpecli/internal/platform/context"
 )
 
 const testHost = "host1"
