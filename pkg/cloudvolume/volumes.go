@@ -9,14 +9,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Cmd represents the ilo command
-var cmdGetVolumes = &cobra.Command{
-	Use:   "cloudvolumes",
-	Short: "Get from Cloud Volumes: hpecli cloudvolumes get cloudvolumes",
-	RunE:  runCVGetVolumes,
+func newGetVolumesCommand() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "cloudvolume get volumes",
+		Short: "Get from Cloud Volumes: hpecli cloudvolumes get cloudvolumes",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return runGetVolumes()
+		},
+	}
+
+	return cmd
 }
 
-func runCVGetVolumes(_ *cobra.Command, _ []string) error {
+func runGetVolumes() error {
 	log.Logger.Debug("Beginning runCVGetVolumes")
 
 	host, token, err := hostAndToken()
@@ -28,7 +33,7 @@ func runCVGetVolumes(_ *cobra.Command, _ []string) error {
 
 	log.Logger.Debugf("Attempting get cloud volumes at: %v", host)
 
-	cvc := NewCVClientFromAPIKey(host, token)
+	cvc := newCVClientFromAPIKey(host, token)
 
 	jsonResult, err := cvc.GetCloudVolumes()
 	if err != nil {

@@ -22,6 +22,10 @@ func MockOpen() (db.Store, error) {
 	return ms, nil
 }
 
+func MockClear() {
+	ms.m = make(map[string][]byte)
+}
+
 func (ms *MockStore) Get(key string, value interface{}) error {
 	if strings.Contains(key, "fail") {
 		return ErrorExpected
@@ -63,10 +67,5 @@ func (ms *MockStore) Delete(key string) error {
 }
 
 func (ms *MockStore) Close() error {
-	return nil
-}
-
-func (ms *MockStore) Clear() error {
-	ms.m = make(map[string][]byte)
 	return nil
 }

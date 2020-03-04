@@ -6,12 +6,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Cmd represents the ilo command
-var cmdGet = &cobra.Command{
-	Use:   "get",
-	Short: "Get resources from HPE Nimble Cloud Volumes",
-}
+func newGetCommand() *cobra.Command {
+	// cmd represents the cloudvolume command
+	var cmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get resources from HPE Nimble Cloud Volumes",
+	}
 
-func init() {
-	cmdGet.AddCommand(cmdGetVolumes)
+	cmd.AddCommand(
+		newGetVolumesCommand(),
+	)
+
+	return cmd
 }
