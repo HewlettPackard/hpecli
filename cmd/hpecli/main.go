@@ -76,7 +76,7 @@ func run() error {
 	// update.Cmd.CalledAs() has a value if that was the command that was executed
 	// if update was just run, we don't need to tell them that there is an update
 	if newRelease && update.Cmd.CalledAs() == "" {
-		log.Logger.Warn("An update is available.  You can update by running \"hpecli update\"")
+		log.Logger.Warn("An updated version of the CLI is available.  You can update by running \"hpecli update\"")
 	}
 
 	return nil

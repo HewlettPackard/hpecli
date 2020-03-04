@@ -3,6 +3,7 @@
 package oneview
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -15,6 +16,7 @@ var ovLoginData struct {
 	host,
 	username,
 	password string
+	passwordStdin bool
 }
 
 // ovLoginCmd represents the oneview ovLoginCmd command
@@ -27,7 +29,8 @@ var ovLoginCmd = &cobra.Command{
 func init() {
 	ovLoginCmd.Flags().StringVar(&ovLoginData.host, "host", "", "oneview host/ip address")
 	ovLoginCmd.Flags().StringVarP(&ovLoginData.username, "username", "u", "", "oneview username")
-	ovLoginCmd.Flags().StringVarP(&ovLoginData.password, "password", "p", "", "oneview passowrd")
+	ovLoginCmd.Flags().StringVarP(&ovLoginData.password, "password", "p", "", "oneview password")
+	ovLoginCmd.Flags().BoolVarP(&ovLoginData.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	_ = ovLoginCmd.MarkFlagRequired("host")
 	_ = ovLoginCmd.MarkFlagRequired("username")
 }
@@ -37,14 +40,8 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 		ovLoginData.host = fmt.Sprintf("https://%s", ovLoginData.host)
 	}
 
-	if ovLoginData.password == "" {
-		p, err := password.ReadFromConsole("oneview password: ")
-		if err != nil {
-			log.Logger.Error("Unable to read password from console!")
-			return err
-		}
-
-		ovLoginData.password = p
+	if err := handlePasswordOptions(); err != nil {
+		return err
 	}
 
 	log.Logger.Debugf("Attempting login with user: %v, at: %v", ovLoginData.username, ovLoginData.host)
@@ -63,6 +60,38 @@ func runOVLogin(_ *cobra.Command, _ []string) error {
 	} else {
 		log.Logger.Warningf("Successfully logged into OneView: %s", ovLoginData.host)
 	}
+
+	return nil
+}
+
+func handlePasswordOptions() error {
+	if ovLoginData.password != "" {
+		if ovLoginData.passwordStdin {
+			return errors.New("--password and --password-stdin are mutually exclusive")
+		}
+		// if the password was set .. we don't need to get it from somewhere else
+		return nil
+	}
+
+	// asked to read from stdin
+	if ovLoginData.passwordStdin {
+		pswd, err := password.ReadFromStdIn()
+		if err != nil {
+			return err
+		}
+
+		ovLoginData.password = pswd
+
+		return nil
+	}
+
+	// password wasn't specified so we need to prompt them for it
+	pswd, err := password.ReadFromConsole("oneview password: ")
+	if err != nil {
+		return err
+	}
+
+	ovLoginData.password = pswd
 
 	return nil
 }
