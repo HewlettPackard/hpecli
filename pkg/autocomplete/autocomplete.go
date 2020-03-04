@@ -45,7 +45,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	log.Logger.Debugf("Bash completion file for hpecli saved to", genautocompleteCmd.autocompleteTarget)
+	log.Logger.Debug("Bash completion file for hpecli saved to", genautocompleteCmd.autocompleteTarget)
 
 	return nil
 }
