@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
-	"github.com/HewlettPackard/hpecli/pkg/bashcompletion"
+	"github.com/HewlettPackard/hpecli/pkg/autocomplete"
 	"github.com/HewlettPackard/hpecli/pkg/cloudvolume"
 	"github.com/HewlettPackard/hpecli/pkg/greenlake"
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
@@ -88,7 +88,7 @@ func addSubCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(update.Cmd)
 	rootCmd.AddCommand(greenlake.Cmd)
 	rootCmd.AddCommand(version.Cmd)
-	rootCmd.AddCommand(bashcompletion.Cmd)
+	rootCmd.AddCommand(autocomplete.Cmd)
 }
 
 // cobra doesn't parse the command line arguments until cmd.Execute is called

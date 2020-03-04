@@ -14,3 +14,6 @@
 # Mac meta files, Desktop Services Store
 .DS_Store
 pkg/.DS_Store
+
+# autocompletion script
+autocomplete.sh
