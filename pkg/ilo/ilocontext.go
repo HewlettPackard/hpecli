@@ -2,9 +2,7 @@
 
 package ilo
 
-import (
-	"github.com/HewlettPackard/hpecli/internal/platform/context"
-)
+import "github.com/HewlettPackard/hpecli/internal/platform/context"
 
 const iloAPIKeyPrefix = "hpecli_ilo_token_"
 const iloContextKey = "hpecli_ilo_context"
@@ -49,6 +47,11 @@ func getSessionData(host string) (data *sessionData, err error) {
 	}
 
 	return data, nil
+}
+
+func getContext() (string, error) {
+	c := context.New(iloContextKey)
+	return c.ModuleContext()
 }
 
 func setContext(host string) error {

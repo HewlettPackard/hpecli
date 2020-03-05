@@ -38,3 +38,15 @@ func TestContextIsSetInDB(t *testing.T) {
 		t.Fatal("expected to find the context but not the key")
 	}
 }
+
+func TestCheckDefaultContextFound(t *testing.T) {
+	// setup data
+	setContext("https://127.0.0.1")
+
+	// don't specify a host, so it will look for the default context value
+	ovContextHost.host = ""
+
+	if err := runChangeContext(nil, nil); err != nil {
+		t.Errorf("didn't get default context successfully: %s", err)
+	}
+}

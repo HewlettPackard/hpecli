@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/spf13/cobra"
 )
 
@@ -21,12 +22,23 @@ func newContextCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&host, "host", "", "ilo host/ip address")
-	_ = cmd.MarkFlagRequired("host")
 
 	return cmd
 }
 
 func runSetContext(host *string) error {
+	// didn't specify host, so just show current context
+	if *host == "" {
+		ctx, err := getContext()
+		if err != nil {
+			return err
+		}
+
+		log.Logger.Warningf("Default ilo commands directed to host: %s", ctx)
+
+		return nil
+	}
+
 	if !strings.HasPrefix(*host, "http") {
 		*host = fmt.Sprintf("https://%s", *host)
 	}
