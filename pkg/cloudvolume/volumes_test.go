@@ -5,11 +5,9 @@ package cloudvolume
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
-	"github.com/HewlettPackard/hpecli/internal/platform/db"
 )
 
 func init() {
@@ -17,11 +15,11 @@ func init() {
 }
 
 func TestRunCVGetVolumesWithMissingAPIKey(t *testing.T) {
-	f := db.KeystoreLocation()
-	// delete the default store
-	_ = os.Remove(f)
+	// clear everything from the mock store
+	context.MockClear()
 
-	err := runCVGetVolumes(nil, nil)
+	err := runGetVolumes()
+	// since the context isn't present - should fail
 	if err == nil {
 		t.Fatal(err)
 	}
@@ -38,13 +36,9 @@ func TestRunCVGetVolumes(t *testing.T) {
 
 	defer ts.Close()
 
-	f := db.KeystoreLocation()
-	// delete the default store
-	_ = os.Remove(f)
-
 	saveData(ts.URL, "someAPIKey")
 
-	err := runCVGetVolumes(nil, nil)
+	err := runGetVolumes()
 	if err != nil {
 		t.Fatal(err)
 	}
