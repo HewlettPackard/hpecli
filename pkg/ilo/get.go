@@ -6,12 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	cmdILOGet.AddCommand(cmdILOServiceRoot)
-}
+func newGetCommand() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get details from iLO",
+	}
 
-// Cmd represents the ilo command
-var cmdILOGet = &cobra.Command{
-	Use:   "get",
-	Short: "Get details from iLO",
+	cmd.AddCommand(
+		newServiceRootCommand(),
+	)
+
+	return cmd
 }
