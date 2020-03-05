@@ -85,7 +85,7 @@ func run() error {
 func addSubCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(
 		cloudvolume.NewCloudVolumeCommand(),
-    ilo.NewILOCommand()
+		ilo.NewILOCommand(),
 	)
 	rootCmd.AddCommand(oneview.Cmd)
 	rootCmd.AddCommand(update.Cmd)
