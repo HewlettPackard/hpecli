@@ -15,7 +15,7 @@ func init() {
 	context.DefaultDBOpenFunc = context.MockOpen
 }
 
-func TestRunLogins(t *testing.T) {
+func TestLoginWorks(t *testing.T) {
 	const want = "e826d2b3-4925-4f49-86ab-e7f1462c0511"
 	jsonResponse := fmt.Sprintf(`{"geo":"US", "token":"%s"}`, want)
 
@@ -23,15 +23,16 @@ func TestRunLogins(t *testing.T) {
 		fmt.Fprint(w, jsonResponse)
 	})
 
-	opts := cvLoginOptions{
-		host:     ts.URL,
-		password: "arbitrary",
-	}
+	defer ts.Close()
+
+	// setup login details.  would normally be populated by cobra
+	cvLoginData.host = ts.URL
+	cvLoginData.password = "arbitrary - so we don't promp"
 
 	// erase value from db - so we know it is empty
 	saveData(ts.URL, "")
 
-	err := runLogin(&opts)
+	err := runCVLogin(nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,29 +57,13 @@ func TestHostGetsPrefixed(t *testing.T) {
 	})
 	defer ts.Close()
 
-	opts := cvLoginOptions{
-		host:     strings.TrimPrefix(ts.URL, "http://"),
-		password: "arbitrary",
-	}
+	// setup login details.  would normally be populated by cobra
+	cvLoginData.host = strings.TrimPrefix(ts.URL, "http://")
 
-	_ = runLogin(&opts)
+	_ = runCVLogin(nil, nil)
 
 	// ensure host got http prefix applied
-	if !strings.HasPrefix(opts.host, "https://") {
+	if !strings.HasPrefix(cvLoginData.host, "https://") {
 		t.Fatal("expected host to get https prefix")
-	}
-}
-
-func TestRunLoginCmd(t *testing.T) {
-	cmd := newLoginCommand()
-
-	// check some fields are set
-	if cmd.Use != "login" {
-		t.Error("use text not set as expected")
-	}
-
-	// just check one of the flags that are set
-	if cmd.Flags().Lookup("host") == nil {
-		t.Error("didn't find expected flag for host")
 	}
 }

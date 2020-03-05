@@ -6,17 +6,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCloudVolumeCommand() *cobra.Command {
-	// cmd represents the ilo command
-	var cmd = &cobra.Command{
-		Use:   "cloudvolume",
-		Short: "Access to HPE Nimble Cloud Volume commands",
-	}
+// Cmd represents the ilo command
+var Cmd = &cobra.Command{
+	Use:   "cloudvolume",
+	Short: "Access to HPE Nimble Cloud Volume commands",
+}
 
-	cmd.AddCommand(
-		newGetCommand(),
-		newLoginCommand(),
-	)
-
-	return cmd
+func init() {
+	Cmd.AddCommand(cmdGet)
+	Cmd.AddCommand(cmdLogin)
 }
