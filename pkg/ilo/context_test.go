@@ -58,3 +58,14 @@ func TestNewContextCommand(t *testing.T) {
 		t.Error("unexpected use value")
 	}
 }
+
+func TestCheckDefaultContextFound(t *testing.T) {
+	// setup data
+	setContext("https://127.0.0.1")
+
+	host := ""
+	// don't specify a host, so it will look for the default context value
+	if err := runSetContext(&host); err != nil {
+		t.Errorf("didn't get default context successfully: %s", err)
+	}
+}

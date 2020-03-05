@@ -42,6 +42,11 @@ func hostData(host string) (token string, err error) {
 	return token, nil
 }
 
+func getContext() (string, error) {
+	c := context.New(ovContextKey)
+	return c.ModuleContext()
+}
+
 func setContext(host string) error {
 	c := context.New(ovContextKey)
 	return c.SetModuleContext(host)
