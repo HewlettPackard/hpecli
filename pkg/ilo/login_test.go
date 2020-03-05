@@ -78,5 +78,4 @@ func TestTwoPasswordOptions(t *testing.T) {
 	if !strings.Contains(err.Error(), "mutually exclusive") {
 		t.Error("unexpected error text")
 	}
-
 }

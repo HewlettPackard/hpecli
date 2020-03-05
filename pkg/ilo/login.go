@@ -25,15 +25,15 @@ func newLoginCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "login",
 		Short: "Login to iLO: hpecli ilo login",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return runLogin(&opts)
 		},
 	}
 
+	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	cmd.Flags().StringVar(&opts.host, "host", "", "ilo ip address")
 	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "ilo username")
 	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "ilo password")
-	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	_ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("username")
 
