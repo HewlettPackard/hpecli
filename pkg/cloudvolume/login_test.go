@@ -48,7 +48,6 @@ func TestRunLogins(t *testing.T) {
 	if gotToken != want {
 		t.Fatalf(errTempl, gotHost, want)
 	}
-
 }
 
 func TestHostGetsPrefixed(t *testing.T) {
