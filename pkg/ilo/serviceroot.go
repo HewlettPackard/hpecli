@@ -9,15 +9,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// cmdIloLogin represents the get command
-var cmdILOServiceRoot = &cobra.Command{
-	Use:           "serviceroot",
-	Short:         "Get service root details",
-	SilenceErrors: true,
-	RunE:          runILOServiceRoot,
+func newServiceRootCommand() *cobra.Command {
+	// cmd represents the ilo command
+	var cmd = &cobra.Command{
+		Use:           "serviceroot",
+		Short:         "Get service root details",
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runILOServiceRoot()
+		},
+	}
+
+	return cmd
 }
 
-func runILOServiceRoot(cmd *cobra.Command, _ []string) error {
+func runILOServiceRoot() error {
 	log.Logger.Debug("Beginning runILOServiceRoot")
 
 	sd, err := defaultSessionData()
@@ -29,7 +35,7 @@ func runILOServiceRoot(cmd *cobra.Command, _ []string) error {
 
 	log.Logger.Warningf("Using iLO: %s", sd.Host)
 
-	client := NewILOClientFromAPIKey(sd.Host, sd.Token)
+	client := newILOClientFromAPIKey(sd.Host, sd.Token)
 
 	jsonResult, err := client.getServiceRoot()
 	if err != nil {

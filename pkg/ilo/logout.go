@@ -10,25 +10,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var iloLogoutHost struct {
-	host string
+func newLogoutCommand() *cobra.Command {
+	var host string
+
+	var cmd = &cobra.Command{
+		Use:   "logout",
+		Short: "Logout from ilo: hpecli ilo logout",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runILOLogout(&host)
+		},
+	}
+
+	cmd.Flags().StringVar(&host, "host", "", "ilo host/ip address")
+
+	return cmd
 }
 
-// iloLogoutCmd represents the ilo logout command
-var iloLogoutCmd = &cobra.Command{
-	Use:   "logout",
-	Short: "Logout from ilo: hpecli ilo logout",
-	RunE:  runILOLogout,
-}
-
-func init() {
-	iloLogoutCmd.Flags().StringVar(&iloLogoutHost.host, "host", "", "ilo host/ip address")
-}
-
-func runILOLogout(_ *cobra.Command, _ []string) error {
+func runILOLogout(host *string) error {
 	log.Logger.Debug("Beginning runILOLogout")
 
-	sessionData, err := sessionDataToLogout()
+	sessionData, err := sessionDataToLogout(host)
 	if err != nil {
 		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
@@ -37,7 +38,7 @@ func runILOLogout(_ *cobra.Command, _ []string) error {
 
 	log.Logger.Warningf("Using iLO: %s", sessionData.Host)
 
-	client := NewILOClientFromAPIKey(sessionData.Host, sessionData.Token)
+	client := newILOClientFromAPIKey(sessionData.Host, sessionData.Token)
 
 	err = client.logout(sessionData.Location)
 	if err != nil {
@@ -57,10 +58,10 @@ func runILOLogout(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func sessionDataToLogout() (data *sessionData, err error) {
+func sessionDataToLogout(host *string) (data *sessionData, err error) {
 	data = &sessionData{}
 
-	if iloLogoutHost.host == "" {
+	if *host == "" {
 		// they didn't specify a host.. so use the context to find one
 		d, e := defaultSessionData()
 		if e != nil {
@@ -73,11 +74,11 @@ func sessionDataToLogout() (data *sessionData, err error) {
 	}
 
 	// they specified a host to logout.  get the token for that host
-	if !strings.HasPrefix(iloLogoutHost.host, "http") {
-		iloLogoutHost.host = fmt.Sprintf("https://%s", iloLogoutHost.host)
+	if !strings.HasPrefix(*host, "http") {
+		*host = fmt.Sprintf("https://%s", *host)
 	}
 
-	d, err := getSessionData(iloLogoutHost.host)
+	d, err := getSessionData(*host)
 	if err != nil {
 		return data, err
 	}

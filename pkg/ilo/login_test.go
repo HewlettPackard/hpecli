@@ -20,14 +20,16 @@ func TestHostPrefixAdded(t *testing.T) {
 	})
 	defer server.Close()
 
-	iloLoginData.host = strings.Replace(server.URL, "http://", "", 1)
-	iloLoginData.password = "blah"
+	opts := iloLoginOptions{
+		host:     strings.Replace(server.URL, "http://", "", 1),
+		password: "blah",
+	}
 
 	// this will fail with a remote call.. ignore the failure and
 	// check the host string to ensure prefix addded
-	_ = runILOLogin(nil, nil)
+	_ = runLogin(&opts)
 
-	if !strings.HasPrefix(iloLoginData.host, "https://") {
+	if !strings.HasPrefix(opts.host, "https://") {
 		t.Fatalf("host should be prefixed with http scheme")
 	}
 }
@@ -42,20 +44,39 @@ func TestAPIKeyIsStored(t *testing.T) {
 
 	defer server.Close()
 
-	iloLoginData.host = server.URL
-	iloLoginData.password = "blah"
+	opts := iloLoginOptions{
+		host:     server.URL,
+		password: "blah",
+	}
 
-	err := runILOLogin(nil, nil)
+	err := runLogin(&opts)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	d, _ := defaultSessionData()
-	if d.Host != iloLoginData.host {
-		t.Fatalf(errTempl, d.Host, iloLoginData.host)
+	if d.Host != opts.host {
+		t.Fatalf(errTempl, d.Host, opts.host)
 	}
 
 	if d.Token != sessionID {
 		t.Fatalf(errTempl, d.Token, sessionID)
 	}
+}
+
+func TestTwoPasswordOptions(t *testing.T) {
+	opts := &iloLoginOptions{
+		password:      "pswd",
+		passwordStdin: true,
+	}
+
+	err := handlePasswordOptions(opts)
+	if err == nil {
+		t.Error("expected error")
+	}
+
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Error("unexpected error text")
+	}
+
 }

@@ -32,5 +32,5 @@ func TestAPIKeyInjectedIntoRequest(t *testing.T) {
 	// set context to the test server host
 	saveContextAndSessionData(d)
 
-	_ = runILOServiceRoot(nil, nil)
+	_ = runILOServiceRoot()
 }
