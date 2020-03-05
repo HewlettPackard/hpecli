@@ -19,7 +19,7 @@ type Client struct {
 	*rest.Request
 }
 
-func newILOClient(host, username, password string) *Client {
+func NewILOClient(host, username, password string) *Client {
 	return &Client{
 		Host:     host,
 		Username: username,
@@ -27,7 +27,7 @@ func newILOClient(host, username, password string) *Client {
 	}
 }
 
-func newILOClientFromAPIKey(host, token string) *Client {
+func NewILOClientFromAPIKey(host, token string) *Client {
 	return &Client{
 		Host:   host,
 		APIKey: token,

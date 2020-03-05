@@ -20,6 +20,7 @@ type cvLoginOptions struct {
 func newLoginCommand() *cobra.Command {
 	var opts cvLoginOptions
 
+	// Cmd represents the cloudvolume get command
 	var cmd = &cobra.Command{
 		Use:   "login",
 		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolume login",

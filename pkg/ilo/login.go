@@ -12,50 +12,45 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type iloLoginOptions struct {
+var iloLoginData struct {
 	host,
 	username,
 	password string
 	passwordStdin bool
 }
 
-func newLoginCommand() *cobra.Command {
-	var opts iloLoginOptions
-
-	var cmd = &cobra.Command{
-		Use:   "login",
-		Short: "Login to iLO: hpecli ilo login",
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return runLogin(&opts)
-		},
-	}
-
-	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
-	cmd.Flags().StringVar(&opts.host, "host", "", "ilo ip address")
-	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "ilo username")
-	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "ilo password")
-	_ = cmd.MarkFlagRequired("host")
-	_ = cmd.MarkFlagRequired("username")
-
-	return cmd
+// cmdIloLogin represents the get command
+var cmdILOLogin = &cobra.Command{
+	Use:   "login",
+	Short: "Login to iLO: hpecli ilo login",
+	RunE:  runILOLogin,
 }
 
-func runLogin(opts *iloLoginOptions) error {
-	if !strings.HasPrefix(opts.host, "http") {
-		opts.host = fmt.Sprintf("https://%s", opts.host)
+func init() {
+	cmdILOLogin.Flags().StringVar(&iloLoginData.host, "host", "", "ilo ip address")
+	cmdILOLogin.Flags().StringVarP(&iloLoginData.username, "username", "u", "", "ilo username")
+	cmdILOLogin.Flags().StringVarP(&iloLoginData.password, "password", "p", "", "ilo password")
+	cmdILOLogin.Flags().BoolVarP(&iloLoginData.passwordStdin, "password-stdin", "", false, "read password from stdin")
+	_ = cmdILOLogin.MarkFlagRequired("host")
+	_ = cmdILOLogin.MarkFlagRequired("username")
+}
+
+func runILOLogin(_ *cobra.Command, _ []string) error {
+	if !strings.HasPrefix(iloLoginData.host, "http") {
+		iloLoginData.host = fmt.Sprintf("https://%s", iloLoginData.host)
 	}
 
-	if err := handlePasswordOptions(opts); err != nil {
+	if err := handlePasswordOptions(); err != nil {
 		return err
 	}
 
-	log.Logger.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
+	log.Logger.Debugf("Attempting login with user: %v, at: %v", iloLoginData.username, iloLoginData.host)
 
-	cl := newILOClient(opts.host, opts.username, opts.password)
+	cl := NewILOClient(iloLoginData.host, iloLoginData.username, iloLoginData.password)
 
 	sd, err := cl.login()
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to ilo at: %s", opts.host)
+		log.Logger.Warningf("Unable to login with supplied credentials to ilo at: %s", iloLoginData.host)
 		return err
 	}
 
@@ -64,15 +59,15 @@ func runLogin(opts *iloLoginOptions) error {
 	if err = saveContextAndSessionData(sd); err != nil {
 		log.Logger.Warning("Successfully logged into ilo, but was unable to save the session data")
 	} else {
-		log.Logger.Warningf("Successfully logged into ilo: %s", opts.host)
+		log.Logger.Warningf("Successfully logged into ilo: %s", iloLoginData.host)
 	}
 
 	return nil
 }
 
-func handlePasswordOptions(opts *iloLoginOptions) error {
-	if opts.password != "" {
-		if opts.passwordStdin {
+func handlePasswordOptions() error {
+	if iloLoginData.password != "" {
+		if iloLoginData.passwordStdin {
 			return errors.New("--password and --password-stdin are mutually exclusive")
 		}
 		// if the password was set .. we don't need to get it from somewhere else
@@ -80,13 +75,13 @@ func handlePasswordOptions(opts *iloLoginOptions) error {
 	}
 
 	// asked to read from stdin
-	if opts.passwordStdin {
+	if iloLoginData.passwordStdin {
 		pswd, err := password.ReadFromStdIn()
 		if err != nil {
 			return err
 		}
 
-		opts.password = pswd
+		iloLoginData.password = pswd
 
 		return nil
 	}
@@ -97,7 +92,7 @@ func handlePasswordOptions(opts *iloLoginOptions) error {
 		return err
 	}
 
-	opts.password = pswd
+	iloLoginData.password = pswd
 
 	return nil
 }

@@ -6,18 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewILOCommand() *cobra.Command {
-	var cmd = &cobra.Command{
-		Use:   "ilo",
-		Short: "Access to HPE iLO commands",
-	}
+func init() {
+	Cmd.AddCommand(cmdILOContext)
+	Cmd.AddCommand(cmdILOGet)
+	Cmd.AddCommand(cmdILOLogin)
+	Cmd.AddCommand(iloLogoutCmd)
+}
 
-	cmd.AddCommand(
-		newContextCommand(),
-		newGetCommand(),
-		newLoginCommand(),
-		newLogoutCommand(),
-	)
-
-	return cmd
+// Cmd represents the ilo command
+var Cmd = &cobra.Command{
+	Use:   "ilo",
+	Short: "Access to HPE iLO commands",
 }

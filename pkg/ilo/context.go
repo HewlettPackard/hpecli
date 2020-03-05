@@ -9,27 +9,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newContextCommand() *cobra.Command {
-	var host string
-
-	var cmd = &cobra.Command{
-		Use:   "context",
-		Short: "Chagne context to different ilo host",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSetContext(&host)
-		},
-	}
-
-	cmd.Flags().StringVar(&host, "host", "", "ilo host/ip address")
-	_ = cmd.MarkFlagRequired("host")
-
-	return cmd
+// Cmd represents the ilo command
+var cmdILOContext = &cobra.Command{
+	Use:   "context",
+	Short: "Chagne context to different ilo host",
+	RunE:  runSetContext,
 }
 
-func runSetContext(host *string) error {
-	if !strings.HasPrefix(*host, "http") {
-		*host = fmt.Sprintf("https://%s", *host)
+var iloContextHost struct {
+	host string
+}
+
+func init() {
+	cmdILOContext.Flags().StringVar(&iloContextHost.host, "host", "", "ilo host/ip address")
+	_ = cmdILOContext.MarkFlagRequired("host")
+}
+
+func runSetContext(_ *cobra.Command, _ []string) error {
+	if !strings.HasPrefix(iloContextHost.host, "http") {
+		iloContextHost.host = fmt.Sprintf("https://%s", iloContextHost.host)
 	}
 
-	return setContext(*host)
+	return setContext(iloContextHost.host)
 }

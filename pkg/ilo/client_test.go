@@ -25,7 +25,7 @@ func init() {
 }
 
 func TestNewILOCClient(t *testing.T) {
-	c := newILOClient(clientHost, clientUsername, clientPassword)
+	c := NewILOClient(clientHost, clientUsername, clientPassword)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -44,7 +44,7 @@ func TestNewILOCClient(t *testing.T) {
 }
 
 func TestNewILOClientFromAPIKey(t *testing.T) {
-	c := newILOClientFromAPIKey(clientHost, clientToken)
+	c := NewILOClientFromAPIKey(clientHost, clientToken)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -67,7 +67,7 @@ func TestMalformedResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newILOClient(ts.URL, clientUsername, clientPassword)
+	c := NewILOClient(ts.URL, clientUsername, clientPassword)
 
 	_, err := c.login()
 	if err == nil {
@@ -88,7 +88,7 @@ func TestTokenResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newILOClient(ts.URL, clientUsername, clientPassword)
+	c := NewILOClient(ts.URL, clientUsername, clientPassword)
 
 	got, err := c.login()
 	if err != nil {
@@ -116,7 +116,7 @@ func TestAPIKeyInjected(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newILOClientFromAPIKey(ts.URL, want)
+	c := NewILOClientFromAPIKey(ts.URL, want)
 
 	// checks are done on server side above
 	_, _ = c.getServiceRoot()
@@ -135,7 +135,7 @@ func TestGetServiceRoot(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newILOClientFromAPIKey(ts.URL, "someAPIKey")
+	c := NewILOClientFromAPIKey(ts.URL, "someAPIKey")
 
 	got, err := c.getServiceRoot()
 	if err != nil {
@@ -157,7 +157,7 @@ func TestLogoutRestCallFails(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newILOClientFromAPIKey(ts.URL, "someAPIKey")
+	c := NewILOClientFromAPIKey(ts.URL, "someAPIKey")
 
 	err := c.logout(ts.URL + sessionURL)
 	if err == nil {
@@ -166,7 +166,7 @@ func TestLogoutRestCallFails(t *testing.T) {
 }
 
 func TestLogoutRestCallError(t *testing.T) {
-	c := newILOClientFromAPIKey("someHOst", "someAPIKey")
+	c := NewILOClientFromAPIKey("someHOst", "someAPIKey")
 
 	// control char in the URL will cause failure
 	err := c.logout("/someurl/0x7f")
@@ -183,7 +183,7 @@ func TestLogoutWorks(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newILOClientFromAPIKey(ts.URL, "someAPIKey")
+	c := NewILOClientFromAPIKey(ts.URL, "someAPIKey")
 
 	err := c.logout(ts.URL + sessionURL)
 	if err != nil {

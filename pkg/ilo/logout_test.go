@@ -15,13 +15,19 @@ func init() {
 }
 
 func TestLogoutHostPrefixAdded(t *testing.T) {
-	host := "127.0.0.1"
+	server := newTestServer("/redfish/v1/sessionservice/sessions/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	defer server.Close()
+
+	iloLogoutHost.host = strings.Replace(server.URL, "http://", "", 1)
 
 	// this will fail with a remote call.. ignore the failure and
 	// check the host string to ensure prefix addded
-	_ = runILOLogout(&host)
+	_ = runILOLogout(nil, nil)
 
-	if !strings.HasPrefix(host, "https://") {
+	if !strings.HasPrefix(iloLogoutHost.host, "https://") {
 		t.Fatalf("host should be prefixed with http scheme")
 	}
 }
@@ -37,16 +43,16 @@ func TestLogoutSessionDataDeleted(t *testing.T) {
 
 	defer server.Close()
 
-	host := server.URL
+	iloLogoutHost.host = server.URL
 
 	saveContextAndSessionData(&sessionData{server.URL, sessionID, server.URL + pathURI})
 
-	err := runILOLogout(&host)
+	err := runILOLogout(nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = getSessionData(host)
+	_, err = getSessionData(iloLogoutHost.host)
 	if err != context.ErrorKeyNotFound {
 		t.Fatalf("expected ErrorKeyNotFound, but found %+v", err)
 	}
@@ -63,16 +69,16 @@ func TestLogoutDefaultSessionDataDeleted(t *testing.T) {
 
 	defer server.Close()
 
-	host := ""
+	iloLogoutHost.host = ""
 
 	saveContextAndSessionData(&sessionData{server.URL, sessionID, server.URL + pathURI})
 
-	err := runILOLogout(&host)
+	err := runILOLogout(nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = getSessionData(host)
+	_, err = getSessionData(iloLogoutHost.host)
 	if err != context.ErrorKeyNotFound {
 		t.Fatalf("expected ErrorKeyNotFound, but found %+v", err)
 	}

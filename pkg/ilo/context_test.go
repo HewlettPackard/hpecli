@@ -14,12 +14,12 @@ func init() {
 }
 
 func TestHostPrefixAddedForContext(t *testing.T) {
-	host := "127.0.0.1"
+	iloContextHost.host = "127.0.0.1"
 
 	// run it and then check the variable after
-	_ = runSetContext(&host)
+	_ = runSetContext(nil, nil)
 
-	if !strings.HasPrefix(host, "https://") {
+	if !strings.HasPrefix(iloContextHost.host, "https://") {
 		t.Fatalf("host should be prefixed with http scheme")
 	}
 }
@@ -48,13 +48,5 @@ func TestGetWorks(t *testing.T) {
 
 	if got.Location != l1 {
 		t.Fatal("didn't retrieve matching value")
-	}
-}
-
-func TestNewContextCommand(t *testing.T) {
-	cmd := newContextCommand()
-
-	if cmd.Use != "context" {
-		t.Error("unexpected use value")
 	}
 }
