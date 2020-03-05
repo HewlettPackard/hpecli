@@ -17,7 +17,7 @@ type CVClient struct {
 	*rest.Request
 }
 
-func NewCVClient(host, username, password string) *CVClient {
+func newCVClient(host, username, password string) *CVClient {
 	return &CVClient{
 		Host:     host,
 		Username: username,
@@ -25,7 +25,7 @@ func NewCVClient(host, username, password string) *CVClient {
 	}
 }
 
-func NewCVClientFromAPIKey(host, token string) *CVClient {
+func newCVClientFromAPIKey(host, token string) *CVClient {
 	return &CVClient{
 		Host:   host,
 		APIKey: token,

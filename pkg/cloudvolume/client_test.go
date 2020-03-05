@@ -33,7 +33,7 @@ func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) 
 }
 
 func TestNewCVCClient(t *testing.T) {
-	c := NewCVClient(clientHost, clientUsername, clientPassword)
+	c := newCVClient(clientHost, clientUsername, clientPassword)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -52,7 +52,7 @@ func TestNewCVCClient(t *testing.T) {
 }
 
 func TestNewCVClientFromAPIKey(t *testing.T) {
-	c := NewCVClientFromAPIKey(clientHost, clientToken)
+	c := newCVClientFromAPIKey(clientHost, clientToken)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -75,7 +75,7 @@ func TestMalformedResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewCVClient(ts.URL, clientUsername, clientPassword)
+	c := newCVClient(ts.URL, clientUsername, clientPassword)
 
 	_, err := c.Login()
 	if err == nil {
@@ -93,7 +93,7 @@ func TestTokenResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewCVClient(ts.URL, clientUsername, clientPassword)
+	c := newCVClient(ts.URL, clientUsername, clientPassword)
 
 	got, err := c.Login()
 	if err != nil {
@@ -119,7 +119,7 @@ func TestAPIKeyInjected(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewCVClientFromAPIKey(ts.URL, apiKey)
+	c := newCVClientFromAPIKey(ts.URL, apiKey)
 
 	// checks are done on server side above
 	_, _ = c.GetCloudVolumes()
@@ -138,7 +138,7 @@ func TestGetCloudVolumes(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewCVClientFromAPIKey(ts.URL, "someAPIKey")
+	c := newCVClientFromAPIKey(ts.URL, "someAPIKey")
 
 	got, err := c.GetCloudVolumes()
 	if err != nil {
