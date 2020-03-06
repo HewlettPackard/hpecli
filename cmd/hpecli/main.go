@@ -74,8 +74,6 @@ func run() error {
 	// check status from async method
 	newRelease := <-isUpdateChan
 
-	rootCmd.Commands()
-
 	// if update was just run, we don't need to tell them that there is an update
 	if newRelease && !update.UpdateRun {
 		log.Logger.Warn("An updated version of the CLI is available.  You can update by running \"hpecli update\"")
@@ -88,12 +86,12 @@ func addSubCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(
 		autocomplete.NewAutoCompleteCommand(),
 		cloudvolume.NewCloudVolumeCommand(),
+		greenlake.NewGreenlakeCommand(),
 		ilo.NewILOCommand(),
+		oneview.NewOneViewCommand(),
 		update.NewUpdateCommand(),
+		version.NewVersionCommand(),
 	)
-	rootCmd.AddCommand(oneview.Cmd)
-	rootCmd.AddCommand(greenlake.Cmd)
-	rootCmd.AddCommand(version.NewVersionCommand())
 }
 
 // cobra doesn't parse the command line arguments until cmd.Execute is called

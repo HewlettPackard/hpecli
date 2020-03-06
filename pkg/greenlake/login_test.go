@@ -15,48 +15,69 @@ func init() {
 	context.DefaultDBOpenFunc = context.MockOpen
 }
 
-func TestGlHostPrefixAdded(t *testing.T) {
-	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
+const uriPath = "/identity/v1/token"
+
+func TestGLHostPrefixAddedForLogin(t *testing.T) {
+	// clear everything from the mock store
+	context.MockClear()
+
+	server := newTestServer(uriPath, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, `{"access_token":"accessToken"}`)
 	})
+
 	defer server.Close()
 
-	glLoginData.host = strings.Replace(server.URL, "http://", "", 1)
-	glLoginData.secretKey = "blah"
+	host := strings.Replace(server.URL, "http://", "", 1)
 
-	// this will fail with a remote call.. ignore the failure and
-	// check the host string to ensure prefix addded
-	_ = runGLLogin(nil, nil)
+	cmd := newLoginCommand()
+	cmd.SetArgs([]string{"--host", host, "--tenantid", "id", "--userid", "user", "--secretkey", "key"})
+	_ = cmd.Execute()
 
-	if !strings.HasPrefix(glLoginData.host, "http://") {
-		t.Fatalf("host should be prefixed with http scheme")
+	// check to ensure context value gets the http scheme added
+	got, _ := getContext()
+	if got != "http://"+host {
+		t.Error("context value didn't get http scheme prefix")
 	}
 }
 
 func TestGLAccessTokenIsStored(t *testing.T) {
 	const accessToken = "GreenLake_Access_Token"
 
-	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
+	server := newTestServer(uriPath, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"access_token":"%s"}`, accessToken)
 	})
 
 	defer server.Close()
 
-	glLoginData.host = server.URL
-	glLoginData.secretKey = "blah"
+	cmd := newLoginCommand()
+	cmd.SetArgs([]string{"--host", server.URL, "--tenantid", "id", "--userid", "user", "--secretkey", "key"})
 
-	err := runGLLogin(nil, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_ = cmd.Execute()
 
 	d, _ := defaultSessionData()
-	if d.Host != glLoginData.host {
-		t.Fatalf(errTempl, d.Host, glLoginData.host)
+	if d.Host != server.URL {
+		t.Fatalf(errTempl, d.Host, server.URL)
 	}
 
 	if d.Token != accessToken {
 		t.Fatalf(errTempl, d.Token, accessToken)
+	}
+}
+
+func TestHTTPFailure(t *testing.T) {
+	server := newTestServer(uriPath, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+	defer server.Close()
+
+	opts := &glLoginOptions{
+		secretKey: "key",
+	}
+
+	err := runLogin(opts)
+	if err == nil {
+		t.Fatal("failed http request should fail the login request")
 	}
 }

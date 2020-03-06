@@ -6,14 +6,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	Cmd.AddCommand(cmdGLContext)
-	Cmd.AddCommand(cmdGLGet)
-	Cmd.AddCommand(cmdGLLogin)
-}
+func NewGreenlakeCommand() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use: "greenlake",
+	}
 
-// Cmd represents the greenlake command
-var Cmd = &cobra.Command{
-	Use:   "greenlake",
-	Short: "Access to HPE Green Lake commands",
+	cmd.AddCommand(
+		newContextCommand(),
+		newGetCommand(),
+		newLoginCommand(),
+	)
+
+	return cmd
 }

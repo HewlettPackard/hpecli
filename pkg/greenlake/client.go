@@ -31,8 +31,8 @@ type Token struct {
 	AccessTokenOnly bool   `json:"accessTokenOnly"`
 }
 
-// NewGLClient create
-func NewGLClient(grantType, clientID, secretKey, tenantID, host string) *GLClient {
+// newGLClient create
+func newGLClient(grantType, clientID, secretKey, tenantID, host string) *GLClient {
 	return &GLClient{
 		GrantType:    grantType,
 		ClientID:     clientID,
@@ -43,8 +43,8 @@ func NewGLClient(grantType, clientID, secretKey, tenantID, host string) *GLClien
 	}
 }
 
-// NewGLClientFromAPIKey creates a new GreenLake GLClient from existing API sessions key
-func NewGLClientFromAPIKey(host, tenantID, token string) *GLClient {
+// newGLClientFromAPIKey creates a new GreenLake GLClient from existing API sessions key
+func newGLClientFromAPIKey(host, tenantID, token string) *GLClient {
 	return &GLClient{
 		GrantType:    "client_credentials",
 		ClientID:     "",
@@ -93,11 +93,11 @@ func (c *GLClient) login() (*sessionData, error) {
 	return sd, nil
 }
 
-// GetUsers to list users
-func (c *GLClient) GetUsers() ([]byte, error) {
+// users to list users
+func (c *GLClient) users() ([]byte, error) {
 	uriPath := fmt.Sprintf("/scim/v1/tenant/" + c.TenantID + "/" + "Users")
 
-	resp, err := rest.Get(c.Host+uriPath, c.AddAuth(c.APIKey), rest.AllowSelfSignedCerts())
+	resp, err := rest.Get(c.Host+uriPath, c.addAuth(c.APIKey), rest.AllowSelfSignedCerts())
 	if err != nil {
 		return []byte{}, err
 	}
@@ -105,8 +105,8 @@ func (c *GLClient) GetUsers() ([]byte, error) {
 	return resp.JSON(), nil
 }
 
-// AddAuth func
-func (c *GLClient) AddAuth(apiKey string) func(*rest.Request) {
+// addAuth func
+func (c *GLClient) addAuth(apiKey string) func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Header.Add("Authorization", "Bearer "+apiKey)
 	}

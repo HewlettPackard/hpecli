@@ -3,7 +3,6 @@
 package greenlake
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
@@ -14,13 +13,21 @@ func init() {
 }
 
 func TestGLHostPrefixAddedForContext(t *testing.T) {
-	glContextHost.host = "127.0.0.2"
+	// clear everything from the mock store
+	context.MockClear()
 
-	// run it and then check the variable after
-	_ = runSetContext(nil, nil)
+	host := "127.0.0.2"
+	want := "https://" + host
 
-	if !strings.HasPrefix(glContextHost.host, "https://") {
-		t.Fatalf("host should be prefixed with http scheme")
+	cmd := newContextCommand()
+	cmd.SetArgs([]string{"--host", host})
+
+	_ = cmd.Execute()
+
+	// see if the naked host got stored (it shouldn't)
+	got, _ := getContext()
+	if got != want {
+		t.Error("didn't find context with corrected host: " + want)
 	}
 }
 

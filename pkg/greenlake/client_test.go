@@ -26,7 +26,7 @@ func init() {
 }
 
 func TestNewGLCClient(t *testing.T) {
-	c := NewGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, clientHost)
+	c := newGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, clientHost)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -53,7 +53,7 @@ func TestNewGLCClient(t *testing.T) {
 }
 
 func TestNewGLClientFromAPIKey(t *testing.T) {
-	c := NewGLClientFromAPIKey(clientHost, clientTenantID, clientToken)
+	c := newGLClientFromAPIKey(clientHost, clientTenantID, clientToken)
 	if c == nil {
 		t.Fatal("expected client to not be nil")
 	}
@@ -80,7 +80,7 @@ func TestGLMalformedResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, ts.URL)
+	c := newGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, ts.URL)
 
 	_, err := c.login()
 	if err == nil {
@@ -97,7 +97,7 @@ func TestGLTokenResponseForLogin(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, ts.URL)
+	c := newGLClient(clientGrantType, clientID, clientSecretKey, clientTenantID, ts.URL)
 
 	got, err := c.login()
 	if err != nil {
@@ -120,10 +120,10 @@ func TestGLAPIKeyInjected(t *testing.T) {
 	})
 
 	defer ts.Close()
-	c := NewGLClientFromAPIKey(ts.URL, clientTenantID, want)
+	c := newGLClientFromAPIKey(ts.URL, clientTenantID, want)
 
 	// checks are done on server side above
-	_, _ = c.GetUsers()
+	_, _ = c.users()
 }
 
 func TestGetUsers(t *testing.T) {
@@ -137,9 +137,9 @@ func TestGetUsers(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewGLClientFromAPIKey(ts.URL, clientTenantID, clientToken)
+	c := newGLClientFromAPIKey(ts.URL, clientTenantID, clientToken)
 
-	got, err := c.GetUsers()
+	got, err := c.users()
 	if err != nil {
 		t.Fatalf("unexpected error in GetServiceRoot attempt")
 	}
