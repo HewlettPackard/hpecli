@@ -84,6 +84,7 @@ func run() error {
 
 func addSubCommands(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(
+		autocomplete.NewAutoCompleteCommand(),
 		cloudvolume.NewCloudVolumeCommand(),
 		greenlake.NewGreenlakeCommand(),
 		ilo.NewILOCommand(),
@@ -91,7 +92,6 @@ func addSubCommands(rootCmd *cobra.Command) {
 		update.NewUpdateCommand(),
 		version.NewVersionCommand(),
 	)
-	rootCmd.AddCommand(autocomplete.Cmd)
 }
 
 // cobra doesn't parse the command line arguments until cmd.Execute is called

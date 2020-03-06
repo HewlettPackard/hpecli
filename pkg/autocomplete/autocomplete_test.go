@@ -5,17 +5,21 @@ import (
 )
 
 func TestCompletionForBash(t *testing.T) {
-	err := run(Cmd, nil)
+	cmd := NewAutoCompleteCommand()
+
+	err := cmd.Execute()
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCompletionForNotBash(t *testing.T) {
-	genautocompleteCmd.autocompleteType = "zsh"
-	err := run(Cmd, nil)
+	opts := &autocompleteOptions{
+		acType: "zsh",
+	}
 
-	if err != nil {
-		t.Fatal(err)
+	err := runAutoComplete(nil, opts)
+	if err == nil {
+		t.Fatal("expected to find error on non bash shell type")
 	}
 }
