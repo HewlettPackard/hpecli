@@ -15,11 +15,13 @@ func init() {
 	context.DefaultDBOpenFunc = context.MockOpen
 }
 
+const uriPath = "/identity/v1/token"
+
 func TestGLHostPrefixAddedForLogin(t *testing.T) {
 	// clear everything from the mock store
 	context.MockClear()
 
-	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
+	server := newTestServer(uriPath, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, `{"access_token":"accessToken"}`)
 	})
@@ -42,7 +44,7 @@ func TestGLHostPrefixAddedForLogin(t *testing.T) {
 func TestGLAccessTokenIsStored(t *testing.T) {
 	const accessToken = "GreenLake_Access_Token"
 
-	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
+	server := newTestServer(uriPath, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"access_token":"%s"}`, accessToken)
 	})
@@ -65,7 +67,7 @@ func TestGLAccessTokenIsStored(t *testing.T) {
 }
 
 func TestHTTPFailure(t *testing.T) {
-	server := newTestServer("/identity/v1/token", func(w http.ResponseWriter, r *http.Request) {
+	server := newTestServer(uriPath, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	})
 	defer server.Close()
