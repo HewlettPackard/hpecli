@@ -12,61 +12,65 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ovLoginData struct {
+type ovLoginOptions struct {
 	host,
 	username,
 	password string
 	passwordStdin bool
 }
 
-// ovLoginCmd represents the oneview ovLoginCmd command
-var ovLoginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Login to OneView: hpecli oneview login",
-	RunE:  runOVLogin,
-}
+func newLoginCommand() *cobra.Command {
+	var opts ovLoginOptions
 
-func init() {
-	ovLoginCmd.Flags().StringVar(&ovLoginData.host, "host", "", "oneview host/ip address")
-	ovLoginCmd.Flags().StringVarP(&ovLoginData.username, "username", "u", "", "oneview username")
-	ovLoginCmd.Flags().StringVarP(&ovLoginData.password, "password", "p", "", "oneview password")
-	ovLoginCmd.Flags().BoolVarP(&ovLoginData.passwordStdin, "password-stdin", "", false, "read password from stdin")
-	_ = ovLoginCmd.MarkFlagRequired("host")
-	_ = ovLoginCmd.MarkFlagRequired("username")
-}
-
-func runOVLogin(_ *cobra.Command, _ []string) error {
-	if !strings.HasPrefix(ovLoginData.host, "http") {
-		ovLoginData.host = fmt.Sprintf("https://%s", ovLoginData.host)
+	var cmd = &cobra.Command{
+		Use:   "login",
+		Short: "Login to OneView: hpecli oneview login",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			if !strings.HasPrefix(opts.host, "http") {
+				opts.host = fmt.Sprintf("https://%s", opts.host)
+			}
+			return runLogin(&opts)
+		},
 	}
 
-	if err := handlePasswordOptions(); err != nil {
+	cmd.Flags().StringVar(&opts.host, "host", "", "oneview host/ip address")
+	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "oneview username")
+	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "oneview password")
+	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
+	_ = cmd.MarkFlagRequired("host")
+	_ = cmd.MarkFlagRequired("username")
+
+	return cmd
+}
+
+func runLogin(opts *ovLoginOptions) error {
+	if err := handlePasswordOptions(opts); err != nil {
 		return err
 	}
 
-	log.Logger.Debugf("Attempting login with user: %v, at: %v", ovLoginData.username, ovLoginData.host)
+	log.Logger.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
 
 	// OneView Login currently doesn't support forced login message acknowledgement - so we roll our own
-	token, err := Login(ovLoginData.host, ovLoginData.username, ovLoginData.password)
+	token, err := login(opts.host, opts.username, opts.password)
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to OneView at: %s", ovLoginData.host)
+		log.Logger.Warningf("Unable to login with supplied credentials to OneView at: %s", opts.host)
 		return err
 	}
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
-	if err = saveContextAndHostData(ovLoginData.host, token); err != nil {
+	if err = saveContextAndHostData(opts.host, token); err != nil {
 		log.Logger.Warning("Successfully logged into OneView, but was unable to save the session data")
 	} else {
-		log.Logger.Warningf("Successfully logged into OneView: %s", ovLoginData.host)
+		log.Logger.Warningf("Successfully logged into OneView: %s", opts.host)
 	}
 
 	return nil
 }
 
-func handlePasswordOptions() error {
-	if ovLoginData.password != "" {
-		if ovLoginData.passwordStdin {
+func handlePasswordOptions(opts *ovLoginOptions) error {
+	if opts.password != "" {
+		if opts.passwordStdin {
 			return errors.New("--password and --password-stdin are mutually exclusive")
 		}
 		// if the password was set .. we don't need to get it from somewhere else
@@ -74,13 +78,13 @@ func handlePasswordOptions() error {
 	}
 
 	// asked to read from stdin
-	if ovLoginData.passwordStdin {
+	if opts.passwordStdin {
 		pswd, err := password.ReadFromStdIn()
 		if err != nil {
 			return err
 		}
 
-		ovLoginData.password = pswd
+		opts.password = pswd
 
 		return nil
 	}
@@ -91,7 +95,7 @@ func handlePasswordOptions() error {
 		return err
 	}
 
-	ovLoginData.password = pswd
+	opts.password = pswd
 
 	return nil
 }

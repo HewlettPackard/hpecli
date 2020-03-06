@@ -10,24 +10,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Cmd represents the ilo command
-var ovContextCmd = &cobra.Command{
-	Use:   "context",
-	Short: "Chagne context to different OneView host",
-	RunE:  runChangeContext,
+func newContextCommand() *cobra.Command {
+	var host string
+
+	cmd := &cobra.Command{
+		Use:   "context",
+		Short: "Chagne context to different OneView host",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if !strings.HasPrefix(host, "http") {
+				host = fmt.Sprintf("https://%s", host)
+			}
+
+			return runSetContext(host)
+		},
+	}
+
+	cmd.Flags().StringVar(&host, "host", "", "oneview host/ip address")
+
+	return cmd
 }
 
-var ovContextHost struct {
-	host string
-}
-
-func init() {
-	ovContextCmd.Flags().StringVar(&ovContextHost.host, "host", "", "oneview host/ip address")
-}
-
-func runChangeContext(_ *cobra.Command, _ []string) error {
+func runSetContext(host string) error {
 	// didn't specify host, so just show current context
-	if ovContextHost.host == "" {
+	if host == "" {
 		ctx, err := getContext()
 		if err != nil {
 			return err
@@ -38,9 +43,5 @@ func runChangeContext(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	if !strings.HasPrefix(ovContextHost.host, "http") {
-		ovContextHost.host = fmt.Sprintf("https://%s", ovContextHost.host)
-	}
-
-	return setContext(ovContextHost.host)
+	return setContext(host)
 }

@@ -10,27 +10,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ovServersData struct {
-	name string
+func newServersCommand() *cobra.Command {
+	var serverName string
+
+	var cmd = &cobra.Command{
+		Use:   "servers",
+		Short: "Get servers from OneView: hpecli oneview get servers",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return getServerHardware(serverName)
+		},
+	}
+
+	cmd.Flags().StringVar(&serverName, "name", "", "name of the server to retrieve")
+
+	return cmd
 }
 
-// login represents the oneview login command
-var serversCmd = &cobra.Command{
-	Use:   "servers",
-	Short: "Get servers from OneView: hpecli oneview get servers",
-	RunE:  getServers,
-}
-
-func init() {
-	ovGetCmd.AddCommand(serversCmd)
-	serversCmd.Flags().StringVar(&ovServersData.name, "name", "", "name of the server to retrieve")
-}
-
-func getServers(_ *cobra.Command, _ []string) error {
-	return getServerHardware()
-}
-
-func getServerHardware() error {
+func getServerHardware(serverName string) error {
 	host, token, err := hostAndToken()
 	if err != nil {
 		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
@@ -38,13 +34,13 @@ func getServerHardware() error {
 			"Please login to OneView using: hpecli oneview login")
 	}
 
-	ovc := NewOVClientFromAPIKey(host, token)
+	ovc := newOVClientFromAPIKey(host, token)
 
 	log.Logger.Warningf("Using OneView: %s", host)
 
 	var sh interface{}
-	if ovServersData.name != "" {
-		sh, err = ovc.GetServerHardwareByName(ovServersData.name)
+	if serverName != "" {
+		sh, err = ovc.GetServerHardwareByName(serverName)
 	} else {
 		sh, err = ovc.GetServerHardwareList(nil, "", "", "", "")
 	}

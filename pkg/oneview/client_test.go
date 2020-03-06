@@ -15,7 +15,7 @@ func init() {
 }
 
 func TestUserPassConstructor(t *testing.T) {
-	ovc := NewOVClient(testHost, testUser, testPass)
+	ovc := newOVClient(testHost, testUser, testPass)
 	if ovc == nil {
 		t.Fatal("constructor returned nil")
 	}
@@ -36,7 +36,7 @@ func TestUserPassConstructor(t *testing.T) {
 func TestAPIKeyConstructor(t *testing.T) {
 	const testAPIKey = "some key"
 
-	ovc := NewOVClientFromAPIKey(testHost, testAPIKey)
+	ovc := newOVClientFromAPIKey(testHost, testAPIKey)
 	if ovc == nil {
 		t.Fatal("constructor returned nil")
 	}

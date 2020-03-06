@@ -6,8 +6,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Cmd represents the ilo command
-var ovGetCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get data from HPE OneView",
+func newGetCommand() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get data from HPE OneView",
+	}
+
+	cmd.AddCommand(
+		newEnclosuresCommand(),
+		newServersCommand(),
+	)
+
+	return cmd
 }
