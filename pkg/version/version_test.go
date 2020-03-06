@@ -45,7 +45,8 @@ func TestGetFull(t *testing.T) {
 }
 
 func TestCmdCreated(t *testing.T) {
-	if Cmd == nil {
+	cmd := NewVersionCommand()
+	if cmd == nil {
 		t.Fatal("command should have been initialized")
 	}
 }
@@ -80,9 +81,8 @@ func TestIsFullVersion(t *testing.T) {
 	for _, c := range cases {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
-			verbose = c.verbose
 			log.Logger.Level = c.logLevel
-			got := isFullVersion()
+			got := isFullVersion(c.verbose)
 			if got != c.want {
 				t.Fatalf(expectedError, got, c.want)
 			}
@@ -98,27 +98,21 @@ func TestFullVersionOutput(t *testing.T) {
 	// if values aren't injected at compile time
 	// then everything just defaults to 0
 	want := "0.0.0:0:0"
-	verbose = true
 
-	got := versionOutput()
+	got := versionToShow(true)
 	if got != want {
 		t.Fatalf(expectedError, got, want)
 	}
 }
 
-func TestVersionOutput(t *testing.T) {
+func TestRunVersion(t *testing.T) {
 	// if values aren't injected at compile time
 	// then everything just defaults to 0
 	want := v0
-	verbose = false
 	log.Logger.Level = logrus.InfoLevel
 
-	got := versionOutput()
+	got := versionToShow(false)
 	if got != want {
 		t.Fatalf(expectedError, got, want)
 	}
-}
-
-func TestRun(_ *testing.T) {
-	run(nil, nil)
 }

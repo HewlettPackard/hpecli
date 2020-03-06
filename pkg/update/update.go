@@ -13,14 +13,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Cmd represents the update command
-var Cmd = &cobra.Command{
-	Use:   "update",
-	Short: "Update the hpecli executable",
-	RunE:  runUpdate,
+// UpdateRun is by main to see if the update command was run
+// to suppress the message that and update is available
+var UpdateRun bool
+
+func NewUpdateCommand() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "update",
+		Short: "Update the hpecli executable",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			UpdateRun = true
+			return runUpdate()
+		},
+	}
+
+	return cmd
 }
 
-func runUpdate(_ *cobra.Command, _ []string) error {
+func runUpdate() error {
 	localVer := version.Get()
 
 	resp, err := checkUpdate(&jsonSource{url: versionURL}, localVer)
