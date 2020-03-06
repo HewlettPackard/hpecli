@@ -10,27 +10,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ovEnclosureData struct {
-	name string
+func newEnclosuresCommand() *cobra.Command {
+	var enclosureName string
+
+	var cmd = &cobra.Command{
+		Use:   "enclosures",
+		Short: "Get enclosures from OneView: hpecli oneview get enclosures",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return getEnclosuresData(enclosureName)
+		},
+	}
+
+	cmd.Flags().StringVar(&enclosureName, "name", "", "name of the enclosure to retrieve")
+
+	return cmd
 }
 
-func init() {
-	ovGetCmd.AddCommand(enclosuresCmd)
-	enclosuresCmd.Flags().StringVar(&ovEnclosureData.name, "name", "", "name of the enclosure to retrieve")
-}
-
-// login represents the oneview login command
-var enclosuresCmd = &cobra.Command{
-	Use:   "enclosures",
-	Short: "Get enclosures from OneView: hpecli oneview get enclosures",
-	RunE:  getEnclosures,
-}
-
-func getEnclosures(_ *cobra.Command, _ []string) error {
-	return getEnclosuresData()
-}
-
-func getEnclosuresData() error {
+func getEnclosuresData(enclosureName string) error {
 	host, token, err := hostAndToken()
 	if err != nil {
 		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
@@ -38,14 +34,14 @@ func getEnclosuresData() error {
 			"Please login to OneView using: hpecli oneview login")
 	}
 
-	ovc := NewOVClientFromAPIKey(host, token)
+	ovc := newOVClientFromAPIKey(host, token)
 
 	log.Logger.Warningf("Using OneView: %s", host)
 
 	var el interface{}
 
-	if ovEnclosureData.name != "" {
-		el, err = ovc.GetEnclosureByName(ovEnclosureData.name)
+	if enclosureName != "" {
+		el, err = ovc.GetEnclosureByName(enclosureName)
 	} else {
 		el, err = ovc.GetEnclosures("", "", "", "", "")
 	}

@@ -13,8 +13,10 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(ovContextCmd)
-	Cmd.AddCommand(ovGetCmd)
-	Cmd.AddCommand(ovLoginCmd)
-	Cmd.AddCommand(ovLogoutCmd)
+	Cmd.AddCommand(
+		newContextCommand(),
+		newGetCommand(),
+		newLoginCommand(),
+		newLogoutCommand(),
+	)
 }

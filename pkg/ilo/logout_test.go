@@ -3,7 +3,9 @@
 package ilo
 
 import (
+	"errors"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -15,14 +17,26 @@ func init() {
 }
 
 func TestLogoutHostPrefixAdded(t *testing.T) {
-	host := "127.0.0.1"
+	// // clear everything from the mock store
+	context.MockClear()
 
-	// this will fail with a remote call.. ignore the failure and
-	// check the host string to ensure prefix addded
-	_ = runILOLogout(&host)
+	mux := http.NewServeMux()
+	server := httptest.NewTLSServer(mux)
+	mux.HandleFunc("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 
-	if !strings.HasPrefix(host, "https://") {
-		t.Fatalf("host should be prefixed with http scheme")
+	defer server.Close()
+
+	host := strings.Replace(server.URL, "https://", "", 1)
+
+	cmd := newLogoutCommand()
+	cmd.SetArgs([]string{"--host", host})
+	_ = cmd.Execute()
+
+	_, err := getSessionData(server.URL)
+	if !errors.Is(err, context.ErrorKeyNotFound) {
+		t.Fatal("logout should delete the context")
 	}
 }
 
@@ -41,7 +55,7 @@ func TestLogoutSessionDataDeleted(t *testing.T) {
 
 	saveContextAndSessionData(&sessionData{server.URL, sessionID, server.URL + pathURI})
 
-	err := runILOLogout(&host)
+	err := runLogout(host)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +81,7 @@ func TestLogoutDefaultSessionDataDeleted(t *testing.T) {
 
 	saveContextAndSessionData(&sessionData{server.URL, sessionID, server.URL + pathURI})
 
-	err := runILOLogout(&host)
+	err := runLogout(host)
 	if err != nil {
 		t.Fatal(err)
 	}

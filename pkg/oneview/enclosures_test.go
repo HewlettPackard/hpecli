@@ -33,7 +33,7 @@ func TestAPIKeyPutInEnclosureRequest(t *testing.T) {
 	saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	_ = getEnclosuresData()
+	_ = getEnclosuresData("")
 }
 
 func TestEnclosureClientRequestFails(t *testing.T) {
@@ -50,7 +50,7 @@ func TestEnclosureClientRequestFails(t *testing.T) {
 	saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	if err := getEnclosures(nil, nil); err == nil {
+	if err := getEnclosuresData(""); err == nil {
 		t.Fatal("expected to get an error")
 	}
 }
@@ -70,13 +70,13 @@ func TestEnclosureJSONMarshallFails(t *testing.T) {
 	saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	if err := getEnclosuresData(); err == nil {
+	if err := getEnclosuresData(""); err == nil {
 		t.Fatal("expected to get an error")
 	}
 }
 
 func TestGetEnclosureByName(t *testing.T) {
-	ovEnclosureData.name = "enc-name"
+	encName := "enc-name"
 
 	server := newTestServer(encURL, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -89,7 +89,7 @@ func TestGetEnclosureByName(t *testing.T) {
 	// set context to the test server host
 	saveContextAndHostData(server.URL, "sessionID")
 
-	if err := getEnclosuresData(); err != nil {
+	if err := getEnclosuresData(encName); err != nil {
 		t.Fatal(err)
 	}
 }
