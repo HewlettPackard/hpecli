@@ -15,33 +15,36 @@ var buildDate = "0"
 var gitCommitID = "0"
 var version = "0.0.0"
 
-var verbose bool
+func NewVersionCommand() *cobra.Command {
+	var verbose bool
 
-// Cmd version
-var Cmd = &cobra.Command{
-	Use:   "version",
-	Short: "Displays version of hpecli",
-	Run:   run,
-}
-
-func init() {
-	Cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose version")
-}
-
-func run(_ *cobra.Command, _ []string) {
-	v := versionOutput()
-	log.Logger.Info(v)
-}
-
-func versionOutput() string {
-	if isFullVersion() {
-		return GetFull()
+	var cmd = &cobra.Command{
+		Use:   "version",
+		Short: "Displays version of hpecli",
+		Run: func(_ *cobra.Command, _ []string) {
+			runVersion(verbose)
+		},
 	}
 
-	return Get()
+	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose version")
+
+	return cmd
 }
 
-func isFullVersion() bool {
+func runVersion(verbose bool) {
+	log.Logger.Info(versionToShow(verbose))
+}
+
+func versionToShow(verbose bool) string {
+	ver := Get()
+	if isFullVersion(verbose) {
+		ver = GetFull()
+	}
+
+	return ver
+}
+
+func isFullVersion(verbose bool) bool {
 	return verbose || log.Logger.Level >= logrus.DebugLevel
 }
 

@@ -92,7 +92,7 @@ func addSubCommands(rootCmd *cobra.Command) {
 	)
 	rootCmd.AddCommand(oneview.Cmd)
 	rootCmd.AddCommand(greenlake.Cmd)
-	rootCmd.AddCommand(version.Cmd)
+	rootCmd.AddCommand(version.NewVersionCommand())
 	rootCmd.AddCommand(autocomplete.Cmd)
 }
 
