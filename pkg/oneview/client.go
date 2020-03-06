@@ -14,9 +14,9 @@ import (
 
 const apiDefault = 800
 
-// NewOVClient creates a new OneView Client from username/password
+// newOVClient creates a new OneView Client from username/password
 // Creating our own constructor method that defaults
-func NewOVClient(host, username, password string) *ov.OVClient {
+func newOVClient(host, username, password string) *ov.OVClient {
 	return &ov.OVClient{
 		Client: ovrest.Client{
 			User:       username,
@@ -31,8 +31,8 @@ func NewOVClient(host, username, password string) *ov.OVClient {
 	}
 }
 
-// NewOVClientFromAPIKey creates a new OneView Client from existing API sessions key
-func NewOVClientFromAPIKey(host, apikey string) *ov.OVClient {
+// newOVClientFromAPIKey creates a new OneView Client from existing API sessions key
+func newOVClientFromAPIKey(host, apikey string) *ov.OVClient {
 	return &ov.OVClient{
 		Client: ovrest.Client{
 			User:       "",
@@ -47,8 +47,8 @@ func NewOVClientFromAPIKey(host, apikey string) *ov.OVClient {
 	}
 }
 
-// Login creates a OneView session
-func Login(host, username, password string) (string, error) {
+// login creates a OneView session
+func login(host, username, password string) (string, error) {
 	const uriPath = "/rest/login-sessions"
 
 	loginJSON := fmt.Sprintf(`{"userName":"%s", "password":"%s", "authLoginDomain":"LOCAL", "loginMsgAck":"true"}`,
@@ -57,7 +57,7 @@ func Login(host, username, password string) (string, error) {
 	opts := func(r *rest.Request) {
 		rest.AddJSONMimeType()(r)
 		rest.AllowSelfSignedCerts()(r)
-		AddAPIHeaders()(r)
+		addAPIHeaders()(r)
 	}
 
 	resp, err := rest.Post(host+uriPath, strings.NewReader(loginJSON), opts)
@@ -79,8 +79,8 @@ func Login(host, username, password string) (string, error) {
 	return "", fmt.Errorf("unable to session Token from login request")
 }
 
-// AddAPIHeaders sets OneView API version
-func AddAPIHeaders() func(*rest.Request) {
+// addAPIHeaders sets OneView API version
+func addAPIHeaders() func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Header.Set("X-API-Version", "800")
 	}

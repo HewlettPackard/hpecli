@@ -5,6 +5,8 @@ package oneview
 import (
 	"errors"
 	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
@@ -12,6 +14,36 @@ import (
 
 const logoutURI = "/rest/login-sessions"
 const expectedErrMsg = "expected to see an error here but didn't"
+
+func init() {
+	context.DefaultDBOpenFunc = context.MockOpen
+}
+
+func TestHostPrefixAddedForLogout(t *testing.T) {
+	// // clear everything from the mock store
+	context.MockClear()
+
+	mux := http.NewServeMux()
+	server := httptest.NewTLSServer(mux)
+	mux.HandleFunc("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	defer server.Close()
+
+	host := strings.Replace(server.URL, "https://", "", 1)
+	saveContextAndHostData(server.URL, "token")
+
+	cmd := newLogoutCommand()
+	cmd.SetArgs([]string{"--host", host})
+	_ = cmd.Execute()
+
+	// check the db to make sure it was persisted
+	_, err := hostData(server.URL)
+	if !errors.Is(err, context.ErrorKeyNotFound) {
+		t.Fatal("logout should delete the context")
+	}
+}
 
 func TestLogoutRequestFails(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
@@ -27,7 +59,7 @@ func TestLogoutRequestFails(t *testing.T) {
 	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	if err := runOVLogout(nil, nil); err == nil {
+	if err := runLogout(""); err == nil {
 		t.Fatal(expectedErrMsg)
 	}
 }
@@ -43,7 +75,7 @@ func TestLogoutRemovesAPIKeyFromContext(t *testing.T) {
 	// set context to the test server host
 	_ = saveContextAndHostData(server.URL, sessionID)
 
-	_ = runOVLogout(nil, nil)
+	_ = runLogout("")
 
 	// verify the data is gone
 	var token string
@@ -69,8 +101,7 @@ func TestLogoutRemovesAPIKeyFromParameter(t *testing.T) {
 	_ = setContext("")
 
 	// specify the param like it was passed on the command line
-	ovLogoutHost.host = server.URL
-	_ = runOVLogout(nil, nil)
+	_ = runLogout(server.URL)
 
 	// verify the data is gone
 	var token string
@@ -88,7 +119,7 @@ func TestLogoutFailsWhenItCantGetContext(t *testing.T) {
 	_ = setContext("")
 
 	// run the command that will fail because of the missing context
-	if err := runOVLogout(nil, nil); err == nil {
+	if err := runLogout(""); err == nil {
 		t.Fatal(expectedErrMsg)
 	}
 }

@@ -17,7 +17,11 @@ func newLogoutCommand() *cobra.Command {
 		Use:   "logout",
 		Short: "Logout from ilo: hpecli ilo logout",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runILOLogout(&host)
+			if !strings.HasPrefix(host, "http") {
+				host = fmt.Sprintf("https://%s", host)
+			}
+
+			return runLogout(host)
 		},
 	}
 
@@ -26,7 +30,7 @@ func newLogoutCommand() *cobra.Command {
 	return cmd
 }
 
-func runILOLogout(host *string) error {
+func runLogout(host string) error {
 	log.Logger.Debug("Beginning runILOLogout")
 
 	sessionData, err := sessionDataToLogout(host)
@@ -58,10 +62,10 @@ func runILOLogout(host *string) error {
 	return nil
 }
 
-func sessionDataToLogout(host *string) (data *sessionData, err error) {
+func sessionDataToLogout(host string) (data *sessionData, err error) {
 	data = &sessionData{}
 
-	if *host == "" {
+	if host == "" {
 		// they didn't specify a host.. so use the context to find one
 		d, e := defaultSessionData()
 		if e != nil {
@@ -73,12 +77,7 @@ func sessionDataToLogout(host *string) (data *sessionData, err error) {
 		return d, nil
 	}
 
-	// they specified a host to logout.  get the token for that host
-	if !strings.HasPrefix(*host, "http") {
-		*host = fmt.Sprintf("https://%s", *host)
-	}
-
-	d, err := getSessionData(*host)
+	d, err := getSessionData(host)
 	if err != nil {
 		return data, err
 	}

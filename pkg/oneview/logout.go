@@ -10,30 +10,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ovLogoutHost struct {
-	host string
+func newLogoutCommand() *cobra.Command {
+	var host string
+
+	var cmd = &cobra.Command{
+		Use:   "logout",
+		Short: "Logout from OneView: hpecli oneview logout",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			if host != "" && !strings.HasPrefix(host, "http") {
+				host = fmt.Sprintf("https://%s", host)
+			}
+
+			return runLogout(host)
+		},
+	}
+
+	cmd.Flags().StringVar(&host, "host", "", "oneview host/ip address")
+
+	return cmd
 }
 
-// ovLogoutCmd represents the oneview ovLoginCmd command
-var ovLogoutCmd = &cobra.Command{
-	Use:   "logout",
-	Short: "Logout from OneView: hpecli oneview logout",
-	RunE:  runOVLogout,
-}
-
-func init() {
-	ovLogoutCmd.Flags().StringVar(&ovLogoutHost.host, "host", "", "oneview host/ip address")
-}
-
-func runOVLogout(_ *cobra.Command, _ []string) error {
-	host, token, err := hostToLogout()
+func runLogout(hostParam string) error {
+	host, token, err := hostToLogout(hostParam)
 	if err != nil {
 		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for OneView.  " +
 			"Please login to OneView using: hpecli oneview login")
 	}
 
-	ovc := NewOVClientFromAPIKey(host, token)
+	ovc := newOVClientFromAPIKey(host, token)
 
 	log.Logger.Warningf("Using OneView: %s", host)
 
@@ -56,8 +61,8 @@ func runOVLogout(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func hostToLogout() (host, token string, err error) {
-	if ovLogoutHost.host == "" {
+func hostToLogout(hostParam string) (host, token string, err error) {
+	if hostParam == "" {
 		// they didn't specify a host.. so use the context to find one
 		h, t, e := hostAndToken()
 		if e != nil {
@@ -69,15 +74,10 @@ func hostToLogout() (host, token string, err error) {
 		return h, t, nil
 	}
 
-	// they specified a host to logout.  get the token for that host
-	if !strings.HasPrefix(ovLogoutHost.host, "http") {
-		ovLogoutHost.host = fmt.Sprintf("https://%s", ovLogoutHost.host)
-	}
-
-	token, err = hostData(ovLogoutHost.host)
+	token, err = hostData(hostParam)
 	if err != nil {
 		return "", "", err
 	}
 
-	return ovLogoutHost.host, token, nil
+	return hostParam, token, nil
 }

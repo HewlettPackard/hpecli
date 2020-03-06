@@ -33,7 +33,7 @@ func TestAPIKeyPutInServerRequest(t *testing.T) {
 	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	_ = getServerHardware()
+	_ = getServerHardware("")
 }
 
 func TestClientServerRequestFails(t *testing.T) {
@@ -50,7 +50,7 @@ func TestClientServerRequestFails(t *testing.T) {
 	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	if err := getServers(nil, nil); err == nil {
+	if err := getServerHardware(""); err == nil {
 		t.Fatal("expected to get an error")
 	}
 }
@@ -70,7 +70,7 @@ func TestServerJSONMarshallFails(t *testing.T) {
 	_ = saveContextAndHostData(server.URL, sessionID)
 
 	// check is above in the http request handler side
-	if err := getServerHardware(); err == nil {
+	if err := getServerHardware(""); err == nil {
 		t.Fatal("expected to get an error")
 	}
 }

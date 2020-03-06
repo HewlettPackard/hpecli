@@ -4,7 +4,6 @@ package oneview
 
 import (
 	"errors"
-	"strings"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
@@ -15,21 +14,28 @@ func init() {
 }
 
 func TestHostPrefixAddedForContext(t *testing.T) {
-	ovContextHost.host = "127.0.0.1"
+	host := "127.0.1.1"
 
-	// run it and then check the variable after
-	_ = runChangeContext(nil, nil)
+	cmd := newContextCommand()
+	cmd.SetArgs([]string{"--host", host})
+	_ = cmd.Execute()
 
-	if !strings.HasPrefix(ovContextHost.host, "https://") {
-		t.Fatalf("host should be prefixed with http scheme")
+	// check the db to make sure it was persisted
+	got, err := getContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got != "https://"+host {
+		t.Fatal("context didn't get set correctly")
 	}
 }
 
 func TestContextIsSetInDB(t *testing.T) {
-	ovContextHost.host = "https://127.0.0.1"
+	host := "https://127.0.0.1"
 
 	// sets the context in the DB
-	_ = runChangeContext(nil, nil)
+	_ = runSetContext(host)
 
 	_, _, err := hostAndToken()
 	// we have set the context but not the apikey value
@@ -43,10 +49,8 @@ func TestCheckDefaultContextFound(t *testing.T) {
 	// setup data
 	setContext("https://127.0.0.1")
 
-	// don't specify a host, so it will look for the default context value
-	ovContextHost.host = ""
-
-	if err := runChangeContext(nil, nil); err != nil {
+	host := ""
+	if err := runSetContext(host); err != nil {
 		t.Errorf("didn't get default context successfully: %s", err)
 	}
 }

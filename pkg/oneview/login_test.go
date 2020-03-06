@@ -19,20 +19,31 @@ func init() {
 }
 
 func TestHostPrefixAdded(t *testing.T) {
-	server := newTestServer("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
+	// clear everything from the mock store
+	context.MockClear()
+
+	mux := http.NewServeMux()
+	server := httptest.NewTLSServer(mux)
+	mux.HandleFunc("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"sessionID":"%s"}`, "sessionID")
 	})
+
 	defer server.Close()
 
-	ovLoginData.host = strings.Replace(server.URL, "http://", "", 1)
-	ovLoginData.password = "blah blah"
+	host := strings.Replace(server.URL, "https://", "", 1)
 
-	// this will fail with a remote call.. ignore the failure and
-	// check the host string to ensure prefix addded
-	_ = runOVLogin(nil, nil)
+	cmd := newLoginCommand()
+	cmd.SetArgs([]string{"--host", host, "-u", "user", "-p", "pass"})
+	_ = cmd.Execute()
 
-	if !strings.HasPrefix(ovLoginData.host, "https://") {
-		t.Fatalf("host should be prefixed with http scheme")
+	// check the db to make sure it was persisted
+	got, err := getContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got != "https://"+host {
+		t.Fatal("context didn't get set correctly")
 	}
 }
 
@@ -46,10 +57,12 @@ func TestAPIKeyIsStored(t *testing.T) {
 
 	defer server.Close()
 
-	ovLoginData.host = server.URL
-	ovLoginData.password = "blah blah"
+	opts := &ovLoginOptions{
+		host:     server.URL,
+		password: "blah blah",
+	}
 
-	err := runOVLogin(nil, nil)
+	err := runLogin(opts)
 	if err != nil {
 		t.Fatal(err)
 	}
