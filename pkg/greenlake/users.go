@@ -9,28 +9,33 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// cmdGetUsers represents the green lake users command
-var cmdGetUsers = &cobra.Command{
-	Use:   "users",
-	Short: "Get from Users: hpecli greenlake get users",
-	RunE:  runGLGetUsers,
+func newUsersCommand() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "users",
+		Short: "Get from Users: hpecli greenlake get users",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return runUsers()
+		},
+	}
+
+	return cmd
 }
 
-func runGLGetUsers(_ *cobra.Command, _ []string) error {
-	log.Logger.Debug("Beginning runGLGetUsers")
+func runUsers() error {
+	log.Logger.Debug("Beginning runUsers")
 
 	sd, err := defaultSessionData()
 	if err != nil {
 		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
-		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake." +
+		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
 			"Please login to GreenLake using: hpecli greenlake login")
 	}
 
 	log.Logger.Debugf("Attempting get green lake users at: %v", sd.Host)
 
-	glc := NewGLClientFromAPIKey(sd.Host, sd.TenantID, sd.Token)
+	glc := newGLClientFromAPIKey(sd.Host, sd.TenantID, sd.Token)
 
-	jsonResult, err := glc.GetUsers()
+	jsonResult, err := glc.users()
 	if err != nil {
 		return err
 	}

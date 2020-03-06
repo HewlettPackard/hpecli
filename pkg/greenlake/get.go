@@ -6,12 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	cmdGLGet.AddCommand(cmdGetUsers)
-}
+func newGetCommand() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get details from HPE Green Lake",
+	}
 
-// cmdGLGet represents the greenlake command
-var cmdGLGet = &cobra.Command{
-	Use:   "get",
-	Short: "Get details from HPE Green Lake",
+	cmd.AddCommand(
+		newUsersCommand(),
+	)
+
+	return cmd
 }
