@@ -3,6 +3,7 @@
 package greenlake
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -11,53 +12,52 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var glLoginData struct {
+type glLoginOptions struct {
 	host,
 	userID,
 	secretKey,
 	tenantID string
+	secretKeyStdin bool
 }
 
-// cmdGLLogin represents the green lake login command
-var cmdGLLogin = &cobra.Command{
-	Use:   "login",
-	Short: "Login to greenlake: hpecli greenlake login",
-	RunE:  runGLLogin,
-}
+func newLoginCommand() *cobra.Command {
+	var opts glLoginOptions
 
-func init() {
-	cmdGLLogin.Flags().StringVar(&glLoginData.host, "host", "", "greenlake host/ip address")
-	cmdGLLogin.Flags().StringVarP(&glLoginData.userID, "userid", "u", "", "greenlake userid")
-	cmdGLLogin.Flags().StringVarP(&glLoginData.secretKey, "secretkey", "s", "", "greenlake secretkey")
-	cmdGLLogin.Flags().StringVarP(&glLoginData.tenantID, "tenantid", "t", "", "greenlake tenantid")
-	_ = cmdGLLogin.MarkFlagRequired("host")
-	_ = cmdGLLogin.MarkFlagRequired("userid")
-	_ = cmdGLLogin.MarkFlagRequired("tenantid")
-}
-
-func runGLLogin(_ *cobra.Command, _ []string) error {
-	if !strings.HasPrefix(glLoginData.host, "http") {
-		glLoginData.host = fmt.Sprintf("http://%s", glLoginData.host)
+	var cmd = &cobra.Command{
+		Use:   "login",
+		Short: "Login to greenlake: hpecli greenlake login",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			if !strings.HasPrefix(opts.host, "http") {
+				opts.host = fmt.Sprintf("http://%s", opts.host)
+			}
+			return runLogin(&opts)
+		},
 	}
 
-	if glLoginData.secretKey == "" {
-		p, err := password.ReadFromConsole("greenlake secret key: ")
-		if err != nil {
-			log.Logger.Error("Unable to read password from console!")
-			return err
-		}
+	cmd.Flags().StringVar(&opts.host, "host", "", "greenlake host/ip address")
+	cmd.Flags().StringVarP(&opts.secretKey, "secretkey", "s", "", "greenlake secretkey")
+	cmd.Flags().BoolVarP(&opts.secretKeyStdin, "secretkey-stdin", "", false, "read secretkey from stdin")
+	cmd.Flags().StringVarP(&opts.tenantID, "tenantid", "t", "", "greenlake tenantid")
+	cmd.Flags().StringVarP(&opts.userID, "userid", "u", "", "greenlake userid")
+	_ = cmd.MarkFlagRequired("host")
+	_ = cmd.MarkFlagRequired("tenantid")
+	_ = cmd.MarkFlagRequired("userid")
 
-		glLoginData.secretKey = p
+	return cmd
+}
+
+func runLogin(opts *glLoginOptions) error {
+	if err := handleSecretKeyOptions(opts); err != nil {
+		return err
 	}
 
-	log.Logger.Debugf("Attempting login with user: %v, at: %v", glLoginData.userID, glLoginData.host)
+	log.Logger.Debugf("Attempting login with user: %v, at: %v", opts.userID, opts.host)
 
-	glc := NewGLClient("client_credentials", glLoginData.userID,
-		glLoginData.secretKey, glLoginData.tenantID, glLoginData.host)
+	glc := newGLClient("client_credentials", opts.userID, opts.secretKey, opts.tenantID, opts.host)
 
 	sd, err := glc.login()
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to GreenLake at: %s", glLoginData.host)
+		log.Logger.Warningf("Unable to login with supplied credentials to GreenLake at: %s", opts.host)
 		return err
 	}
 
@@ -66,8 +66,40 @@ func runGLLogin(_ *cobra.Command, _ []string) error {
 	if err = saveContextAndSessionData(sd); err != nil {
 		log.Logger.Debug("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
-		log.Logger.Warningf("Successfully logged into GreenLake: %s", glLoginData.host)
+		log.Logger.Warningf("Successfully logged into GreenLake: %s", opts.host)
 	}
+
+	return nil
+}
+
+func handleSecretKeyOptions(opts *glLoginOptions) error {
+	if opts.secretKey != "" {
+		if opts.secretKeyStdin {
+			return errors.New("--password and --password-stdin are mutually exclusive")
+		}
+		// if the password was set .. we don't need to get it from somewhere else
+		return nil
+	}
+
+	// asked to read from stdin
+	if opts.secretKeyStdin {
+		key, err := password.ReadFromStdIn()
+		if err != nil {
+			return err
+		}
+
+		opts.secretKey = key
+
+		return nil
+	}
+
+	// password wasn't specified so we need to prompt them for it
+	key, err := password.ReadFromConsole("greelake password: ")
+	if err != nil {
+		return err
+	}
+
+	opts.secretKey = key
 
 	return nil
 }

@@ -35,5 +35,14 @@ func TestGLAPIKeyInjectedIntoRequest(t *testing.T) {
 	// set context to the test server host
 	saveContextAndSessionData(d)
 
-	_ = runGLGetUsers(nil, nil)
+	_ = runUsers()
+}
+
+func TestMissingContextIsError(t *testing.T) {
+	context.MockClear()
+
+	err := runUsers()
+	if err == nil {
+		t.Error("should have been error that it couldn't find context data")
+	}
 }

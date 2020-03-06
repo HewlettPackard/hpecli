@@ -9,27 +9,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// cmdGLContext represents the green lake command
-var cmdGLContext = &cobra.Command{
-	Use:   "context",
-	Short: "Change context to different GreenLake host",
-	RunE:  runSetContext,
+type glContextOptions struct {
+	host     string
+	tenantid string
 }
 
-var glContextHost struct {
-	host string
-}
+func newContextCommand() *cobra.Command {
+	opts := &glContextOptions{}
 
-func init() {
-	cmdGLContext.Flags().StringVar(&glContextHost.host, "host", "", "greenlake host/ip address")
-	_ = cmdGLContext.MarkFlagRequired("host")
-	_ = cmdGLContext.MarkFlagRequired("tenantid")
-}
+	var cmd = &cobra.Command{
+		Use:   "context",
+		Short: "Change context to different GreenLake host",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			if !strings.HasPrefix(opts.host, "http") {
+				opts.host = fmt.Sprintf("https://%s", opts.host)
+			}
 
-func runSetContext(_ *cobra.Command, _ []string) error {
-	if !strings.HasPrefix(glContextHost.host, "http") {
-		glContextHost.host = fmt.Sprintf("https://%s", glContextHost.host)
+			return setContext(opts.host)
+		},
 	}
 
-	return setContext(glContextHost.host)
+	cmd.Flags().StringVar(&opts.host, "host", "", "greenlake host/ip address")
+	_ = cmd.MarkFlagRequired("host")
+	_ = cmd.MarkFlagRequired("tenantid")
+
+	return cmd
 }

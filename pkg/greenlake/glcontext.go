@@ -40,6 +40,11 @@ func saveContextAndSessionData(data *sessionData) error {
 	return c.SetHostData(dataKey(data.Host), data)
 }
 
+func getContext() (string, error) {
+	c := context.New(glContextKey)
+	return c.ModuleContext()
+}
+
 func setContext(host string) error {
 	c := context.New(glContextKey)
 	return c.SetModuleContext(host)
