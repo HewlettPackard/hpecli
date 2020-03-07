@@ -10,31 +10,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Logger is the default logger configured to log
-// info messages to stdout and everything else to stderr
-var Logger = New()
-
-func New() *logrus.Logger {
-	return &logrus.Logger{
-		Out: ioutil.Discard,
-		Formatter: &Formatter{
-			NoColors: true,
-		},
-		Hooks:        addHook(),
-		Level:        logrus.InfoLevel,
-		ExitFunc:     os.Exit,
-		ReportCaller: true,
-	}
-}
-
-func addHook() logrus.LevelHooks {
-	hook := make(logrus.LevelHooks)
-	hook.Add(&copyHook{
+func init() {
+	logrus.SetOutput(ioutil.Discard)
+	logrus.SetFormatter(&Formatter{NoColors: true})
+	logrus.AddHook(&copyHook{
 		Stdout: os.Stdout,
 		Stderr: os.Stderr,
 	})
+	logrus.SetLevel(logrus.InfoLevel)
+	logrus.SetReportCaller(false)
+}
 
-	return hook
+func SetDebugLogging() {
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetReportCaller(true)
 }
 
 type copyHook struct {
@@ -49,12 +38,7 @@ func (h *copyHook) Levels() []logrus.Level {
 func (h *copyHook) Fire(entry *logrus.Entry) error {
 	// if it info message, write it to stdout
 	if entry.Level == logrus.InfoLevel {
-		n, _ := h.Stdout.Write([]byte(entry.Message))
-		if n > 0 {
-			// write \n to match what happens when entry is formatted by entry.String()
-			_, _ = h.Stdout.Write([]byte("\n"))
-		}
-
+		_, _ = h.Stdout.Write([]byte(entry.Message))
 		return nil
 	}
 
@@ -68,11 +52,7 @@ func (h *copyHook) Fire(entry *logrus.Entry) error {
 	}
 
 	// just write message
-	n, _ := h.Stderr.Write([]byte(entry.Message))
-	if n > 0 {
-		// write \n to match what happens when entry is formatted by entry.String()
-		_, _ = h.Stdout.Write([]byte("\n"))
-	}
+	_, _ = h.Stderr.Write([]byte(entry.Message))
 
 	return nil
 }

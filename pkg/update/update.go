@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/version"
 	goupdate "github.com/inconshreveable/go-update"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +39,7 @@ func runUpdate() error {
 	}
 
 	if !resp.UpdateAvailable {
-		log.Logger.Warning("No update available.  No action taken")
+		logrus.Warning("No update available.  No action taken")
 		return nil
 	}
 
@@ -47,7 +47,7 @@ func runUpdate() error {
 		return err
 	}
 
-	log.Logger.Warningf("Successfully update the cli to version: %s", resp.RemoteVersion)
+	logrus.Warningf("Successfully update the cli to version: %s", resp.RemoteVersion)
 
 	return nil
 }
@@ -61,7 +61,7 @@ func downloadUpdate(cr *CheckResponse) error {
 
 	err = goupdate.Apply(body, goupdate.Options{Checksum: cr.CheckSum})
 	if err != nil {
-		log.Logger.Warningf("Unable to update to new version of the application: %v", err)
+		logrus.Warningf("Unable to update to new version of the application: %v", err)
 		return err
 	}
 

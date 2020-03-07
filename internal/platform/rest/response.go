@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 )
 
 type Response struct {
@@ -28,8 +28,8 @@ func (r *Response) JSON() []byte {
 	dst := &bytes.Buffer{}
 
 	if err := json.Indent(dst, body, "", "  "); err != nil {
-		log.Logger.Debug("Unable to pretty-print output.")
-		log.Logger.Debugf("body=%s", body)
+		logrus.Debug("Unable to pretty-print output.")
+		logrus.Debugf("body=%s", body)
 
 		return body
 	}
@@ -40,7 +40,7 @@ func (r *Response) JSON() []byte {
 // Unmarshall expected json response into passed interface type
 func (r *Response) Unmarshall(t interface{}) error {
 	if err := json.Unmarshal(r.Bytes(), &t); err != nil {
-		log.Logger.Debugf("expcted login response, but received: %+v", t)
+		logrus.Debugf("expcted login response, but received: %+v", t)
 		return err
 	}
 

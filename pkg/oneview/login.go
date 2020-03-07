@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/internal/platform/password"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -48,21 +48,21 @@ func runLogin(opts *ovLoginOptions) error {
 		return err
 	}
 
-	log.Logger.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
+	logrus.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
 
 	// OneView Login currently doesn't support forced login message acknowledgement - so we roll our own
 	token, err := login(opts.host, opts.username, opts.password)
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to OneView at: %s", opts.host)
+		logrus.Warningf("Unable to login with supplied credentials to OneView at: %s", opts.host)
 		return err
 	}
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
 	if err = saveContextAndHostData(opts.host, token); err != nil {
-		log.Logger.Warning("Successfully logged into OneView, but was unable to save the session data")
+		logrus.Warning("Successfully logged into OneView, but was unable to save the session data")
 	} else {
-		log.Logger.Warningf("Successfully logged into OneView: %s", opts.host)
+		logrus.Warningf("Successfully logged into OneView: %s", opts.host)
 	}
 
 	return nil

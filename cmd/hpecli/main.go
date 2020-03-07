@@ -30,22 +30,22 @@ func main() {
 
 func run() error {
 	if isDebugLogging() {
-		log.Logger.SetLevel(logrus.DebugLevel)
+		log.SetDebugLogging()
 	}
 
-	log.Logger.Debug("Started : Application initializing")
-	defer log.Logger.Debug("Completed : Application shutdown")
+	logrus.Debug("Started : Application initializing")
+	defer logrus.Debug("Completed : Application shutdown")
 
 	// channel to get async update
 	isUpdateChan := make(chan bool)
 
 	// async check if an update is available
 	go func() {
-		log.Logger.Debug("update : starting async check to see if an update is available")
+		logrus.Debug("update : starting async check to see if an update is available")
 
 		isUpdate := update.IsUpdateAvailable()
 
-		log.Logger.Debugf("update : IsUpdateAvailable=%v", isUpdate)
+		logrus.Debugf("update : IsUpdateAvailable=%v", isUpdate)
 		isUpdateChan <- isUpdate
 	}()
 
@@ -76,7 +76,7 @@ func run() error {
 
 	// if update was just run, we don't need to tell them that there is an update
 	if newRelease && !update.UpdateRun {
-		log.Logger.Warn("An updated version of the CLI is available.  You can update by running \"hpecli update\"")
+		logrus.Warning("An updated version of the CLI is available.  You can update by running \"hpecli update\"")
 	}
 
 	return nil

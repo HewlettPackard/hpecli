@@ -5,8 +5,7 @@ package autocomplete
 import (
 	"errors"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
-
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -55,7 +54,7 @@ func runAutoComplete(cmd *cobra.Command, opts *autocompleteOptions) error {
 		return err
 	}
 
-	log.Logger.Debug("Bash completion file for hpecli saved to", opts.targetFile)
+	logrus.Debug("Bash completion file for hpecli saved to", opts.targetFile)
 
 	return nil
 }

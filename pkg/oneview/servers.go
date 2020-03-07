@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -29,14 +29,14 @@ func newServersCommand() *cobra.Command {
 func getServerHardware(serverName string) error {
 	host, token, err := hostAndToken()
 	if err != nil {
-		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for OneView.  " +
 			"Please login to OneView using: hpecli oneview login")
 	}
 
 	ovc := newOVClientFromAPIKey(host, token)
 
-	log.Logger.Warningf("Using OneView: %s", host)
+	logrus.Warningf("Using OneView: %s\n", host)
 
 	var sh interface{}
 	if serverName != "" {
@@ -46,16 +46,16 @@ func getServerHardware(serverName string) error {
 	}
 
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to OneView at: %s", host)
+		logrus.Warningf("Unable to login with supplied credentials to OneView at: %s", host)
 		return err
 	}
 
 	out, err := json.MarshalIndent(sh, "", "  ")
 	if err != nil {
-		log.Logger.Warning("Unable to output data as JSON.  Please try the command again.")
+		logrus.Warning("Unable to output data as JSON.  Please try the command again.")
 	}
 
-	log.Logger.Infof("%s", out)
+	logrus.Infof("%s", out)
 
 	return nil
 }

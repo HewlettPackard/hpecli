@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/internal/platform/password"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -49,22 +49,22 @@ func runLogin(opts *iloLoginOptions) error {
 		return err
 	}
 
-	log.Logger.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
+	logrus.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
 
 	cl := newILOClient(opts.host, opts.username, opts.password)
 
 	sd, err := cl.login()
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to ilo at: %s", opts.host)
+		logrus.Warningf("Unable to login with supplied credentials to ilo at: %s", opts.host)
 		return err
 	}
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
 	if err = saveContextAndSessionData(sd); err != nil {
-		log.Logger.Warning("Successfully logged into ilo, but was unable to save the session data")
+		logrus.Warning("Successfully logged into ilo, but was unable to save the session data")
 	} else {
-		log.Logger.Warningf("Successfully logged into ilo: %s", opts.host)
+		logrus.Warningf("Successfully logged into ilo: %s", opts.host)
 	}
 
 	return nil
