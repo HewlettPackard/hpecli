@@ -5,7 +5,7 @@ package greenlake
 import (
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -22,16 +22,16 @@ func newUsersCommand() *cobra.Command {
 }
 
 func runUsers() error {
-	log.Logger.Debug("Beginning runUsers")
+	logrus.Debug("Beginning runUsers")
 
 	sd, err := defaultSessionData()
 	if err != nil {
-		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
 			"Please login to GreenLake using: hpecli greenlake login")
 	}
 
-	log.Logger.Debugf("Attempting get green lake users at: %v", sd.Host)
+	logrus.Debugf("Attempting get green lake users at: %v", sd.Host)
 
 	glc := newGLClientFromAPIKey(sd.Host, sd.TenantID, sd.Token)
 
@@ -40,7 +40,7 @@ func runUsers() error {
 		return err
 	}
 
-	log.Logger.Infof("%s", jsonResult)
+	logrus.Infof("%s", jsonResult)
 
 	return nil
 }

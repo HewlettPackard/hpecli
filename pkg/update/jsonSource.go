@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/hashicorp/go-version"
+	"github.com/sirupsen/logrus"
 )
 
 type jsonSource struct {
@@ -110,9 +110,9 @@ func decodeField(name, value string) []byte {
 
 	result, err := hex.DecodeString(value)
 	if err != nil {
-		log.Logger.Warningf("Unable to decode remote %s field. "+
+		logrus.Warningf("Unable to decode remote %s field. "+
 			"It will be ignored and not used to verify the remote content", name)
-		log.Logger.Debugf("Problem Field: %s=%v", name, value)
+		logrus.Debugf("Problem Field: %s=%v", name, value)
 
 		return nil
 	}

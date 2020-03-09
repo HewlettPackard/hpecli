@@ -94,7 +94,7 @@ func TestColorLevel(t *testing.T) {
 }
 
 func TestFormatWorks(t *testing.T) {
-	want := "[0001-01-01T00:00:00Z] [PANI] [myValue] [anotherValue] \n"
+	want := "[0001-01-01T00:00:00Z] [PANIC] [myValue] [anotherValue] \n"
 	entry := &logrus.Entry{}
 	entry.Data = make(logrus.Fields, 1)
 	entry.Data[fieldName] = fieldValue
@@ -114,7 +114,7 @@ func TestFormatWorks(t *testing.T) {
 }
 
 func TestFormatWithColor(t *testing.T) {
-	want := "[0001-01-01T00:00:00Z] \x1b[31m[PANI] \x1b[0m[myValue] \x1b[0m\n"
+	want := "[0001-01-01T00:00:00Z] \x1b[31m[PANIC] \x1b[0m[myValue] \x1b[0m\n"
 	entry := &logrus.Entry{}
 	entry.Data = make(logrus.Fields, 1)
 	entry.Data[fieldName] = fieldValue
@@ -129,5 +129,51 @@ func TestFormatWithColor(t *testing.T) {
 	got := string(b)
 	if got != want {
 		t.Errorf("unexpected formatted entry.  got=%v -- want=%v", got, want)
+	}
+}
+
+func TestMarshalLevel(t *testing.T) {
+	cases := []struct {
+		name  string
+		level logrus.Level
+	}{
+		{
+			name:  "TRACE",
+			level: logrus.TraceLevel,
+		},
+		{
+			name:  "DEBUG",
+			level: logrus.DebugLevel,
+		},
+		{
+			name:  " INFO",
+			level: logrus.InfoLevel,
+		},
+		{
+			name:  " WARN",
+			level: logrus.WarnLevel,
+		},
+		{
+			name:  "ERROR",
+			level: logrus.ErrorLevel,
+		},
+		{
+			name:  "FATAL",
+			level: logrus.FatalLevel,
+		},
+		{
+			name:  "PANIC",
+			level: logrus.PanicLevel,
+		},
+	}
+
+	for _, test := range cases {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			got := marshalLevel(test.level)
+			if got != test.name {
+				t.Errorf("didn't get expected value.  got=%v  -  wanted=%v", got, test.name)
+			}
+		})
 	}
 }

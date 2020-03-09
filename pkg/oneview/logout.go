@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -33,28 +33,28 @@ func newLogoutCommand() *cobra.Command {
 func runLogout(hostParam string) error {
 	host, token, err := hostToLogout(hostParam)
 	if err != nil {
-		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for OneView.  " +
 			"Please login to OneView using: hpecli oneview login")
 	}
 
 	ovc := newOVClientFromAPIKey(host, token)
 
-	log.Logger.Warningf("Using OneView: %s", host)
+	logrus.Warningf("Using OneView: %s\n", host)
 
 	// Use OVClient to logout
 	err = ovc.SessionLogout()
 	if err != nil {
-		log.Logger.Warningf("Unable to logout from OneView at: %s", host)
+		logrus.Warningf("Unable to logout from OneView at: %s", host)
 		return err
 	}
 
-	log.Logger.Warningf("Successfully logged out of OneView: %s", host)
+	logrus.Warningf("Successfully logged out of OneView: %s", host)
 
 	// Cleanup context
 	err = deleteSavedHostData(host)
 	if err != nil {
-		log.Logger.Warning("Unable to cleanup the session data")
+		logrus.Warning("Unable to cleanup the session data")
 		return err
 	}
 
@@ -66,7 +66,7 @@ func hostToLogout(hostParam string) (host, token string, err error) {
 		// they didn't specify a host.. so use the context to find one
 		h, t, e := hostAndToken()
 		if e != nil {
-			log.Logger.Debugf("unable to retrieve apiKey because of: %v", e)
+			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
 			return "", "", fmt.Errorf("unable to retrieve the last login for OneView.  " +
 				"Please login to OneView using: hpecli oneview login")
 		}

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/internal/platform/password"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -51,22 +51,22 @@ func runLogin(opts *glLoginOptions) error {
 		return err
 	}
 
-	log.Logger.Debugf("Attempting login with user: %v, at: %v", opts.userID, opts.host)
+	logrus.Debugf("Attempting login with user: %v, at: %v", opts.userID, opts.host)
 
 	glc := newGLClient("client_credentials", opts.userID, opts.secretKey, opts.tenantID, opts.host)
 
 	sd, err := glc.login()
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to GreenLake at: %s", opts.host)
+		logrus.Warningf("Unable to login with supplied credentials to GreenLake at: %s", opts.host)
 		return err
 	}
 
 	// change context to current host and save the access token as the API key
 	// for subsequent requests
 	if err = saveContextAndSessionData(sd); err != nil {
-		log.Logger.Debug("Successfully logged into GreenLake, but was unable to save the session data")
+		logrus.Debug("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
-		log.Logger.Warningf("Successfully logged into GreenLake: %s", opts.host)
+		logrus.Warningf("Successfully logged into GreenLake: %s", opts.host)
 	}
 
 	return nil

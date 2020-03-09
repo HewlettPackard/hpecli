@@ -5,7 +5,6 @@ package version
 import (
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +31,7 @@ func NewVersionCommand() *cobra.Command {
 }
 
 func runVersion(verbose bool) {
-	log.Logger.Info(versionToShow(verbose))
+	logrus.Info(versionToShow(verbose))
 }
 
 func versionToShow(verbose bool) string {
@@ -45,7 +44,7 @@ func versionToShow(verbose bool) string {
 }
 
 func isFullVersion(verbose bool) bool {
-	return verbose || log.Logger.Level >= logrus.DebugLevel
+	return verbose || logrus.GetLevel() >= logrus.DebugLevel
 }
 
 // Get returns the short version. just the version (e.g. 0.0.1)

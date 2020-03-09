@@ -5,7 +5,7 @@ package ilo
 import (
 	"fmt"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -24,16 +24,16 @@ func newServiceRootCommand() *cobra.Command {
 }
 
 func runILOServiceRoot() error {
-	log.Logger.Debug("Beginning runILOServiceRoot")
+	logrus.Debug("Beginning runILOServiceRoot")
 
 	sd, err := defaultSessionData()
 	if err != nil {
-		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	log.Logger.Warningf("Using iLO: %s", sd.Host)
+	logrus.Warningf("Using iLO: %s\n", sd.Host)
 
 	client := newILOClientFromAPIKey(sd.Host, sd.Token)
 
@@ -42,7 +42,7 @@ func runILOServiceRoot() error {
 		return err
 	}
 
-	log.Logger.Infof("%s", jsonResult)
+	logrus.Infof("%s", jsonResult)
 
 	return nil
 }

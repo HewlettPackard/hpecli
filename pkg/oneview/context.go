@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ func runSetContext(host string) error {
 			return err
 		}
 
-		log.Logger.Warningf("Default oneview commands directed to host: %s", ctx)
+		logrus.Warningf("Default oneview commands directed to host: %s", ctx)
 
 		return nil
 	}

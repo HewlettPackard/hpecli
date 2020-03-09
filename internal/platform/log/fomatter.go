@@ -8,7 +8,6 @@ import (
 	"io"
 	"path"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -30,14 +29,13 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	fmt.Fprintf(b, "[%s] ", entry.Time.Format(time.RFC3339))
 
 	// write level
-	level := strings.ToUpper(entry.Level.String())
+	level := marshalLevel(entry.Level)
 
 	if !f.NoColors {
 		fmt.Fprintf(b, "\x1b[%dm", levelColor)
 	}
 
-	// write log level (only first 4 char)
-	fmt.Fprintf(b, "[%s] ", level[:4])
+	fmt.Fprintf(b, "[%s] ", level)
 
 	if !f.NoColors {
 		b.WriteString("\x1b[0m")
@@ -99,4 +97,25 @@ func colorForLevel(level logrus.Level) int {
 	default:
 		return colorBlue
 	}
+}
+
+func marshalLevel(level logrus.Level) string {
+	switch level {
+	case logrus.TraceLevel:
+		return "TRACE"
+	case logrus.DebugLevel:
+		return "DEBUG"
+	case logrus.InfoLevel:
+		return " INFO"
+	case logrus.WarnLevel:
+		return " WARN"
+	case logrus.ErrorLevel:
+		return "ERROR"
+	case logrus.FatalLevel:
+		return "FATAL"
+	case logrus.PanicLevel:
+		return "PANIC"
+	}
+
+	return "UNKNOWN"
 }

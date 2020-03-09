@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/version"
 	gover "github.com/hashicorp/go-version"
+	"github.com/sirupsen/logrus"
 )
 
 // CheckResponse is a response for a Check request.
@@ -63,18 +63,18 @@ var cacheResponse *CheckResponse
 // IsUpdateAvailable checks if a later version is avaialbe of the CLI binary
 func IsUpdateAvailable() bool {
 	cliVer := version.Get()
-	log.Logger.Debug("Local version is: " + cliVer)
-	log.Logger.Debug("Checking for a newer version at: " + versionURL)
+	logrus.Debug("Local version is: " + cliVer)
+	logrus.Debug("Checking for a newer version at: " + versionURL)
 
 	res, err := checkUpdate(&jsonSource{url: versionURL}, cliVer)
 	if err != nil {
-		log.Logger.Debug("Unable to determine if a new version of the CLI is available")
-		log.Logger.Debugf("Error: %v", err)
+		logrus.Debug("Unable to determine if a new version of the CLI is available")
+		logrus.Debugf("Error: %v", err)
 
 		return false
 	}
 
-	log.Logger.Debugf("%#v", res)
+	logrus.Debugf("%#v", res)
 
 	return res.UpdateAvailable
 }
@@ -84,7 +84,7 @@ func IsUpdateAvailable() bool {
 func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 	// don't check if env var is setup to skip
 	if os.Getenv(EnvDisableUpdateCheck) != "" {
-		log.Logger.Debugf("%s set.  Not performing remote check", EnvDisableUpdateCheck)
+		logrus.Debugf("%s set.  Not performing remote check", EnvDisableUpdateCheck)
 		return &CheckResponse{}, nil
 	}
 
@@ -92,7 +92,7 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 	// return the cached copy if we have already retrieved the
 	// results this session.
 	if cacheResponse != nil {
-		log.Logger.Debug("cacheResponse present.  Not making additional remote check")
+		logrus.Debug("cacheResponse present.  Not making additional remote check")
 		return cacheResponse, nil
 	}
 

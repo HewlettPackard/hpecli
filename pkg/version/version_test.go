@@ -5,7 +5,6 @@ package version
 import (
 	"testing"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/sirupsen/logrus"
 )
 
@@ -81,7 +80,7 @@ func TestIsFullVersion(t *testing.T) {
 	for _, c := range cases {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
-			log.Logger.Level = c.logLevel
+			logrus.SetLevel(c.logLevel)
 			got := isFullVersion(c.verbose)
 			if got != c.want {
 				t.Fatalf(expectedError, got, c.want)
@@ -109,7 +108,8 @@ func TestRunVersion(t *testing.T) {
 	// if values aren't injected at compile time
 	// then everything just defaults to 0
 	want := v0
-	log.Logger.Level = logrus.InfoLevel
+
+	logrus.SetLevel(logrus.InfoLevel)
 
 	got := versionToShow(false)
 	if got != want {

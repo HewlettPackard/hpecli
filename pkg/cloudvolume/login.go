@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/internal/platform/password"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +39,7 @@ func newLoginCommand() *cobra.Command {
 }
 
 func runLogin(opts *cvLoginOptions) error {
-	log.Logger.Debug("cloudvolumes/login called")
+	logrus.Debug("cloudvolumes/login called")
 
 	if !strings.HasPrefix(opts.host, "http") {
 		opts.host = fmt.Sprintf("https://%s", opts.host)
@@ -48,30 +48,30 @@ func runLogin(opts *cvLoginOptions) error {
 	if opts.password == "" {
 		p, err := password.ReadFromConsole("cloudvolumes password: ")
 		if err != nil {
-			log.Logger.Error("Unable to read password from console!")
+			logrus.Error("Unable to read password from console!")
 			return err
 		}
 
 		opts.password = p
 	}
 
-	log.Logger.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
+	logrus.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)
 
 	cvc := newCVClient(opts.host, opts.username, opts.password)
 
 	token, err := cvc.Login()
 	if err != nil {
-		log.Logger.Warningf("Unable to login with supplied credentials to CloudVolume at: %s", opts.host)
+		logrus.Warningf("Unable to login with supplied credentials to CloudVolume at: %s", opts.host)
 		return err
 	}
 
 	// change context to current host and save the token as the API key
 	// for subsequent requests
 	if err := saveData(opts.host, token); err != nil {
-		log.Logger.Warning("Successfully logged into CloudVolumes, but was unable to save the session data")
-		log.Logger.Debugf("%+v", err)
+		logrus.Warning("Successfully logged into CloudVolumes, but was unable to save the session data")
+		logrus.Debugf("%+v", err)
 	} else {
-		log.Logger.Warningf("Successfully logged into CloudVolumes: %s", opts.host)
+		logrus.Warningf("Successfully logged into CloudVolumes: %s", opts.host)
 	}
 
 	return nil

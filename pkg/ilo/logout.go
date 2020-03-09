@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -31,31 +31,31 @@ func newLogoutCommand() *cobra.Command {
 }
 
 func runLogout(host string) error {
-	log.Logger.Debug("Beginning runILOLogout")
+	logrus.Debug("Beginning runILOLogout")
 
 	sessionData, err := sessionDataToLogout(host)
 	if err != nil {
-		log.Logger.Debugf("unable to retrieve apiKey because of: %v", err)
+		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	log.Logger.Warningf("Using iLO: %s", sessionData.Host)
+	logrus.Warningf("Using iLO: %s\n", sessionData.Host)
 
 	client := newILOClientFromAPIKey(sessionData.Host, sessionData.Token)
 
 	err = client.logout(sessionData.Location)
 	if err != nil {
-		log.Logger.Warningf("Unable to logout from iLO at: %s", sessionData.Host)
+		logrus.Warningf("Unable to logout from iLO at: %s", sessionData.Host)
 		return err
 	}
 
-	log.Logger.Warningf("Successfully logged out of remote ilo: %s", sessionData.Host)
+	logrus.Warningf("Successfully logged out of remote ilo: %s", sessionData.Host)
 
 	// Cleanup context
 	err = deleteSessionData(sessionData.Host)
 	if err != nil {
-		log.Logger.Warning("Unable to cleanup the session data")
+		logrus.Warning("Unable to cleanup the session data")
 		return err
 	}
 
@@ -69,7 +69,7 @@ func sessionDataToLogout(host string) (data *sessionData, err error) {
 		// they didn't specify a host.. so use the context to find one
 		d, e := defaultSessionData()
 		if e != nil {
-			log.Logger.Debugf("unable to retrieve apiKey because of: %v", e)
+			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
 			return data, fmt.Errorf("unable to retrieve the last login for iLO.  " +
 				"Please login to iLO using: hpecli ilo login")
 		}

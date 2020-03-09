@@ -23,18 +23,18 @@ func TestHookWritesToCorrectOutput(t *testing.T) {
 			name:       "Debug",
 			level:      logrus.DebugLevel,
 			stdOutWant: "",
-			stdErrWant: `time="0001-01-01T00:00:00Z" level=debug msg="some Message"` + "\n",
+			stdErrWant: `[0001-01-01T00:00:00Z] [DEBUG] some Message` + "\n",
 		},
 		{
 			name:       "Info",
 			level:      logrus.InfoLevel,
-			stdOutWant: msg + "\n",
+			stdOutWant: msg,
 			stdErrWant: "",
 		},
 		{
 			name:       "Warn",
 			level:      logrus.WarnLevel,
-			stdOutWant: "\n",
+			stdOutWant: "",
 			stdErrWant: msg,
 		},
 	}
@@ -46,7 +46,7 @@ func TestHookWritesToCorrectOutput(t *testing.T) {
 			stdErr := bytes.Buffer{}
 
 			entry := &logrus.Entry{}
-			entry.Logger = logrus.New()
+			entry.Logger = logrus.StandardLogger()
 			entry.Logger.Level = test.level
 			entry.Message = msg
 			entry.Level = test.level
@@ -73,13 +73,5 @@ func TestHookWritesToCorrectOutput(t *testing.T) {
 					test.level, gotErrOut, test.stdErrWant)
 			}
 		})
-	}
-}
-
-func TestEnsureHookInstalled(t *testing.T) {
-	log := New()
-	//nolint:gomnd  // don't care about magic number here
-	if len(log.Hooks) == 1 {
-		t.Errorf("didn't find hook installed")
 	}
 }
