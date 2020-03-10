@@ -7,33 +7,25 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/HewlettPackard/hpecli/pkg/version"
 	goupdate "github.com/inconshreveable/go-update"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-// UpdateRun is by main to see if the update command was run
-// to suppress the message that and update is available
-var UpdateRun bool
-
-func NewUpdateCommand() *cobra.Command {
+func NewUpdateCommand(version string) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "update",
 		Short: "Update the hpecli executable",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			UpdateRun = true
-			return runUpdate()
+			return runUpdate(version)
 		},
 	}
 
 	return cmd
 }
 
-func runUpdate() error {
-	localVer := version.Get()
-
-	resp, err := checkUpdate(&jsonSource{url: versionURL}, localVer)
+func runUpdate(localVersion string) error {
+	resp, err := checkUpdate(&jsonSource{url: versionURL}, localVersion)
 	if err != nil {
 		return err
 	}

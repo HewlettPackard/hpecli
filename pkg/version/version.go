@@ -5,23 +5,35 @@ package version
 import (
 	"fmt"
 
+	"github.com/HewlettPackard/hpecli/pkg/update"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-// values are injected by the linker at build time via ldflags
-var buildDate = "0"
-var gitCommitID = "0"
-var version = "0.0.0"
+type Info struct {
+	Sematic     string
+	GitCommitID string
+	BuildDate   string
+	Verbose     bool
+}
 
-func NewVersionCommand() *cobra.Command {
+func (vi *Info) String() string {
+	if vi.Verbose {
+		return fmt.Sprintf("%s:%s:%s", vi.Sematic, vi.GitCommitID, vi.BuildDate)
+	}
+
+	return vi.Sematic
+}
+
+func NewVersionCommand(vInfo *Info) *cobra.Command {
 	var verbose bool
 
 	var cmd = &cobra.Command{
 		Use:   "version",
 		Short: "Displays version of hpecli",
 		Run: func(_ *cobra.Command, _ []string) {
-			runVersion(verbose)
+			vInfo.Verbose = vInfo.Verbose || verbose
+			runVersion(vInfo)
 		},
 	}
 
@@ -30,29 +42,23 @@ func NewVersionCommand() *cobra.Command {
 	return cmd
 }
 
-func runVersion(verbose bool) {
-	logrus.Info(versionToShow(verbose))
-}
+func runVersion(vInfo *Info) {
+	logrus.Debugln("update : starting check to see if an update is available")
+	logrus.Infof("Local CLI version: %s\n", vInfo.String())
 
-func versionToShow(verbose bool) string {
-	ver := Get()
-	if isFullVersion(verbose) {
-		ver = GetFull()
+	resp, err := update.CheckForUpdate(vInfo.Sematic)
+	if err != nil {
+		logrus.Debugf("Unable to get remove version.  %s\n", err)
+		logrus.Infoln("Unable to determine remote version.")
+
+		return
 	}
 
-	return ver
-}
+	if !resp.UpdateAvailable {
+		logrus.Infoln("You are currently running the latest version of the CLI.")
+		return
+	}
 
-func isFullVersion(verbose bool) bool {
-	return verbose || logrus.GetLevel() >= logrus.DebugLevel
-}
-
-// Get returns the short version. just the version (e.g. 0.0.1)
-func Get() string {
-	return version
-}
-
-// GetFull returns the long version. (e.g. 0.0.2:6683f37:2019-11-23)
-func GetFull() string {
-	return fmt.Sprintf("%s:%s:%s", version, gitCommitID, buildDate)
+	logrus.Infof("Updated CLI is available.  Remote version: %s.  You can update by running \"hpecli update\"\n",
+		resp.RemoteVersion)
 }
