@@ -28,14 +28,14 @@ func TestHookWritesToCorrectOutput(t *testing.T) {
 		{
 			name:       "Info",
 			level:      logrus.InfoLevel,
-			stdOutWant: msg,
+			stdOutWant: msg + "\n",
 			stdErrWant: "",
 		},
 		{
 			name:       "Warn",
 			level:      logrus.WarnLevel,
 			stdOutWant: "",
-			stdErrWant: msg,
+			stdErrWant: msg + "\n",
 		},
 	}
 
