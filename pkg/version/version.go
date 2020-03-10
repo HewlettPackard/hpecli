@@ -49,10 +49,10 @@ func isFullVersion(verbose bool) bool {
 
 // Get returns the short version. just the version (e.g. 0.0.1)
 func Get() string {
-	return version
+	return fmt.Sprintf("%s\n", version)
 }
 
 // GetFull returns the long version. (e.g. 0.0.2:6683f37:2019-11-23)
 func GetFull() string {
-	return fmt.Sprintf("%s:%s:%s", version, gitCommitID, buildDate)
+	return fmt.Sprintf("%s:%s:%s\n", version, gitCommitID, buildDate)
 }
