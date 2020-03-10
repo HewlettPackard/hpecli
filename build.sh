@@ -1,6 +1,5 @@
 #!/bin/bash
-DT=`date +%F`
-GC=`git rev-parse --short HEAD`
-VERSION_FILE=github.com/HewlettPackard/hpecli/pkg/version
+ISO_DATE=`date +%F`
+GIT_COMMIT=`git rev-parse --short HEAD`
 
-go build -o hpecli -ldflags "-X '$VERSION_FILE.version=0.0.1' -X '$VERSION_FILE.buildDate=$DT' -X '$VERSION_FILE.gitCommitId=$GC'" ./cmd/hpecli
+go build -o hpecli -ldflags "-X main.sematicVer=0.0.1 -X main.buildDate=$ISO_DATE -X main.gitCommitID=$GIT_COMMIT" ./cmd/hpecli

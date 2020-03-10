@@ -24,7 +24,7 @@ func TestUpdateWithNoUpdateAvailable(t *testing.T) {
 
 	versionURL = fmt.Sprintf("%s%s", ts.URL, "/json")
 
-	if err := runUpdate(); err != nil {
+	if err := runUpdate("0.0.0"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -39,20 +39,9 @@ func TestUpdateWithErrorInCheckUpdate(t *testing.T) {
 
 	defer ts.Close()
 
-	versionURL = ""
-
-	if err := runUpdate(); err == nil {
+	cmd := NewUpdateCommand("A")
+	if err := cmd.Execute(); err == nil {
 		t.Fatal("expected failure")
-	}
-}
-
-func TestUpdateRunSet(t *testing.T) {
-	UpdateRun = false
-
-	NewUpdateCommand().Execute()
-
-	if !UpdateRun {
-		t.Error("UpdateRun not set on command execution")
 	}
 }
 

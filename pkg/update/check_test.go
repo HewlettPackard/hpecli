@@ -33,7 +33,7 @@ func TestIsUpdateAvailableEmptyLocalVersion(t *testing.T) {
 			name:       "no local version",
 			localVer:   "",
 			remoteJSON: `{"version":"0.0.1"}`,
-			update:     true,
+			update:     false,
 		},
 	}
 
@@ -49,9 +49,9 @@ func TestIsUpdateAvailableEmptyLocalVersion(t *testing.T) {
 			})
 			defer server.Close()
 
-			got := IsUpdateAvailable()
-			if got != c.update {
-				t.Fatal("didn't get expected response")
+			got, _ := CheckForUpdate(c.localVer)
+			if got.UpdateAvailable != c.update {
+				t.Fatalf("Incorrect response:  got=%v, want=%v", got.UpdateAvailable, c.update)
 			}
 		})
 	}
@@ -62,8 +62,8 @@ func TestIsUpdateAvailablInvalidURLErrors(t *testing.T) {
 	cacheResponse = nil
 	versionURL = "://badScheme"
 
-	got := IsUpdateAvailable()
-	if got != false {
+	got, _ := CheckForUpdate("0.0.0")
+	if got.UpdateAvailable != false {
 		t.Fatal("error in checkUpdate should generate false response")
 	}
 }
@@ -190,8 +190,8 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 		t.Fatal("response to be unititialed before request")
 	}
 
-	got := IsUpdateAvailable()
-	if got != true {
+	got, _ := CheckForUpdate("0.0.0")
+	if got.UpdateAvailable != true {
 		t.Fatal("expected to see update available, but reported as not available")
 	}
 	// make sure response got populated
@@ -201,9 +201,9 @@ func TestCachedCopyDoestRetrieveAgain(t *testing.T) {
 	// save to check later
 	r := cacheResponse
 
-	got = IsUpdateAvailable()
+	got, _ = CheckForUpdate("0.0.0")
 	// just make sure it is still true
-	if got != true {
+	if got.UpdateAvailable != true {
 		t.Fatal("expected to see update available, but reported as not available")
 	}
 

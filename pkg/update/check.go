@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/HewlettPackard/hpecli/pkg/version"
 	gover "github.com/hashicorp/go-version"
 	"github.com/sirupsen/logrus"
 )
@@ -54,29 +53,29 @@ const EnvDisableUpdateCheck = "HPECLI_DISABLE_UPDATE_CHECK"
 // json file that describes the latest release version.  Should be updated when new versions are published
 // can alternatively change to using github tags once we real releases
 const versionHost = "raw.githubusercontent.com"
+
 const versionPath = "/HewlettPackard/hpecli/master/site/published-version.json"
 
 var versionURL = fmt.Sprintf("https://%s%s", versionHost, versionPath)
 
 var cacheResponse *CheckResponse
 
-// IsUpdateAvailable checks if a later version is avaialbe of the CLI binary
-func IsUpdateAvailable() bool {
-	cliVer := version.Get()
-	logrus.Debug("Local version is: " + cliVer)
+// CheckForUpdate returns data about the availability of an updated version of the CLI
+func CheckForUpdate(localVersion string) (*CheckResponse, error) {
+	logrus.Debug("Local version is: " + localVersion)
 	logrus.Debug("Checking for a newer version at: " + versionURL)
 
-	res, err := checkUpdate(&jsonSource{url: versionURL}, cliVer)
+	res, err := checkUpdate(&jsonSource{url: versionURL}, localVersion)
 	if err != nil {
 		logrus.Debug("Unable to determine if a new version of the CLI is available")
 		logrus.Debugf("Error: %v", err)
 
-		return false
+		return &CheckResponse{}, err
 	}
 
 	logrus.Debugf("%#v", res)
 
-	return res.UpdateAvailable
+	return res, nil
 }
 
 // Check fetches last version information from its source

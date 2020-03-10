@@ -16,9 +16,13 @@ import (
 	"github.com/HewlettPackard/hpecli/pkg/update"
 	"github.com/HewlettPackard/hpecli/pkg/version"
 	"github.com/sirupsen/logrus"
-
 	"github.com/spf13/cobra"
 )
+
+// values are injected by the linker at build time via ldflags
+var buildDate = "0"    // populated looks like: 2020-03-09
+var gitCommitID = "0"  // populated looks like: fb75887
+var sematicVer = "DEV" // populated looks like: 0.1.2
 
 func main() {
 	if err := run(); err != nil {
@@ -35,19 +39,6 @@ func run() error {
 
 	logrus.Debug("Started : Application initializing")
 	defer logrus.Debug("Completed : Application shutdown")
-
-	// channel to get async update
-	isUpdateChan := make(chan bool)
-
-	// async check if an update is available
-	go func() {
-		logrus.Debug("update : starting async check to see if an update is available")
-
-		isUpdate := update.IsUpdateAvailable()
-
-		logrus.Debugf("update : IsUpdateAvailable=%v", isUpdate)
-		isUpdateChan <- isUpdate
-	}()
 
 	// create the root command.  It doesn't do anything, but used to hold
 	// all of the other top level commands
@@ -71,26 +62,25 @@ func run() error {
 		return err
 	}
 
-	// check status from async method
-	newRelease := <-isUpdateChan
-
-	// if update was just run, we don't need to tell them that there is an update
-	if newRelease && !update.UpdateRun {
-		logrus.Warning("An updated version of the CLI is available.  You can update by running \"hpecli update\"")
-	}
-
 	return nil
 }
 
 func addSubCommands(rootCmd *cobra.Command) {
+	vInfo := &version.Info{
+		Sematic:     sematicVer,
+		GitCommitID: gitCommitID,
+		BuildDate:   buildDate,
+		Verbose:     isDebugLogging(),
+	}
+
 	rootCmd.AddCommand(
 		autocomplete.NewAutoCompleteCommand(),
 		cloudvolume.NewCloudVolumeCommand(),
 		greenlake.NewGreenlakeCommand(),
 		ilo.NewILOCommand(),
 		oneview.NewOneViewCommand(),
-		update.NewUpdateCommand(),
-		version.NewVersionCommand(),
+		update.NewUpdateCommand(sematicVer),
+		version.NewVersionCommand(vInfo),
 	)
 }
 
