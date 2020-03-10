@@ -23,7 +23,7 @@ func TestGetDefault(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	version = v1
-	want := v1
+	want := v1 + "\n"
 	got := Get()
 
 	if got != want {
@@ -35,7 +35,7 @@ func TestGetFull(t *testing.T) {
 	version = v1
 	gitCommitID = "234a39f"
 	buildDate = "2019-01-01"
-	want := v1 + ":" + gitCommitID + ":" + buildDate
+	want := v1 + ":" + gitCommitID + ":" + buildDate + "\n"
 	got := GetFull()
 
 	if got != want {
