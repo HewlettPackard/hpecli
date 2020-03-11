@@ -2,6 +2,7 @@ package password
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -45,4 +46,26 @@ func ReadFromStdIn() (string, error) {
 	t = strings.TrimSpace(t)
 
 	return t, nil
+}
+
+func Read(password *string, promptFor bool, prompt string) (err error) {
+	if *password != "" && promptFor {
+		return errors.New("--password and --password-stdin are mutually exclusive")
+	}
+
+	if *password != "" {
+		// password specified.. leave it and don't get another one
+		return
+	}
+
+	// asked to read from stdin
+	if promptFor {
+		*password, err = ReadFromStdIn()
+		return
+	}
+
+	// prompt the user for the password on the console
+	*password, err = ReadFromConsole(prompt)
+
+	return
 }

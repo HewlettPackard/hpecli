@@ -3,7 +3,6 @@
 package oneview
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -44,7 +43,7 @@ func newLoginCommand() *cobra.Command {
 }
 
 func runLogin(opts *ovLoginOptions) error {
-	if err := handlePasswordOptions(opts); err != nil {
+	if err := password.Read(&opts.password, opts.passwordStdin, "oneview password: "); err != nil {
 		return err
 	}
 
@@ -64,38 +63,6 @@ func runLogin(opts *ovLoginOptions) error {
 	} else {
 		logrus.Warningf("Successfully logged into OneView: %s", opts.host)
 	}
-
-	return nil
-}
-
-func handlePasswordOptions(opts *ovLoginOptions) error {
-	if opts.password != "" {
-		if opts.passwordStdin {
-			return errors.New("--password and --password-stdin are mutually exclusive")
-		}
-		// if the password was set .. we don't need to get it from somewhere else
-		return nil
-	}
-
-	// asked to read from stdin
-	if opts.passwordStdin {
-		pswd, err := password.ReadFromStdIn()
-		if err != nil {
-			return err
-		}
-
-		opts.password = pswd
-
-		return nil
-	}
-
-	// password wasn't specified so we need to prompt them for it
-	pswd, err := password.ReadFromConsole("oneview password: ")
-	if err != nil {
-		return err
-	}
-
-	opts.password = pswd
 
 	return nil
 }

@@ -74,19 +74,3 @@ func TestAPIKeyIsStored(t *testing.T) {
 		t.Fatalf(errTempl, d.Token, sessionID)
 	}
 }
-
-func TestTwoPasswordOptions(t *testing.T) {
-	opts := &iloLoginOptions{
-		password:      "pswd",
-		passwordStdin: true,
-	}
-
-	err := handlePasswordOptions(opts)
-	if err == nil {
-		t.Error("expected error")
-	}
-
-	if !strings.Contains(err.Error(), "mutually exclusive") {
-		t.Error("unexpected error text")
-	}
-}
