@@ -3,7 +3,6 @@
 package ilo
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
@@ -11,17 +10,6 @@ import (
 
 func init() {
 	context.DefaultDBOpenFunc = context.MockOpen
-}
-
-func TestHostPrefixAddedForContext(t *testing.T) {
-	host := "127.0.0.1"
-
-	// run it and then check the variable after
-	_ = runSetContext(&host)
-
-	if !strings.HasPrefix(host, "https://") {
-		t.Fatalf("host should be prefixed with http scheme")
-	}
 }
 
 func TestGetWorks(t *testing.T) {
@@ -65,7 +53,7 @@ func TestCheckDefaultContextFound(t *testing.T) {
 
 	host := ""
 	// don't specify a host, so it will look for the default context value
-	if err := runSetContext(&host); err != nil {
+	if err := runSetContext(host); err != nil {
 		t.Errorf("didn't get default context successfully: %s", err)
 	}
 }

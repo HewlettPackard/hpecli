@@ -21,7 +21,7 @@ func newContextCommand() *cobra.Command {
 		Use:   "context",
 		Short: "Change context to different GreenLake host",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			if !strings.HasPrefix(opts.host, "http") {
+			if opts.host != "" && !strings.HasPrefix(opts.host, "http") {
 				opts.host = fmt.Sprintf("https://%s", opts.host)
 			}
 
