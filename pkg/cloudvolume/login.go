@@ -12,9 +12,10 @@ import (
 )
 
 type cvLoginOptions struct {
-	host     string
-	username string
-	password string
+	host          string
+	username      string
+	password      string
+	passwordStdin bool
 }
 
 func newLoginCommand() *cobra.Command {
@@ -36,6 +37,7 @@ func newLoginCommand() *cobra.Command {
 	cmd.Flags().StringVar(&opts.host, "host", "", "Cloud Volumes portal hostname/ip")
 	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "cloudvolume username")
 	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "cloudvolume passowrd")
+	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	_ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("username")
 
@@ -45,14 +47,8 @@ func newLoginCommand() *cobra.Command {
 func runLogin(opts *cvLoginOptions) error {
 	logrus.Debug("cloudvolumes/login called")
 
-	if opts.password == "" {
-		p, err := password.ReadFromConsole("cloudvolumes password: ")
-		if err != nil {
-			logrus.Error("Unable to read password from console!")
-			return err
-		}
-
-		opts.password = p
+	if err := password.Read(&opts.password, opts.passwordStdin, "cloudvolumes password: "); err != nil {
+		return err
 	}
 
 	logrus.Debugf("Attempting login with user: %v, at: %v", opts.username, opts.host)

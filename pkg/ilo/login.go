@@ -3,7 +3,6 @@
 package ilo
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -34,10 +33,10 @@ func newLoginCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	cmd.Flags().StringVar(&opts.host, "host", "", "ilo ip address")
 	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "ilo username")
 	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "ilo password")
+	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	_ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("username")
 
@@ -45,7 +44,7 @@ func newLoginCommand() *cobra.Command {
 }
 
 func runLogin(opts *iloLoginOptions) error {
-	if err := handlePasswordOptions(opts); err != nil {
+	if err := password.Read(&opts.password, opts.passwordStdin, "ilo password: "); err != nil {
 		return err
 	}
 
@@ -66,38 +65,6 @@ func runLogin(opts *iloLoginOptions) error {
 	} else {
 		logrus.Warningf("Successfully logged into ilo: %s", opts.host)
 	}
-
-	return nil
-}
-
-func handlePasswordOptions(opts *iloLoginOptions) error {
-	if opts.password != "" {
-		if opts.passwordStdin {
-			return errors.New("--password and --password-stdin are mutually exclusive")
-		}
-		// if the password was set .. we don't need to get it from somewhere else
-		return nil
-	}
-
-	// asked to read from stdin
-	if opts.passwordStdin {
-		pswd, err := password.ReadFromStdIn()
-		if err != nil {
-			return err
-		}
-
-		opts.password = pswd
-
-		return nil
-	}
-
-	// password wasn't specified so we need to prompt them for it
-	pswd, err := password.ReadFromConsole("ilo password: ")
-	if err != nil {
-		return err
-	}
-
-	opts.password = pswd
 
 	return nil
 }

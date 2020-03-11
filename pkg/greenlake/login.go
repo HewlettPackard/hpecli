@@ -3,7 +3,6 @@
 package greenlake
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -47,7 +46,7 @@ func newLoginCommand() *cobra.Command {
 }
 
 func runLogin(opts *glLoginOptions) error {
-	if err := handleSecretKeyOptions(opts); err != nil {
+	if err := password.Read(&opts.secretKey, opts.secretKeyStdin, "greenlake secretKey: "); err != nil {
 		return err
 	}
 
@@ -68,38 +67,6 @@ func runLogin(opts *glLoginOptions) error {
 	} else {
 		logrus.Warningf("Successfully logged into GreenLake: %s", opts.host)
 	}
-
-	return nil
-}
-
-func handleSecretKeyOptions(opts *glLoginOptions) error {
-	if opts.secretKey != "" {
-		if opts.secretKeyStdin {
-			return errors.New("--password and --password-stdin are mutually exclusive")
-		}
-		// if the password was set .. we don't need to get it from somewhere else
-		return nil
-	}
-
-	// asked to read from stdin
-	if opts.secretKeyStdin {
-		key, err := password.ReadFromStdIn()
-		if err != nil {
-			return err
-		}
-
-		opts.secretKey = key
-
-		return nil
-	}
-
-	// password wasn't specified so we need to prompt them for it
-	key, err := password.ReadFromConsole("greelake password: ")
-	if err != nil {
-		return err
-	}
-
-	opts.secretKey = key
 
 	return nil
 }
