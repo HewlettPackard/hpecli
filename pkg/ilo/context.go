@@ -17,7 +17,10 @@ func newContextCommand() *cobra.Command {
 		Use:   "context",
 		Short: "Chagne context to different ilo host",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSetContext(&host)
+			if host != "" && !strings.HasPrefix(host, "http") {
+				host = fmt.Sprintf("https://%s", host)
+			}
+			return runSetContext(host)
 		},
 	}
 
@@ -26,9 +29,9 @@ func newContextCommand() *cobra.Command {
 	return cmd
 }
 
-func runSetContext(host *string) error {
+func runSetContext(host string) error {
 	// didn't specify host, so just show current context
-	if *host == "" {
+	if host == "" {
 		ctx, err := getContext()
 		if err != nil {
 			return err
@@ -39,9 +42,5 @@ func runSetContext(host *string) error {
 		return nil
 	}
 
-	if !strings.HasPrefix(*host, "http") {
-		*host = fmt.Sprintf("https://%s", *host)
-	}
-
-	return setContext(*host)
+	return setContext(host)
 }

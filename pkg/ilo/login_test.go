@@ -4,6 +4,7 @@ package ilo
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -15,22 +16,32 @@ func init() {
 }
 
 func TestHostPrefixAdded(t *testing.T) {
-	server := newTestServer("/redfish/v1/sessionservice/sessions/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
+	// clear everything from the mock store
+	context.MockClear()
+
+	mux := http.NewServeMux()
+	server := httptest.NewTLSServer(mux)
+	mux.HandleFunc("/redfish/v1/sessionservice/sessions/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("x-auth-token", "someToken")
+		w.WriteHeader(http.StatusCreated)
 	})
+
 	defer server.Close()
 
-	opts := iloLoginOptions{
-		host:     strings.Replace(server.URL, "http://", "", 1),
-		password: "blah",
+	host := strings.Replace(server.URL, "https://", "", 1)
+
+	cmd := newLoginCommand()
+	cmd.SetArgs([]string{"--host", host, "-u", "user", "-p", "pass"})
+	_ = cmd.Execute()
+
+	// check the db to make sure it was persisted
+	got, err := getContext()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	// this will fail with a remote call.. ignore the failure and
-	// check the host string to ensure prefix addded
-	_ = runLogin(&opts)
-
-	if !strings.HasPrefix(opts.host, "https://") {
-		t.Fatalf("host should be prefixed with http scheme")
+	if got != "https://"+host {
+		t.Fatal("context didn't get set correctly")
 	}
 }
 

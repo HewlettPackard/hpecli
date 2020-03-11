@@ -25,6 +25,10 @@ func newLoginCommand() *cobra.Command {
 		Use:   "login",
 		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolume login",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if !strings.HasPrefix(opts.host, "http") {
+				opts.host = fmt.Sprintf("https://%s", opts.host)
+			}
+
 			return runLogin(&opts)
 		},
 	}
@@ -40,10 +44,6 @@ func newLoginCommand() *cobra.Command {
 
 func runLogin(opts *cvLoginOptions) error {
 	logrus.Debug("cloudvolumes/login called")
-
-	if !strings.HasPrefix(opts.host, "http") {
-		opts.host = fmt.Sprintf("https://%s", opts.host)
-	}
 
 	if opts.password == "" {
 		p, err := password.ReadFromConsole("cloudvolumes password: ")

@@ -17,7 +17,7 @@ func newContextCommand() *cobra.Command {
 		Use:   "context",
 		Short: "Chagne context to different OneView host",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !strings.HasPrefix(host, "http") {
+			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
 			}
 

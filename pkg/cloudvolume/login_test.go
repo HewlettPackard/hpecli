@@ -5,7 +5,6 @@ package cloudvolume
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
@@ -47,25 +46,6 @@ func TestRunLogins(t *testing.T) {
 
 	if gotToken != want {
 		t.Fatalf(errTempl, gotHost, want)
-	}
-}
-
-func TestHostGetsPrefixed(t *testing.T) {
-	ts := newTestServer("/auth/login", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-	defer ts.Close()
-
-	opts := cvLoginOptions{
-		host:     strings.TrimPrefix(ts.URL, "http://"),
-		password: "arbitrary",
-	}
-
-	_ = runLogin(&opts)
-
-	// ensure host got http prefix applied
-	if !strings.HasPrefix(opts.host, "https://") {
-		t.Fatal("expected host to get https prefix")
 	}
 }
 

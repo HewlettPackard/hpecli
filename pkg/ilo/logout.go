@@ -17,7 +17,7 @@ func newLogoutCommand() *cobra.Command {
 		Use:   "logout",
 		Short: "Logout from ilo: hpecli ilo logout",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !strings.HasPrefix(host, "http") {
+			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
 			}
 
