@@ -68,6 +68,7 @@ func TestLogoutRemovesAPIKeyFromContext(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
 
 	server := newTestServer(logoutURI, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
 	})
 
 	defer server.Close()
@@ -92,6 +93,7 @@ func TestLogoutRemovesAPIKeyFromParameter(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
 
 	server := newTestServer(logoutURI, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
 	})
 
 	defer server.Close()
