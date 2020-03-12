@@ -16,7 +16,7 @@ func newContextCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "context",
 		Short: "Chagne context to different OneView host",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
 			}
@@ -31,17 +31,17 @@ func newContextCommand() *cobra.Command {
 }
 
 func runSetContext(host string) error {
-	// didn't specify host, so just show current context
-	if host == "" {
-		ctx, err := getContext()
-		if err != nil {
-			return err
-		}
-
-		logrus.Warningf("Default oneview commands directed to host: %s", ctx)
-
-		return nil
+	if host != "" {
+		return setContext(host)
 	}
 
-	return setContext(host)
+	// didn't specify host, so just show current context
+	ctx, err := getContext()
+	if err != nil {
+		return err
+	}
+
+	logrus.Warningf("Default oneview commands directed to host: %s", ctx)
+
+	return nil
 }
