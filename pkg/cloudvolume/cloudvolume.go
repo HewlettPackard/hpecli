@@ -9,8 +9,8 @@ import (
 func NewCloudVolumeCommand() *cobra.Command {
 	// cmd represents the ilo command
 	var cmd = &cobra.Command{
-		Use:   "cloudvolume",
-		Short: "Access to HPE Nimble Cloud Volume commands",
+		Use:   "cloudvolumes",
+		Short: "Access to HPE Nimble Cloud Volumes commands",
 	}
 
 	cmd.AddCommand(

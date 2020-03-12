@@ -24,7 +24,7 @@ func newLoginCommand() *cobra.Command {
 	// Cmd represents the cloudvolume get command
 	var cmd = &cobra.Command{
 		Use:   "login",
-		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolume login",
+		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolumes login",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !strings.HasPrefix(opts.host, "http") {
 				opts.host = fmt.Sprintf("https://%s", opts.host)

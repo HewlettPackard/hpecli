@@ -11,8 +11,8 @@ import (
 
 func newGetVolumesCommand() *cobra.Command {
 	var cmd = &cobra.Command{
-		Use:   "cloudvolume get volumes",
-		Short: "Get from Cloud Volumes: hpecli cloudvolumes get cloudvolumes",
+		Use:   "volumes",
+		Short: "Get from Cloud Volumes: hpecli cloudvolumes get volumes",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return runGetVolumes()
 		},
