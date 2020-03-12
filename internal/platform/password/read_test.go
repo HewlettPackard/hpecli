@@ -9,6 +9,9 @@ import (
 	"testing"
 )
 
+const errUnexpectedErr = "unexpected error: %+v"
+const errDidNotReadCorrectly = "didn't read passsword correctly"
+
 func TestTwoPasswordOptions(t *testing.T) {
 	var p string = "have one"
 	err := Read(&p, true, "ilo")
@@ -63,7 +66,7 @@ func TestReadFromConsole(t *testing.T) {
 
 	got, err := ReadFromConsole("abc")
 	if err != nil {
-		t.Fatalf("unexpected error: %+v", err)
+		t.Fatalf(errUnexpectedErr, err)
 	}
 
 	if out.String() != "abc\n" {
@@ -71,7 +74,7 @@ func TestReadFromConsole(t *testing.T) {
 	}
 
 	if got != "mypassword" {
-		t.Fatal("didn't read passsword correctly")
+		t.Fatal(errDidNotReadCorrectly)
 	}
 }
 
@@ -81,12 +84,12 @@ func TestReadFromStdin(t *testing.T) {
 
 	got, err := ReadFromStdIn()
 	if err != nil {
-		t.Fatalf("unexpected error: %+v", err)
+		t.Fatalf(errUnexpectedErr, err)
 	}
 
 	// ensure password is read.. and trimmed
 	if got != "mypassword" {
-		t.Fatal("didn't read passsword correctly")
+		t.Fatal(errDidNotReadCorrectly)
 	}
 }
 
@@ -109,12 +112,12 @@ func TestReadPromptFor(t *testing.T) {
 	err := Read(&got, true, "")
 
 	if err != nil {
-		t.Fatalf("unexpected error: %+v", err)
+		t.Fatalf(errUnexpectedErr, err)
 	}
 
 	// ensure password is read.. and trimmed
 	if got != "otherPassword" {
-		t.Fatal("didn't read passsword correctly")
+		t.Fatal(errDidNotReadCorrectly)
 	}
 }
 
@@ -131,7 +134,7 @@ func TestReadPrompt(t *testing.T) {
 	err := Read(&got, false, wantPrompt)
 
 	if err != nil {
-		t.Fatalf("unexpected error: %+v", err)
+		t.Fatalf(errUnexpectedErr, err)
 	}
 
 	if out.String() != wantPrompt+"\n" {
@@ -139,7 +142,7 @@ func TestReadPrompt(t *testing.T) {
 	}
 
 	if got != "diff-password" {
-		t.Fatal("didn't read passsword correctly")
+		t.Fatal(errDidNotReadCorrectly)
 	}
 }
 
