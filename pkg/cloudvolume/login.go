@@ -55,7 +55,7 @@ func runLogin(opts *cvLoginOptions) error {
 
 	cvc := newCVClient(opts.host, opts.username, opts.password)
 
-	token, err := cvc.Login()
+	token, err := cvc.login()
 	if err != nil {
 		logrus.Warningf("Unable to login with supplied credentials to CloudVolume at: %s", opts.host)
 		return err

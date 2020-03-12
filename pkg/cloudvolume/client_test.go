@@ -77,9 +77,24 @@ func TestMalformedResponseForLogin(t *testing.T) {
 
 	c := newCVClient(ts.URL, clientUsername, clientPassword)
 
-	_, err := c.Login()
+	_, err := c.login()
 	if err == nil {
 		t.Fatalf("Didn't get expected error on not json response")
+	}
+}
+
+func TestUnauthorizedLoginError(t *testing.T) {
+	ts := newTestServer("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	})
+
+	defer ts.Close()
+
+	c := newCVClient(ts.URL, clientUsername, clientPassword)
+
+	_, err := c.login()
+	if err == nil {
+		t.Fatalf("Didn't get expected error on unauthorized login")
 	}
 }
 
@@ -95,7 +110,7 @@ func TestTokenResponseForLogin(t *testing.T) {
 
 	c := newCVClient(ts.URL, clientUsername, clientPassword)
 
-	got, err := c.Login()
+	got, err := c.login()
 	if err != nil {
 		t.Fatalf("unexpected error in login attempt")
 	}
@@ -122,7 +137,7 @@ func TestAPIKeyInjected(t *testing.T) {
 	c := newCVClientFromAPIKey(ts.URL, apiKey)
 
 	// checks are done on server side above
-	_, _ = c.GetCloudVolumes()
+	_, _ = c.getCloudVolumes()
 }
 
 func TestGetCloudVolumes(t *testing.T) {
@@ -140,7 +155,7 @@ func TestGetCloudVolumes(t *testing.T) {
 
 	c := newCVClientFromAPIKey(ts.URL, "someAPIKey")
 
-	got, err := c.GetCloudVolumes()
+	got, err := c.getCloudVolumes()
 	if err != nil {
 		t.Fatalf("unexpected error in getCloudVolumes attempt")
 	}
