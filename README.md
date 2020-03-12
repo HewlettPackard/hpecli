@@ -17,6 +17,10 @@ Simply download a binary that is appropriate for your OS, and then run it for he
 hpecli --help
 ```
 
+<img src="./site/hpecli-version-new.gif" align="center">
+
+More of these [here](./site/demo.md)
+
 
 ## Contributing
 
