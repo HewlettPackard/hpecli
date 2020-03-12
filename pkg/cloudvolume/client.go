@@ -4,6 +4,7 @@ package cloudvolume
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/rest"
@@ -32,7 +33,7 @@ func newCVClientFromAPIKey(host, token string) *CVClient {
 	}
 }
 
-func (c *CVClient) Login() (string, error) {
+func (c *CVClient) login() (string, error) {
 	const uriPath = "/auth/login"
 
 	postBody := fmt.Sprintf(`{"email":"%s", "password":"%s"}`, c.Username, c.Password)
@@ -40,6 +41,10 @@ func (c *CVClient) Login() (string, error) {
 	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(postBody), rest.AddJSONMimeType())
 	if err != nil {
 		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unable to create login sessions to greenlake.  Repsponse was: %+v", resp.Status)
 	}
 
 	type loginResponse struct {
@@ -57,10 +62,10 @@ func (c *CVClient) Login() (string, error) {
 	return "", fmt.Errorf("unable to get response from login command")
 }
 
-func (c *CVClient) GetCloudVolumes() ([]byte, error) {
+func (c *CVClient) getCloudVolumes() ([]byte, error) {
 	const uriPath = "/api/v2/cloud_volumes"
 
-	resp, err := rest.Get(c.Host+uriPath, c.AddAuth())
+	resp, err := rest.Get(c.Host+uriPath, c.addAuth())
 	if err != nil {
 		return []byte{}, err
 	}
@@ -68,7 +73,7 @@ func (c *CVClient) GetCloudVolumes() ([]byte, error) {
 	return resp.JSON(), nil
 }
 
-func (c *CVClient) AddAuth() func(*rest.Request) {
+func (c *CVClient) addAuth() func(*rest.Request) {
 	return func(r *rest.Request) {
 		r.Request.SetBasicAuth("username", c.APIKey)
 	}

@@ -35,7 +35,7 @@ func runGetVolumes() error {
 
 	cvc := newCVClientFromAPIKey(host, token)
 
-	jsonResult, err := cvc.GetCloudVolumes()
+	jsonResult, err := cvc.getCloudVolumes()
 	if err != nil {
 		return err
 	}
