@@ -33,7 +33,7 @@ func TestHostPrefixAdded(t *testing.T) {
 	host := strings.Replace(server.URL, "https://", "", 1)
 
 	cmd := newLoginCommand()
-	cmd.SetArgs([]string{"--host", host, "-u", "user", "-p", "pass"})
+	cmd.SetArgs([]string{"--host", host, "--username", "admin", "--password", "somePse"})
 	_ = cmd.Execute()
 
 	// check the db to make sure it was persisted
@@ -48,7 +48,7 @@ func TestHostPrefixAdded(t *testing.T) {
 }
 
 func TestAPIKeyIsStored(t *testing.T) {
-	const sessionID = "HERE_IS_A_ID"
+	const sessionID = "SomeSessionID"
 
 	server := newTestServer("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
