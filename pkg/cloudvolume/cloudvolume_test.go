@@ -9,7 +9,7 @@ import (
 func TestCheckCmdCreation(t *testing.T) {
 	cmd := NewCloudVolumeCommand()
 
-	if cmd.Name() != "cloudvolume" {
+	if cmd.Name() != "cloudvolumes" {
 		t.Error("name not set on command")
 	}
 
