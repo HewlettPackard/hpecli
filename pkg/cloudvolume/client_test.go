@@ -18,6 +18,7 @@ const (
 	clientPassword = "password"
 	clientToken    = "lkjsdfjka;sdfjlasdjkf"
 	errTempl       = "got=%s, want=%s"
+	loginPath      = "/auth/login"
 )
 
 func init() {
@@ -69,7 +70,7 @@ func TestNewCVClientFromAPIKey(t *testing.T) {
 func TestMalformedResponseForLogin(t *testing.T) {
 	const notJSON = "bad response"
 
-	ts := newTestServer("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+	ts := newTestServer(loginPath, func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, notJSON)
 	})
 
@@ -84,7 +85,7 @@ func TestMalformedResponseForLogin(t *testing.T) {
 }
 
 func TestUnauthorizedLoginError(t *testing.T) {
-	ts := newTestServer("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+	ts := newTestServer(loginPath, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 	})
 
@@ -102,7 +103,7 @@ func TestTokenResponseForLogin(t *testing.T) {
 	const want = "74dc0153-6daa-49ae-905e-cc59bff3225e"
 	jsonResponse := fmt.Sprintf(`{"geo":"US", "token":"%s"}`, want)
 
-	ts := newTestServer("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+	ts := newTestServer(loginPath, func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, jsonResponse)
 	})
 
