@@ -77,6 +77,7 @@ func ReadFromStdIn() (string, error) {
 	return t, nil
 }
 
+
 // Read will use one of several methods to get a password from a user
 // password is an existing password if set.  This is return unmodified if
 // passed in with a value.
