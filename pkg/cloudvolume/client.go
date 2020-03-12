@@ -4,6 +4,7 @@ package cloudvolume
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/rest"
@@ -40,6 +41,10 @@ func (c *CVClient) Login() (string, error) {
 	resp, err := rest.Post(c.Host+uriPath, strings.NewReader(postBody), rest.AddJSONMimeType())
 	if err != nil {
 		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unable to create login sessions to greenlake.  Repsponse was: %+v", resp.Status)
 	}
 
 	type loginResponse struct {
