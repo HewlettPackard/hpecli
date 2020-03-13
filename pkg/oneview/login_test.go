@@ -74,6 +74,19 @@ func TestAPIKeyIsStored(t *testing.T) {
 	}
 }
 
+func TestInvalidArgCombo(t *testing.T) {
+	opts := &ovLoginOptions{password: "yes", passwordStdin: true}
+
+	err := validateArgs(opts)
+	if err == nil {
+		t.Fatal("should have got validation error")
+	}
+
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Error("wrong error returned")
+	}
+}
+
 func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
 	mux := http.NewServeMux()
 	server := httptest.NewServer(mux)

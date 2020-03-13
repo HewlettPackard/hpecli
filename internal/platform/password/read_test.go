@@ -5,25 +5,11 @@ package password
 import (
 	"bytes"
 	"errors"
-	"strings"
 	"testing"
 )
 
 const errUnexpectedErr = "unexpected error: %+v"
 const errDidNotReadCorrectly = "didn't read passsword correctly"
-
-func TestTwoPasswordOptions(t *testing.T) {
-	var p string = "have one"
-	err := Read(&p, true, "ilo")
-
-	if err == nil {
-		t.Error("expected error")
-	}
-
-	if !strings.Contains(err.Error(), "mutually exclusive") {
-		t.Error("unexpected error text")
-	}
-}
 
 func TestPasswordAlreadySpecified(t *testing.T) {
 	var p string = "have one"
