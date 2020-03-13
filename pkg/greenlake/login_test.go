@@ -81,3 +81,16 @@ func TestHTTPFailure(t *testing.T) {
 		t.Fatal("failed http request should fail the login request")
 	}
 }
+
+func TestInvalidArgCombo(t *testing.T) {
+	opts := &glLoginOptions{secretKey: "yes", secretKeyStdin: true}
+
+	err := validateArgs(opts)
+	if err == nil {
+		t.Fatal("should have got validation error")
+	}
+
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Error("wrong error returned")
+	}
+}

@@ -2,7 +2,6 @@ package password
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -77,7 +76,6 @@ func ReadFromStdIn() (string, error) {
 	return t, nil
 }
 
-
 // Read will use one of several methods to get a password from a user
 // password is an existing password if set.  This is return unmodified if
 // passed in with a value.
@@ -85,10 +83,6 @@ func ReadFromStdIn() (string, error) {
 // prompt is what the console prompt should be if it should be read
 // from the console from the user
 func Read(password *string, readStdIn bool, prompt string) (err error) {
-	if *password != "" && readStdIn {
-		return errors.New("--password and --password-stdin are mutually exclusive")
-	}
-
 	if *password != "" {
 		// password specified.. leave it and don't get another one
 		return
