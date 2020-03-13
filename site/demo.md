@@ -8,7 +8,7 @@ If a newer version is available, which we check when you invoke `hpecli version`
 
 <img src="hpecli-update-new.gif" align="center">
 
-# Using oneview commands
+# Working with HPE OneView
 There is a plugin for HPE OneView which allows to control one or more HPE OneView appliance using the `hpecli oneview` command set. Run `hpe oneview --help` to find out the supported verbs. Then we can use `hpecli oneview login`to connect to an HPE OneView instance then `hpecli oneview get servers` or `hpecli oneview get enclosures` to retrieve information from HPE OneView. When done we can use `hpecli oneview logout` to terminate the session.
 
 <img src="hpecli-oneview-new.gif" align="center">
@@ -18,7 +18,12 @@ We cache the latest context used for a given plugin. But you can switch to a dif
 
 <img src="hpecli-context-new.gif" align="center">
 
-# Using iLO/Redfish commands
+# Working with iLO/Redfish 
 There is a plugin for HPE iLO/Redfish which allows to control one or more HPE iLO BMC using the `hpecli ilo` command set. Run `hpe ilo --help` to find out the supported verbs. Then we can use `hpecli ilo login`to connect to an HPE iLO instance then `hpecli ilo get serviceroot` to retrieve root information about this iLO/Redfish instance. When done we can use `hpecli ilo logout` to terminate the session. You can use `hpecli ilo context` to find out which iLO you are opererating and `hpecli ilo context --host <anotherhost>` to switch context.
 
 <img src="hpecli-ilo-new.gif" align="center">
+
+# Working with CloudVolumes
+There is a plugin for HPE Cloud Volumes which uses the `hpecli cloudvolumes` command set. Run `hpe cloudvolumes --help` to find out the supported verbs. Then we can use `hpecli cloudvolumes login`to connect to your HPE Cloud Volumes account then `hpecli cloudvolumes get volumes` to retrieve the list of volumes.
+
+<img src="hpecli-cloudvolumes-new.gif" align="center">
