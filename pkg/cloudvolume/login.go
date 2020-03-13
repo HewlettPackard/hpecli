@@ -3,6 +3,7 @@
 package cloudvolume
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -22,14 +23,13 @@ func newLoginCommand() *cobra.Command {
 	var opts cvLoginOptions
 
 	// Cmd represents the cloudvolume get command
-	var cmd = &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolumes login",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if !strings.HasPrefix(opts.host, "http") {
-				opts.host = fmt.Sprintf("https://%s", opts.host)
-			}
-
+		PreRunE: func(_ *cobra.Command, _ []string) error {
+			return validateArgs(&opts)
+		},
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return runLogin(&opts)
 		},
 	}
@@ -42,6 +42,18 @@ func newLoginCommand() *cobra.Command {
 	_ = cmd.MarkFlagRequired("username")
 
 	return cmd
+}
+
+func validateArgs(opts *cvLoginOptions) error {
+	if opts.host != "" && !strings.HasPrefix(opts.host, "http") {
+		opts.host = fmt.Sprintf("https://%s", opts.host)
+	}
+
+	if opts.password != "" && opts.passwordStdin {
+		return errors.New("--password and --password-stdin are mutually exclusive")
+	}
+
+	return nil
 }
 
 func runLogin(opts *cvLoginOptions) error {
