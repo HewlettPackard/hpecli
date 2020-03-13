@@ -24,11 +24,11 @@ func newLoginCommand() *cobra.Command {
 
 	// Cmd represents the cloudvolume get command
 	cmd := &cobra.Command{
+		Use:   "login",
+		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolumes login",
 		PreRunE: func(_ *cobra.Command, _ []string) error {
 			return validateArgs(&opts)
 		},
-		Use:   "login",
-		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolumes login",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return runLogin(&opts)
 		},
