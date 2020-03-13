@@ -5,6 +5,7 @@ package update
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	gover "github.com/hashicorp/go-version"
 	"github.com/sirupsen/logrus"
@@ -46,9 +47,12 @@ type source interface {
 	get() (*remoteResponse, error)
 }
 
-// EnvDisableUpdateCheck is environmental variable to disable remote
+// EnvDisableUpdateCheck is an environmental variable to disable remote
 // http request to check if a newer version of the CLI is available
 const EnvDisableUpdateCheck = "HPECLI_DISABLE_UPDATE_CHECK"
+// EnvGoOS is an environmental variable that provides the OS type 
+// Can be: darwin, windows or linux
+const EnvGoOS = "GOOS"
 
 // json file that describes the latest release version.  Should be updated when new versions are published
 // can alternatively change to using github tags once we real releases
@@ -114,6 +118,15 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 	if resp.version.GreaterThan(localVersion) {
 		updateAvailable = true
 	}
+
+	osenv := os.Getenv(EnvGoOS)
+	if osenv != "" {
+		logrus.Debugf("%s not set.  Not performing remote check", EnvGoOS)
+		return &CheckResponse{}, nil
+	}
+
+	// Substitute {{$GOOS}} with osenv in updateURL 
+	resp.updateURL = strings.Replace(resp.updateURL, "{{$GOOS}}", osenv, 1) 
 
 	cacheResponse = &CheckResponse{
 		UpdateAvailable: updateAvailable,
