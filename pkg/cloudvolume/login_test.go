@@ -78,11 +78,11 @@ func TestInvalidArgCombo(t *testing.T) {
 }
 
 func TestPrefixAdded(t *testing.T) {
-	opts := &cvLoginOptions{host: "1.1.1.1"}
+	opts := &cvLoginOptions{host: "host.fqdn"}
 
 	_ = validateArgs(opts)
 
-	if opts.host != "https://1.1.1.1" {
+	if opts.host != "https://host.fqdn" {
 		t.Error("host didn't get prefixed")
 	}
 }
