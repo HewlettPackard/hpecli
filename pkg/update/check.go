@@ -5,6 +5,7 @@ package update
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	gover "github.com/hashicorp/go-version"
@@ -50,15 +51,13 @@ type source interface {
 // EnvDisableUpdateCheck is an environmental variable to disable remote
 // http request to check if a newer version of the CLI is available
 const EnvDisableUpdateCheck = "HPECLI_DISABLE_UPDATE_CHECK"
-// EnvGoOS is an environmental variable that provides the OS type 
-// Can be: darwin, windows or linux
-const EnvGoOS = "GOOS"
 
 // json file that describes the latest release version.  Should be updated when new versions are published
 // can alternatively change to using github tags once we real releases
 const versionHost = "raw.githubusercontent.com"
 
-const versionPath = "/HewlettPackard/hpecli/master/site/published-version.json"
+const versionPath = "/HewlettPackard/hpecli/Didier/MultiOSSupport/site/published-version.json"
+
 
 var versionURL = fmt.Sprintf("https://%s%s", versionHost, versionPath)
 
@@ -119,12 +118,14 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 		updateAvailable = true
 	}
 
-	osenv := os.Getenv(EnvGoOS)
-	if osenv != "" {
-		logrus.Debugf("%s not set.  Not performing remote check", EnvGoOS)
+	// retrieve GOOS from runtime GO variables
+	osenv := runtime.GOOS
+
+	if osenv == "" {
+		logrus.Debugf("Runtime variable GOOS not set.  Not performing remote check")
 		return &CheckResponse{}, nil
 	}
-
+	
 	// Substitute {{$GOOS}} with osenv in updateURL 
 	resp.updateURL = strings.Replace(resp.updateURL, "{{$GOOS}}", osenv, 1) 
 
