@@ -56,7 +56,7 @@ const EnvDisableUpdateCheck = "HPECLI_DISABLE_UPDATE_CHECK"
 // can alternatively change to using github tags once we real releases
 const versionHost = "raw.githubusercontent.com"
 
-const versionPath = "/HewlettPackard/hpecli/master/site/published-version.json"
+const versionPath = "/HewlettPackard/hpecli/Didier/MultiOSSupport/site/published-version.json"
 
 
 var versionURL = fmt.Sprintf("https://%s%s", versionHost, versionPath)
@@ -124,10 +124,20 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 	if osenv == "" {
 		logrus.Debugf("Runtime variable GOOS not set.  Not performing remote check")
 		return &CheckResponse{}, nil
-	}
-	
+	} 
+
 	// Substitute {{$GOOS}} with osenv in updateURL 
-	resp.updateURL = strings.Replace(resp.updateURL, "{{$GOOS}}", osenv, 1) 
+	resp.updateURL = strings.Replace(resp.updateURL, "{{$GOOS}}", osenv, 1)
+	
+	// windows uses a .exe filename while linux and MacOs don't
+	var dotexe string = ""
+	if osenv == "windows" {
+		dotexe = ".exe" 			
+	}
+
+	logrus.Debugf("$GOOS=%v, $EXE=%v", osenv, dotexe)
+
+	resp.updateURL = strings.Replace(resp.updateURL, "{{$EXE}}", dotexe, 1) 
 
 	cacheResponse = &CheckResponse{
 		UpdateAvailable: updateAvailable,
