@@ -33,7 +33,7 @@ func runILOServiceRoot() error {
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	logrus.Warningf("Using iLO: %s\n", sd.Host)
+	logrus.Warningf("Using iLO: %s", sd.Host)
 
 	client := newILOClientFromAPIKey(sd.Host, sd.Token)
 

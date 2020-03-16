@@ -25,21 +25,17 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// output buffer
 	b := &bytes.Buffer{}
 
+	if !f.NoColors {
+		fmt.Fprintf(b, "\x1b[%dm", levelColor)
+	}
+
 	// write time
 	fmt.Fprintf(b, "[%s] ", entry.Time.Format(time.RFC3339))
 
 	// write level
 	level := marshalLevel(entry.Level)
 
-	if !f.NoColors {
-		fmt.Fprintf(b, "\x1b[%dm", levelColor)
-	}
-
 	fmt.Fprintf(b, "[%s] ", level)
-
-	if !f.NoColors {
-		b.WriteString("\x1b[0m")
-	}
 
 	// write fields
 	f.writeFields(b, entry)
@@ -48,14 +44,14 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 		fmt.Fprintf(b, "[%s():%d] - ", path.Base(entry.Caller.Function), entry.Caller.Line)
 	}
 
-	if !f.NoColors {
-		b.WriteString("\x1b[0m")
-	}
-
 	// write message
 	b.WriteString(entry.Message)
 
 	b.WriteByte('\n')
+
+	if !f.NoColors {
+		b.WriteString("\x1b[0m")
+	}
 
 	return b.Bytes(), nil
 }
@@ -83,19 +79,19 @@ const (
 	colorRed    = 31
 	colorYellow = 33
 	colorBlue   = 36
-	colorGray   = 37
+	colorWhite  = 37
 )
 
 func colorForLevel(level logrus.Level) int {
 	switch level {
 	case logrus.DebugLevel:
-		return colorGray
+		return colorBlue
 	case logrus.WarnLevel:
 		return colorYellow
 	case logrus.ErrorLevel, logrus.FatalLevel, logrus.PanicLevel:
 		return colorRed
 	default:
-		return colorBlue
+		return colorWhite
 	}
 }
 

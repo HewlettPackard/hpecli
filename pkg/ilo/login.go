@@ -75,7 +75,7 @@ func runLogin(opts *iloLoginOptions) error {
 	if err = saveContextAndSessionData(sd); err != nil {
 		logrus.Warning("Successfully logged into ilo, but was unable to save the session data")
 	} else {
-		logrus.Warningf("Successfully logged into ilo: %s", opts.host)
+		logrus.Infof("Successfully logged into ilo: %s", opts.host)
 	}
 
 	return nil

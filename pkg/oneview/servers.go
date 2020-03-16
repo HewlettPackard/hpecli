@@ -36,7 +36,7 @@ func getServerHardware(serverName string) error {
 
 	ovc := newOVClientFromAPIKey(host, token)
 
-	logrus.Warningf("Using OneView: %s\n", host)
+	logrus.Warningf("Using OneView: %s", host)
 
 	var sh interface{}
 	if serverName != "" {
