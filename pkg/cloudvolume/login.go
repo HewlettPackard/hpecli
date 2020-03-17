@@ -79,7 +79,7 @@ func runLogin(opts *cvLoginOptions) error {
 		logrus.Warning("Successfully logged into CloudVolumes, but was unable to save the session data")
 		logrus.Debugf("%+v", err)
 	} else {
-		logrus.Warningf("Successfully logged into CloudVolumes: %s", opts.host)
+		logrus.Infof("Successfully logged into CloudVolumes: %s", opts.host)
 	}
 
 	return nil

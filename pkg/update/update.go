@@ -39,7 +39,7 @@ func runUpdate(localVersion string) error {
 		return err
 	}
 
-	logrus.Warningf("Successfully update the cli to version: %s", resp.RemoteVersion)
+	logrus.Infof("Successfully update the cli to version: %s", resp.RemoteVersion)
 
 	return nil
 }

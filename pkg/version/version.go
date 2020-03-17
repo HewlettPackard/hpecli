@@ -44,11 +44,11 @@ func NewVersionCommand(vInfo *Info) *cobra.Command {
 
 func runVersion(vInfo *Info) {
 	logrus.Debugln("update : starting check to see if an update is available")
-	logrus.Infof("Local CLI version: %s\n", vInfo.String())
+	logrus.Infof("Local CLI version: %s", vInfo.String())
 
 	resp, err := update.CheckForUpdate(vInfo.Sematic)
 	if err != nil {
-		logrus.Debugf("Unable to get remove version.  %s\n", err)
+		logrus.Debugf("Unable to get remove version.  %s", err)
 		logrus.Infoln("Unable to determine remote version.")
 
 		return
@@ -59,6 +59,6 @@ func runVersion(vInfo *Info) {
 		return
 	}
 
-	logrus.Infof("Updated CLI is available.  Remote version: %s.  You can update by running \"hpecli update\"\n",
+	logrus.Infof("Updated CLI is available.  Remote version: %s.  You can update by running \"hpecli update\"",
 		resp.RemoteVersion)
 }

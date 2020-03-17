@@ -72,7 +72,7 @@ func (c *GLClient) login() (*sessionData, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return sd, fmt.Errorf("unable to create login sessions to Green Lake.  Repsponse was: %+v", resp.Status)
+		return sd, fmt.Errorf("unable to create login sessions to Green Lake.  Response was: %+v", resp.Status)
 	}
 
 	var result Token

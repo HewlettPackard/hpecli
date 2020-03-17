@@ -41,7 +41,7 @@ func runSetContext(host string) error {
 		return err
 	}
 
-	logrus.Warningf("Default oneview commands directed to host: %s", ctx)
+	logrus.Infof("Default oneview commands directed to host: %s", ctx)
 
 	return nil
 }
