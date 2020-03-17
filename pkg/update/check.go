@@ -120,22 +120,18 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 
 	// retrieve GOOS from runtime GO variables
 	osenv := runtime.GOOS
-
-	if osenv == "" {
-		logrus.Debugf("Runtime variable GOOS not set.  Not performing remote check")
-		return &CheckResponse{}, nil
-	} 
+	logrus.Debugf("Detected operating system: %v", osenv)
 
 	// Substitute {{$GOOS}} with osenv in updateURL 
-	logrus.Debugf("Detected operating system: %v", osenv)
 	resp.updateURL = strings.Replace(resp.updateURL, "{{$GOOS}}", osenv, 1)
 	
-	// windows uses a .exe filename while linux and MacOs don't
+	// Windows uses a .exe filename while linux and MacOs don't
 	var dotexe string = ""
 	if osenv == "windows" {
 		dotexe = ".exe" 			
 	}
 
+	// Substitute {{$EXE}} with dotexe in updateURL 
 	resp.updateURL = strings.Replace(resp.updateURL, "{{$EXE}}", dotexe, 1) 
 
 	cacheResponse = &CheckResponse{
