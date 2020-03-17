@@ -74,3 +74,16 @@ func TestAPIKeyIsStored(t *testing.T) {
 		t.Fatalf(errTempl, d.Token, sessionID)
 	}
 }
+
+func TestInvalidArgCombo(t *testing.T) {
+	opts := &iloLoginOptions{password: "yes", passwordStdin: true}
+
+	err := validateArgs(opts)
+	if err == nil {
+		t.Fatal("should have got validation error")
+	}
+
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Error("wrong error returned")
+	}
+}

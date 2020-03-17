@@ -3,6 +3,7 @@
 package greenlake
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -22,13 +23,13 @@ type glLoginOptions struct {
 func newLoginCommand() *cobra.Command {
 	var opts glLoginOptions
 
-	var cmd = &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login to greenlake: hpecli greenlake login",
+		PreRunE: func(_ *cobra.Command, _ []string) error {
+			return validateArgs(&opts)
+		},
 		RunE: func(_ *cobra.Command, _ []string) error {
-			if !strings.HasPrefix(opts.host, "http") {
-				opts.host = fmt.Sprintf("http://%s", opts.host)
-			}
 			return runLogin(&opts)
 		},
 	}
@@ -43,6 +44,18 @@ func newLoginCommand() *cobra.Command {
 	_ = cmd.MarkFlagRequired("userid")
 
 	return cmd
+}
+
+func validateArgs(opts *glLoginOptions) error {
+	if opts.host != "" && !strings.HasPrefix(opts.host, "http") {
+		opts.host = fmt.Sprintf("http://%s", opts.host)
+	}
+
+	if opts.secretKey != "" && opts.secretKeyStdin {
+		return errors.New("--secretKey and --secretkey-stdin are mutually exclusive")
+	}
+
+	return nil
 }
 
 func runLogin(opts *glLoginOptions) error {
