@@ -5,17 +5,17 @@ package log
 import (
 	"io"
 	"io/ioutil"
-	"os"
 
+	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	logrus.SetOutput(ioutil.Discard)
-	logrus.SetFormatter(&Formatter{NoColors: true})
+	logrus.SetFormatter(&Formatter{NoColors: false})
 	logrus.AddHook(&copyHook{
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
+		Stdout: colorable.NewColorableStdout(),
+		Stderr: colorable.NewColorableStderr(),
 	})
 	logrus.SetLevel(logrus.InfoLevel)
 	logrus.SetReportCaller(false)

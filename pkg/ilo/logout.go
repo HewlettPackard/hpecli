@@ -40,7 +40,7 @@ func runLogout(host string) error {
 			"Please login to iLO using: hpecli ilo login")
 	}
 
-	logrus.Warningf("Using iLO: %s\n", sessionData.Host)
+	logrus.Warningf("Using iLO: %s", sessionData.Host)
 
 	client := newILOClientFromAPIKey(sessionData.Host, sessionData.Token)
 
@@ -50,7 +50,7 @@ func runLogout(host string) error {
 		return err
 	}
 
-	logrus.Warningf("Successfully logged out of remote ilo: %s", sessionData.Host)
+	logrus.Infof("Successfully logged out of remote ilo: %s", sessionData.Host)
 
 	// Cleanup context
 	err = deleteSessionData(sessionData.Host)

@@ -66,7 +66,7 @@ func login(host, username, password string) (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unable to create login sessions to oneview.  Repsponse was: %+v", resp.Status)
+		return "", fmt.Errorf("unable to create login sessions to oneview.  Response was: %+v", resp.Status)
 	}
 
 	var session ov.Session

@@ -36,7 +36,7 @@ func getEnclosuresData(enclosureName string) error {
 
 	ovc := newOVClientFromAPIKey(host, token)
 
-	logrus.Warningf("Using OneView: %s\n", host)
+	logrus.Warningf("Using OneView: %s", host)
 
 	var el interface{}
 

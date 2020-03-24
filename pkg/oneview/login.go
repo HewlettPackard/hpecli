@@ -74,7 +74,7 @@ func runLogin(opts *ovLoginOptions) error {
 	if err = saveContextAndHostData(opts.host, token); err != nil {
 		logrus.Warning("Successfully logged into OneView, but was unable to save the session data")
 	} else {
-		logrus.Warningf("Successfully logged into OneView: %s", opts.host)
+		logrus.Infof("Successfully logged into OneView: %s", opts.host)
 	}
 
 	return nil

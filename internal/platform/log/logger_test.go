@@ -47,6 +47,7 @@ func TestHookWritesToCorrectOutput(t *testing.T) {
 
 			entry := &logrus.Entry{}
 			entry.Logger = logrus.StandardLogger()
+			entry.Logger.SetFormatter(&Formatter{NoColors: true})
 			entry.Logger.Level = test.level
 			entry.Message = msg
 			entry.Level = test.level

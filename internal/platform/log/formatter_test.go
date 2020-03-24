@@ -51,14 +51,14 @@ func TestColorLevel(t *testing.T) {
 		want  int
 	}{
 		{
-			name:  "DebugToGray",
+			name:  "DebugToBlue",
 			level: logrus.DebugLevel,
-			want:  colorGray,
+			want:  colorBlue,
 		},
 		{
-			name:  "InfoToBlue",
+			name:  "InfoToWhite",
 			level: logrus.InfoLevel,
-			want:  colorBlue,
+			want:  colorWhite,
 		},
 		{
 			name:  "WarnToYellow",
@@ -114,7 +114,7 @@ func TestFormatWorks(t *testing.T) {
 }
 
 func TestFormatWithColor(t *testing.T) {
-	want := "[0001-01-01T00:00:00Z] \x1b[31m[PANIC] \x1b[0m[myValue] \x1b[0m\n"
+	want := "\x1b[31m[0001-01-01T00:00:00Z] [PANIC] [myValue] \n\x1b[0m"
 	entry := &logrus.Entry{}
 	entry.Data = make(logrus.Fields, 1)
 	entry.Data[fieldName] = fieldValue

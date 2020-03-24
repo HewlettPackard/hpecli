@@ -44,7 +44,7 @@ func (c *CVClient) login() (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unable to create login sessions to greenlake.  Repsponse was: %+v", resp.Status)
+		return "", fmt.Errorf("unable to create login sessions to greenlake.  Response was: %+v", resp.Status)
 	}
 
 	type loginResponse struct {

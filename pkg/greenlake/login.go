@@ -87,7 +87,7 @@ func runLogin(opts *glLoginOptions) error {
 	if err = saveContextAndSessionData(sd); err != nil {
 		logrus.Debug("Successfully logged into GreenLake, but was unable to save the session data")
 	} else {
-		logrus.Warningf("Successfully logged into GreenLake: %s", opts.host)
+		logrus.Infof("Successfully logged into GreenLake: %s", opts.host)
 	}
 
 	return nil

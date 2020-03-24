@@ -40,7 +40,7 @@ func runLogout(hostParam string) error {
 
 	ovc := newOVClientFromAPIKey(host, token)
 
-	logrus.Warningf("Using OneView: %s\n", host)
+	logrus.Infof("Using OneView: %s", host)
 
 	// Use OVClient to logout
 	err = ovc.SessionLogout()
@@ -49,7 +49,7 @@ func runLogout(hostParam string) error {
 		return err
 	}
 
-	logrus.Warningf("Successfully logged out of OneView: %s", host)
+	logrus.Infof("Successfully logged out of OneView: %s", host)
 
 	// Cleanup context
 	err = deleteSavedHostData(host)
