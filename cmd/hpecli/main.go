@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/HewlettPackard/hpecli/pkg/analytics"
 	"github.com/HewlettPackard/hpecli/pkg/autocomplete"
 	"github.com/HewlettPackard/hpecli/pkg/cloudvolume"
 	"github.com/HewlettPackard/hpecli/pkg/greenlake"
@@ -74,6 +75,7 @@ func addSubCommands(rootCmd *cobra.Command) {
 	}
 
 	rootCmd.AddCommand(
+		analytics.NewAnalyticsCommand(),
 		autocomplete.NewAutoCompleteCommand(),
 		cloudvolume.NewCloudVolumeCommand(),
 		greenlake.NewGreenlakeCommand(),

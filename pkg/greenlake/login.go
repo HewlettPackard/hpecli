@@ -5,9 +5,11 @@ package greenlake
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/password"
+	"github.com/HewlettPackard/hpecli/pkg/analytics"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -31,6 +33,13 @@ func newLoginCommand() *cobra.Command {
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return runLogin(&opts)
+		},
+		PersistentPostRunE: func(_ *cobra.Command, _ []string) error {
+			fmt.Printf("analytics.EnvDisableAnalytics:%s \n", os.Getenv(analytics.EnvDisableAnalytics))
+			if os.Getenv(analytics.EnvDisableAnalytics) == "" {
+				return runAnalytics()
+			}
+			return nil
 		},
 	}
 
@@ -81,5 +90,18 @@ func runLogin(opts *glLoginOptions) error {
 		logrus.Warningf("Successfully logged into GreenLake: %s", opts.host)
 	}
 
+	return nil
+}
+
+func runAnalytics() error {
+	print("inside green lake login analytics  \n ")
+	analytics := analytics.NewAnalyticsClient("1", "event", "greenlake", "login", "200", "", "hpecli/0.0.1", "0.0.1", "hpecli")
+
+	resp, err := analytics.TrackEvent()
+	if err != nil {
+		logrus.Warningf("Unable to send the greenlake analytics info with supplied event details")
+		return err
+	}
+	fmt.Printf("Successssssss analytics GreenLake Login %s \n ", resp)
 	return nil
 }
