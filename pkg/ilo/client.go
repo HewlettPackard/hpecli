@@ -48,7 +48,7 @@ func (c *Client) login() (*sessionData, error) {
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return sd, fmt.Errorf("unable to create login sessions to ilo.  Repsponse was: %+v", resp.Status)
+		return sd, fmt.Errorf("unable to create login sessions to ilo.  Response was: %+v", resp.Status)
 	}
 
 	token := resp.Header.Get("X-Auth-Token")
