@@ -3,6 +3,8 @@
 package autocomplete
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -72,7 +74,7 @@ func runAutoComplete(cmd *cobra.Command, opts *autocompleteOptions) error {
 			return err
 		}
 	default:
-		return logrus.Errorf("unsupported shell type %s", opts.acType)
+		return fmt.Errorf("unsupported shell type %s", opts.acType)
 	}
 
 	logrus.Debugf("%s completion file for hpecli saved to %s", opts.acType, opts.targetFile)
