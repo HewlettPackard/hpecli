@@ -49,8 +49,12 @@ func validateArgs(opts *cvLoginOptions) error {
 		opts.host = fmt.Sprintf("https://%s", opts.host)
 	}
 
-	if opts.password != "" && opts.passwordStdin {
-		return errors.New("--password and --password-stdin are mutually exclusive")
+	if opts.password != "" {
+		logrus.Warning("WARNING! Using --password via the CLI is insecure. Use --password-stdin.")
+
+		if opts.passwordStdin {
+			return errors.New("--password and --password-stdin are mutually exclusive")
+		}
 	}
 
 	return nil
