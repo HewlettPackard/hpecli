@@ -51,8 +51,12 @@ func validateArgs(opts *glLoginOptions) error {
 		opts.host = fmt.Sprintf("http://%s", opts.host)
 	}
 
-	if opts.secretKey != "" && opts.secretKeyStdin {
-		return errors.New("--secretKey and --secretkey-stdin are mutually exclusive")
+	if opts.secretKey != "" {
+		logrus.Warning("WARNING! Using --secretkey via the CLI is insecure. Use --secretkey-stdin.")
+
+		if opts.secretKeyStdin {
+			return errors.New("--secretkey and --secretkey-stdin are mutually exclusive")
+		}
 	}
 
 	return nil
