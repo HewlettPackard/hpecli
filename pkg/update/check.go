@@ -5,6 +5,8 @@ package update
 import (
 	"fmt"
 	"os"
+	"runtime"
+	"strings"
 
 	gover "github.com/hashicorp/go-version"
 	"github.com/sirupsen/logrus"
@@ -46,7 +48,7 @@ type source interface {
 	get() (*remoteResponse, error)
 }
 
-// EnvDisableUpdateCheck is environmental variable to disable remote
+// EnvDisableUpdateCheck is an environmental variable to disable remote
 // http request to check if a newer version of the CLI is available
 const EnvDisableUpdateCheck = "HPECLI_DISABLE_UPDATE_CHECK"
 
@@ -55,6 +57,7 @@ const EnvDisableUpdateCheck = "HPECLI_DISABLE_UPDATE_CHECK"
 const versionHost = "raw.githubusercontent.com"
 
 const versionPath = "/HewlettPackard/hpecli/master/site/published-version.json"
+
 
 var versionURL = fmt.Sprintf("https://%s%s", versionHost, versionPath)
 
@@ -114,6 +117,21 @@ func checkUpdate(s source, lVersion string) (*CheckResponse, error) {
 	if resp.version.GreaterThan(localVersion) {
 		updateAvailable = true
 	}
+
+	// retrieve GOOS from runtime GO variables
+	logrus.Debugf("Detected operating system: %v", runtime.GOOS)
+
+	// Substitute {{$GOOS}} with osenv in updateURL 
+	resp.updateURL = strings.Replace(resp.updateURL, "{{$GOOS}}", runtime.GOOS, 1)
+	
+	// Windows uses a .exe filename while linux and MacOs don't
+	var dotexe string = ""
+	if runtime.GOOS == "windows" {
+		dotexe = ".exe" 			
+	}
+
+	// Substitute {{$EXE}} with dotexe in updateURL 
+	resp.updateURL = strings.Replace(resp.updateURL, "{{$EXE}}", dotexe, 1) 
 
 	cacheResponse = &CheckResponse{
 		UpdateAvailable: updateAvailable,
