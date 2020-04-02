@@ -34,9 +34,9 @@ func newLoginCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.host, "host", "", "Cloud Volumes portal hostname/ip")
-	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "cloudvolume username")
-	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "cloudvolume passowrd")
+	cmd.Flags().StringVar(&opts.host, "host", "", "HPE Cloud Volumes portal hostname/ip")
+	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "HPE Cloud Volumes username")
+	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "HPE Cloud Volumes passowrd")
 	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	// _ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("username")
@@ -79,7 +79,7 @@ func runLogin(opts *cvLoginOptions) error {
 
 	token, err := cvc.login()
 	if err != nil {
-		logrus.Warningf("Unable to login with supplied credentials to HPE CloudVolume at: %s", opts.host)
+		logrus.Warningf("Unable to login with supplied credentials to HPE CloudVolumes at: %s", opts.host)
 		return err
 	}
 

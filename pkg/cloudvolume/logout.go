@@ -46,12 +46,12 @@ func runLogout(host string) error {
 			"Please login to HPE Cloud Volumes using: hpe cloudvolumes login")
 	}
 
-	//logrus.Warningf("Using CloudVolumes: %s", host)
+	//logrus.Warningf("Using HPE Cloud Volumes: %s", host)
 
 	_ = newCVClientFromAPIKey(host, token)
 
 	// There is no API logout we can use
-	logrus.Infof("Successfully logged out of HPE CloudVolumes")
+	logrus.Infof("Successfully logged out of HPE Cloud Volumes")
 
 	// Cleanup context
 	err = deleteSavedHostData(host)
