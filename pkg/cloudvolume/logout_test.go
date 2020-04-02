@@ -44,14 +44,6 @@ func TestLogoutNoHost(t *testing.T) {
 	// // clear everything from the mock store
 	context.MockClear()
 
-	mux := http.NewServeMux()
-	server := httptest.NewTLSServer(mux)
-	mux.HandleFunc("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	defer server.Close()
-
 	cmd := newLogoutCommand()
 	_ = cmd.Execute()
 

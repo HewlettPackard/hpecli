@@ -29,6 +29,7 @@ func newLogoutCommand() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVar(&host, "host", cvDefaultHost, "HPE Cloud Volumes portal hostname/ip")
 
 	return cmd
 }
@@ -36,17 +37,12 @@ func newLogoutCommand() *cobra.Command {
 func runLogout(host string) error {
 	logrus.Debug("Beginning runCloudVolumeLogout")
 	
-	if host == "" {
-		host = cvDefaultHost
-	}
-	token, err := hostData(host)
+	host, token, err := hostAndToken()
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("Unable to retrieve the last login for HPE Cloud volumes. " +
 			"Please login to HPE Cloud Volumes using: hpe cloudvolumes login")
 	}
-
-	//logrus.Warningf("Using HPE Cloud Volumes: %s", host)
 
 	_ = newCVClientFromAPIKey(host, token)
 

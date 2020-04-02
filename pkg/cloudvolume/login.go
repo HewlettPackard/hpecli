@@ -34,11 +34,10 @@ func newLoginCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.host, "host", "", "HPE Cloud Volumes portal hostname/ip")
+	cmd.Flags().StringVar(&opts.host, "host", cvDefaultHost, "HPE Cloud Volumes portal hostname/ip")
 	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "HPE Cloud Volumes username")
 	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "HPE Cloud Volumes passowrd")
 	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
-	// _ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("username")
 
 	return cmd
