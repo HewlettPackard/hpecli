@@ -5,8 +5,6 @@ package cloudvolume
 import (
 	"errors"
 	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
@@ -16,33 +14,19 @@ func init() {
 	context.DefaultDBOpenFunc = context.MockOpen
 }
 
-func TestLogoutHostPrefixAdded(t *testing.T) {
-	// // clear everything from the mock store
-	context.MockClear()
-
-	mux := http.NewServeMux()
-	server := httptest.NewTLSServer(mux)
-	mux.HandleFunc("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	defer server.Close()
-
-	host := strings.Replace(server.URL, "https://", "", 1)
+func TestLogoutHost(t *testing.T) {
 
 	cmd := newLogoutCommand()
-	cmd.SetArgs([]string{"--host", host})
+	cmd.SetArgs([]string{"--host", cvDefaultHost})
 	_ = cmd.Execute()
 
-	_, err := hostData(server.URL)
+	_, err := hostData(cvDefaultHost)
 	if !errors.Is(err, context.ErrorKeyNotFound) {
 		t.Fatal("logout should delete the context")
 	}
 }
 
 func TestLogoutNoHost(t *testing.T) {
-	// // clear everything from the mock store
-	context.MockClear()
 
 	cmd := newLogoutCommand()
 	_ = cmd.Execute()

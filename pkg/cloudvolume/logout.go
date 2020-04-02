@@ -20,11 +20,7 @@ func newLogoutCommand() *cobra.Command {
 			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
 			}
-
-			if host == "" {
-				host = cvDefaultHost
-			}
-
+			
 			return runLogout(host)
 		},
 	}
