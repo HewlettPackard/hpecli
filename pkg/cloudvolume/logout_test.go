@@ -40,6 +40,27 @@ func TestLogoutHostPrefixAdded(t *testing.T) {
 	}
 }
 
+func TestLogoutNoHost(t *testing.T) {
+	// // clear everything from the mock store
+	context.MockClear()
+
+	mux := http.NewServeMux()
+	server := httptest.NewTLSServer(mux)
+	mux.HandleFunc("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	defer server.Close()
+
+	cmd := newLogoutCommand()
+	_ = cmd.Execute()
+
+	_, err := hostData(server.URL)
+	if !errors.Is(err, context.ErrorKeyNotFound) {
+		t.Fatal("logout should delete the context")
+	}
+}
+
 func TestLogoutSessionDataDeleted(t *testing.T) {
 	const sessionID = "HERE_IS_A_ID"
 
