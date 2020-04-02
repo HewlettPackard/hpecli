@@ -47,7 +47,7 @@ func TestLogoutNoHost(t *testing.T) {
 	cmd := newLogoutCommand()
 	_ = cmd.Execute()
 
-	_, err := hostData(server.URL)
+	_, err := hostData(cvDefaultHost)
 	if !errors.Is(err, context.ErrorKeyNotFound) {
 		t.Fatal("logout should delete the context")
 	}
