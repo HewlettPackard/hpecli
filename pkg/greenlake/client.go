@@ -55,6 +55,7 @@ func newGLClientFromAPIKey(host, tenantID, token string) *GLClient {
 	}
 }
 
+
 // Login api
 func (c *GLClient) login() (*sessionData, error) {
 	const uriPath = "/identity/v1/token"
@@ -72,18 +73,18 @@ func (c *GLClient) login() (*sessionData, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return sd, fmt.Errorf("unable to create login sessions to Green Lake.  Response was: %+v", resp.Status)
+		return sd, fmt.Errorf("unable to create login sessions to HPE GreenLake.  Response was: %+v", resp.Status)
 	}
 
 	var result Token
 
 	err = resp.Unmarshall(&result)
 	if err != nil {
-		return sd, fmt.Errorf("nable to create login token from session")
+		return sd, fmt.Errorf("unable to create login token from session")
 	}
 
 	if result.AccessToken == "" {
-		return sd, fmt.Errorf("nable to create login token from session")
+		return sd, fmt.Errorf("unable to create login token from session")
 	}
 
 	sd.Host = c.Host

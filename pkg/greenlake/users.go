@@ -12,7 +12,7 @@ import (
 func newUsersCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "users",
-		Short: "Get from Users: hpecli greenlake get users",
+		Short: "Get users from HPE GreenLake",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return runUsers()
 		},
@@ -28,10 +28,10 @@ func runUsers() error {
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
-			"Please login to GreenLake using: hpecli greenlake login")
+			"Please login to GreenLake using: hpe greenlake login")
 	}
 
-	logrus.Debugf("Attempting get green lake users at: %v", sd.Host)
+	logrus.Debugf("Attempting get greenlake users at: %v", sd.Host)
 
 	glc := newGLClientFromAPIKey(sd.Host, sd.TenantID, sd.Token)
 
