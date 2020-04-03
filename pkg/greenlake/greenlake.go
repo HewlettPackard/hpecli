@@ -9,7 +9,11 @@ import (
 func NewGreenlakeCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use: "greenlake",
+<<<<<<< HEAD
 		Short: "Access to HPE GreenLake commands",
+=======
+		Short: "Access to HPE Greenlake commands",
+>>>>>>> 93c21ccd1f04dcbdbae5c791a7a7017643d16921
 	}
 
 	cmd.AddCommand(

@@ -34,12 +34,11 @@ func newLoginCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.host, "host", "", "HPE GreenLake host/ip address")
+	cmd.Flags().StringVar(&opts.host, "host", greenlakeDefaultHost, "HPE GreenLake host/ip address")
 	cmd.Flags().StringVarP(&opts.secretKey, "secretkey", "s", "", "HPE GreenLake secretkey")
 	cmd.Flags().BoolVarP(&opts.secretKeyStdin, "secretkey-stdin", "", false, "read secretkey from stdin")
 	cmd.Flags().StringVarP(&opts.tenantID, "tenantid", "t", "", "HPE GreenLake tenantid")
 	cmd.Flags().StringVarP(&opts.userID, "userid", "u", "", "HPE GreenLake userid")
-	//_ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("tenantid")
 	_ = cmd.MarkFlagRequired("userid")
 
@@ -49,10 +48,6 @@ func newLoginCommand() *cobra.Command {
 func validateArgs(opts *glLoginOptions) error {
 	if opts.host != "" && !strings.HasPrefix(opts.host, "http") {
 		opts.host = fmt.Sprintf("http://%s", opts.host)
-	}
-
-	if opts.host == "" {
-		opts.host = greenlakeDefaultHost
 	}
 
 	if opts.secretKey != "" {
