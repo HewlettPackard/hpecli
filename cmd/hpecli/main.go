@@ -9,6 +9,7 @@ import (
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
 	"github.com/HewlettPackard/hpecli/pkg/autocomplete"
+	"github.com/HewlettPackard/hpecli/pkg/cfm"
 	"github.com/HewlettPackard/hpecli/pkg/cloudvolume"
 	"github.com/HewlettPackard/hpecli/pkg/greenlake"
 	"github.com/HewlettPackard/hpecli/pkg/ilo"
@@ -78,6 +79,7 @@ func addSubCommands(rootCmd *cobra.Command) {
 		cloudvolume.NewCloudVolumeCommand(),
 		greenlake.NewGreenlakeCommand(),
 		ilo.NewILOCommand(),
+		cfm.NewCFMCommand(),
 		oneview.NewOneViewCommand(),
 		update.NewUpdateCommand(sematicVer),
 		version.NewVersionCommand(vInfo),
