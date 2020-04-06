@@ -25,7 +25,7 @@ func newLogoutCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&host, "host", "", "oneview host/ip address")
+	cmd.Flags().StringVar(&host, "host", greenlakeDefaultHost, "oneview host/ip address")
 
 	return cmd
 }
