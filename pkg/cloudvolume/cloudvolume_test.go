@@ -13,7 +13,7 @@ func TestCheckCmdCreation(t *testing.T) {
 		t.Error("name not set on command")
 	}
 
-	if len(cmd.Commands()) != 2 { //nolint:gomnd  // number ok here
+	if len(cmd.Commands()) != 3 { //nolint:gomnd  // number ok here
 		t.Error("unexpected discrepency in sub command count")
 	}
 }
