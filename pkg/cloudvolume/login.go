@@ -25,7 +25,7 @@ func newLoginCommand() *cobra.Command {
 	// Cmd represents the cloudvolume get command
 	cmd := &cobra.Command{
 		Use:   "login",
-		Short: "Login to HPE Nimble Cloud Volumes: hpecli cloudvolumes login",
+		Short: "Login to HPE Cloud Volumes",
 		PreRunE: func(_ *cobra.Command, _ []string) error {
 			return validateArgs(&opts)
 		},
@@ -34,17 +34,17 @@ func newLoginCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.host, "host", "", "Cloud Volumes portal hostname/ip")
-	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "cloudvolume username")
-	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "cloudvolume passowrd")
+	cmd.Flags().StringVar(&opts.host, "host", cvDefaultHost, "HPE Cloud Volumes portal hostname/ip")
+	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "HPE Cloud Volumes username")
+	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "HPE Cloud Volumes password")
 	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
-	_ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("username")
 
 	return cmd
 }
 
 func validateArgs(opts *cvLoginOptions) error {
+
 	if opts.host != "" && !strings.HasPrefix(opts.host, "http") {
 		opts.host = fmt.Sprintf("https://%s", opts.host)
 	}
@@ -63,7 +63,7 @@ func validateArgs(opts *cvLoginOptions) error {
 func runLogin(opts *cvLoginOptions) error {
 	logrus.Debug("cloudvolumes/login called")
 
-	if err := password.Read(&opts.password, opts.passwordStdin, "cloudvolumes password: "); err != nil {
+	if err := password.Read(&opts.password, opts.passwordStdin, "HPE Cloud Volumes password: "); err != nil {
 		return err
 	}
 
@@ -73,17 +73,17 @@ func runLogin(opts *cvLoginOptions) error {
 
 	token, err := cvc.login()
 	if err != nil {
-		logrus.Warningf("Unable to login with supplied credentials to CloudVolume at: %s", opts.host)
+		logrus.Warningf("Unable to login with supplied credentials to HPE CloudVolumes at: %s", opts.host)
 		return err
 	}
 
 	// change context to current host and save the token as the API key
 	// for subsequent requests
 	if err := saveData(opts.host, token); err != nil {
-		logrus.Warning("Successfully logged into CloudVolumes, but was unable to save the session data")
+		logrus.Warning("Successfully logged into HPE Cloud Volumes, but was unable to save the session data")
 		logrus.Debugf("%+v", err)
 	} else {
-		logrus.Infof("Successfully logged into CloudVolumes: %s", opts.host)
+		logrus.Infof("Successfully logged into HPE Cloud Volumes")
 	}
 
 	return nil
