@@ -44,8 +44,8 @@ func run() error {
 	// create the root command.  It doesn't do anything, but used to hold
 	// all of the other top level commands
 	rootCmd := &cobra.Command{
-		Use:           "hpecli",
-		Short:         "hpe cli for accessing various services",
+		Use:           "hpe",
+		Short:         "HPE Command Line Interface for accessing various services",
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
