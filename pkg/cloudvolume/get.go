@@ -10,7 +10,7 @@ func newGetCommand() *cobra.Command {
 	// cmd represents the cloudvolume command
 	var cmd = &cobra.Command{
 		Use:   "get",
-		Short: "Get resources from HPE Nimble Cloud Volumes",
+		Short: "Get resources from HPE Cloud Volumes",
 	}
 
 	cmd.AddCommand(

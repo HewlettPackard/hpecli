@@ -12,7 +12,7 @@ import (
 func newGetVolumesCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "volumes",
-		Short: "Get from Cloud Volumes: hpecli cloudvolumes get volumes",
+		Short: "retrieve volumes from HPE Cloud Volumes",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return runGetVolumes()
 		},
@@ -27,11 +27,11 @@ func runGetVolumes() error {
 	host, token, err := hostAndToken()
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
-		return fmt.Errorf("unable to retrieve the last login for HPE CloudVolumes.  " +
-			"Please login to CloudVolumes using: hpecli cloudvolume login")
+		return fmt.Errorf("unable to retrieve the last login for HPE CloudVolumes. " +
+			"Please login to HPE Cloud Volumes using: hpe cloudvolumes login")
 	}
 
-	logrus.Debugf("Attempting get cloud volumes at: %v", host)
+	logrus.Debugf("Attempting get cloudvolumes at: %v", host)
 
 	cvc := newCVClientFromAPIKey(host, token)
 
