@@ -15,7 +15,7 @@ func newLogoutCommand() *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "logout",
-		Short: "Logout from ilo: hpecli ilo logout",
+		Short: "Logout from ilo",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
@@ -37,7 +37,7 @@ func runLogout(host string) error {
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
-			"Please login to iLO using: hpecli ilo login")
+			"Please login to iLO using: hpe ilo login")
 	}
 
 	logrus.Warningf("Using iLO: %s", sessionData.Host)
@@ -71,7 +71,7 @@ func sessionDataToLogout(host string) (data *sessionData, err error) {
 		if e != nil {
 			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
 			return data, fmt.Errorf("unable to retrieve the last login for iLO.  " +
-				"Please login to iLO using: hpecli ilo login")
+				"Please login to iLO using: hpe ilo login")
 		}
 
 		return d, nil

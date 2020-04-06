@@ -24,7 +24,7 @@ func newLoginCommand() *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "login",
-		Short: "Login to iLO: hpecli ilo login",
+		Short: "Login to iLO",
 		PreRunE: func(_ *cobra.Command, _ []string) error {
 			return validateArgs(&opts)
 		},

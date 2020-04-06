@@ -30,7 +30,7 @@ func runILOServiceRoot() error {
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
-			"Please login to iLO using: hpecli ilo login")
+			"Please login to iLO using: hpe ilo login")
 	}
 
 	logrus.Warningf("Using iLO: %s", sd.Host)
