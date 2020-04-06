@@ -15,7 +15,7 @@ func newLogoutCommand() *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "logout",
-		Short: "Logout from ilo",
+		Short: "Logout from iLO",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
@@ -25,19 +25,19 @@ func newLogoutCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&host, "host", "", "ilo host/ip address")
+	cmd.Flags().StringVar(&host, "host", "", "iLO host/ip address")
 
 	return cmd
 }
 
 func runLogout(host string) error {
-	logrus.Debug("Beginning runILOLogout")
+	logrus.Debug("Beginning runiLOLogout")
 
 	sessionData, err := sessionDataToLogout(host)
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
-			"Please login to iLO using: hpe ilo login")
+			"Please login to iLO using: hpe iLO login")
 	}
 
 	logrus.Warningf("Using iLO: %s", sessionData.Host)
@@ -50,7 +50,7 @@ func runLogout(host string) error {
 		return err
 	}
 
-	logrus.Infof("Successfully logged out of remote ilo: %s", sessionData.Host)
+	logrus.Infof("Successfully logged out of remote iLO: %s", sessionData.Host)
 
 	// Cleanup context
 	err = deleteSessionData(sessionData.Host)
@@ -71,7 +71,7 @@ func sessionDataToLogout(host string) (data *sessionData, err error) {
 		if e != nil {
 			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
 			return data, fmt.Errorf("unable to retrieve the last login for iLO.  " +
-				"Please login to iLO using: hpe ilo login")
+				"Please login to iLO using: hpe iLO login")
 		}
 
 		return d, nil
