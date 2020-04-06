@@ -45,11 +45,6 @@ func newLoginCommand() *cobra.Command {
 
 func validateArgs(opts *cvLoginOptions) error {
 
-
-	if opts.host == "" {
-		opts.host = cvDefaultHost
-	}
-
 	if opts.host != "" && !strings.HasPrefix(opts.host, "http") {
 		opts.host = fmt.Sprintf("https://%s", opts.host)
 	}
