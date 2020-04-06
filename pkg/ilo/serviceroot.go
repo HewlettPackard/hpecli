@@ -13,7 +13,7 @@ func newServiceRootCommand() *cobra.Command {
 	// cmd represents the ilo command
 	var cmd = &cobra.Command{
 		Use:           "serviceroot",
-		Short:         "Get service root details",
+		Short:         "Get iLO service root details",
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runILOServiceRoot()
@@ -30,7 +30,7 @@ func runILOServiceRoot() error {
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE iLO.  " +
-			"Please login to iLO using: hpecli ilo login")
+			"Please login to iLO using: hpe iLO login")
 	}
 
 	logrus.Warningf("Using iLO: %s", sd.Host)
