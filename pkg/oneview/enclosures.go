@@ -15,7 +15,7 @@ func newEnclosuresCommand() *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "enclosures",
-		Short: "Get enclosures from OneView: hpecli oneview get enclosures",
+		Short: "Get enclosures from HPE OneView",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return getEnclosuresData(enclosureName)
 		},
@@ -30,13 +30,13 @@ func getEnclosuresData(enclosureName string) error {
 	host, token, err := hostAndToken()
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
-		return fmt.Errorf("unable to retrieve the last login for OneView.  " +
-			"Please login to OneView using: hpecli oneview login")
+		return fmt.Errorf("unable to retrieve the last login for HPE OneView.  " +
+			"Please login to HPE OneView using: hpe oneview login")
 	}
 
 	ovc := newOVClientFromAPIKey(host, token)
 
-	logrus.Warningf("Using OneView: %s", host)
+	logrus.Warningf("Using HPE OneView: %s", host)
 
 	var el interface{}
 
@@ -47,7 +47,7 @@ func getEnclosuresData(enclosureName string) error {
 	}
 
 	if err != nil {
-		logrus.Warningf("Unable to login with supplied credentials to OneView at: %s", host)
+		logrus.Warningf("Unable to login with supplied credentials to HPE OneView at: %s", host)
 		return err
 	}
 
