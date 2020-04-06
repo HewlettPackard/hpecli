@@ -1,4 +1,4 @@
-// (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
+// (C) Copyright 2020 Hewlett Packard Enterprise Development LP.
 
 package cfm
 
@@ -42,7 +42,6 @@ func newLoginCommand() *cobra.Command {
 }
 
 func validateArgs(opts *cfmLoginOptions) error {
-
 	if opts.password != "" && opts.passwordStdin {
 		return errors.New("--password and --password-stdin are mutually exclusive")
 	}

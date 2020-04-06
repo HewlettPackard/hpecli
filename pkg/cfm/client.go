@@ -1,4 +1,4 @@
-// (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
+// (C) Copyright 2020 Hewlett Packard Enterprise Development LP.
 
 package cfm
 
@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	connectapi "github.com/HewlettPackard/hpecli/cfm/connectapi"
-	"github.com/HewlettPackard/hpecli/internal/platform/rest"
 )
 
 const apiDefault = 800
@@ -40,11 +39,4 @@ func login(host, username, password string) (string, error) {
 	}
 
 	return "", fmt.Errorf("unable to session Token from login request")
-}
-
-// addAPIHeaders sets OneView API version
-func addAPIHeaders() func(*rest.Request) {
-	return func(r *rest.Request) {
-		r.Header.Set("X-API-Version", "800")
-	}
 }
