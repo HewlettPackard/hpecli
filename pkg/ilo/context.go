@@ -15,7 +15,7 @@ func newContextCommand() *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "context",
-		Short: "Chagne context to different ilo host",
+		Short: "Change context to different iLO host",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
@@ -24,7 +24,7 @@ func newContextCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&host, "host", "", "ilo host/ip address")
+	cmd.Flags().StringVar(&host, "host", "", "iLO host/ip address")
 
 	return cmd
 }
@@ -37,7 +37,7 @@ func runSetContext(host string) error {
 			return err
 		}
 
-		logrus.Warningf("Default ilo commands directed to host: %s", ctx)
+		logrus.Warningf("Default iLO commands directed to host: %s", ctx)
 
 		return nil
 	}

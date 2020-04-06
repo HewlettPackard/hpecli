@@ -15,7 +15,7 @@ func newContextCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "context",
-		Short: "Change context to different OneView host",
+		Short: "Change context to different HPE OneView host",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			if host != "" && !strings.HasPrefix(host, "http") {
 				host = fmt.Sprintf("https://%s", host)
@@ -25,7 +25,7 @@ func newContextCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&host, "host", "", "oneview host/ip address")
+	cmd.Flags().StringVar(&host, "host", "", "HPE OneView host/ip address")
 
 	return cmd
 }
@@ -41,7 +41,7 @@ func runSetContext(host string) error {
 		return err
 	}
 
-	logrus.Infof("Default oneview commands directed to host: %s", ctx)
+	logrus.Infof("Default HPE OneView commands directed to host: %s", ctx)
 
 	return nil
 }
