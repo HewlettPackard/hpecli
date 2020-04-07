@@ -15,7 +15,7 @@ import (
 func NewUpdateCommand(version string) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "update",
-		Short: "Update the hpecli executable",
+		Short: "Update hpe CLI",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return runUpdate(version)
 		},
