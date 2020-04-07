@@ -19,7 +19,6 @@ func init() {
 }
 
 func TestLogin(t *testing.T) {
-
 	server := newTestServer("/api/v1/auth/token", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"count":1, "result":"some_uuid_token"}`)
@@ -28,7 +27,7 @@ func TestLogin(t *testing.T) {
 	defer server.Close()
 
 	opts := &cfmLoginOptions{
-		host:     strings.Replace(server.URL, "https://", "", -1),
+		host:     strings.ReplaceAll(server.URL, "https://", ""),
 		username: "admin",
 		password: "somePassword",
 	}
@@ -40,7 +39,6 @@ func TestLogin(t *testing.T) {
 }
 
 func TestLoginFails(t *testing.T) {
-
 	server := newTestServer("/api/v1/auth/token", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, `{"count":1, "result":"some error message"}`)
@@ -49,7 +47,7 @@ func TestLoginFails(t *testing.T) {
 	defer server.Close()
 
 	opts := &cfmLoginOptions{
-		host:     strings.Replace(server.URL, "https://", "", -1),
+		host:     strings.ReplaceAll(server.URL, "https://", ""),
 		username: "admin",
 		password: "somePassword",
 	}
@@ -71,7 +69,7 @@ func TestAPIKeyIsStored(t *testing.T) {
 	defer server.Close()
 
 	opts := &cfmLoginOptions{
-		host:     strings.Replace(server.URL, "https://", "", -1),
+		host:     strings.ReplaceAll(server.URL, "https://", ""),
 		password: "blah blah",
 	}
 
