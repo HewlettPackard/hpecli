@@ -28,7 +28,7 @@ func runUsers() error {
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
-			"Please login to GreenLake using: hpe greenlake login")
+			"Please login to HPE GreenLake using: hpe greenlake login")
 	}
 
 	logrus.Debugf("Attempting get greenlake users at: %v", sd.Host)

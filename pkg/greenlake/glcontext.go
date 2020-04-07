@@ -9,13 +9,24 @@ import (
 const glAPIKeyPrefix = "hpecli_greenlake_token_"
 const glContextKey = "hpecli_greenlake_context"
 
-const greenlakeDefaultHost string = "iam.intg.hpedevops.net"
+const greenlakeDefaultHost string = "https://iam.intg.hpedevops.net"
 
 
 type sessionData struct {
 	Host     string
 	Token    string
 	TenantID string
+}
+
+func getSessionData(host string) (data *sessionData, err error) {
+	data = &sessionData{}
+	c := context.New(glContextKey)
+
+	if err = c.HostData(dataKey(host), &data); err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
 func defaultSessionData() (data *sessionData, err error) {
@@ -70,6 +81,7 @@ func deleteSavedHostData(host string) error {
 	c := context.New(glContextKey)
 	return c.DeleteHostData(dataKey(host))
 }
+
 
 func hostAndToken() (host, token string, err error) {
 	c := context.New(glContextKey)

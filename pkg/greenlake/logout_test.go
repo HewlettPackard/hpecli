@@ -4,9 +4,6 @@ package greenlake
 
 import (
 	"errors"
-	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/context"
@@ -20,97 +17,61 @@ func init() {
 }
 
 func TestHostPrefixAddedForLogout(t *testing.T) {
+	const testHost = "https://testhost.net"
 	// // clear everything from the mock store
 	context.MockClear()
 
-	mux := http.NewServeMux()
-	server := httptest.NewTLSServer(mux)
-	mux.HandleFunc("/rest/login-sessions", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
 
-	defer server.Close()
-
-	host := strings.Replace(server.URL, "https://", "", 1)
-	saveContextAndHostData(server.URL, "token")
+	saveContextAndSessionData(&sessionData{testHost, "token", "tenantID"})
 
 	cmd := newLogoutCommand()
-	cmd.SetArgs([]string{"--host", host})
+	cmd.SetArgs([]string{"--host", testHost})
 	_ = cmd.Execute()
 
 	// check the db to make sure it was persisted
-	_, err := hostData(server.URL)
+	_, err := hostData(testHost)
 	if !errors.Is(err, context.ErrorKeyNotFound) {
 		t.Fatal("logout should delete the context")
 	}
 }
 
-func TestLogoutRequestFails(t *testing.T) {
-	const sessionID = "HERE_IS_A_ID"
-
-	server := newTestServer(logoutURI, func(w http.ResponseWriter, r *http.Request) {
-		// cause the request to fail
-		w.WriteHeader(http.StatusBadRequest)
-	})
-
-	defer server.Close()
-
-	// set context to the test server host
-	_ = saveContextAndHostData(server.URL, sessionID)
-
-	// check is above in the http request handler side
-	if err := runLogout(""); err == nil {
-		t.Fatal(expectedErrMsg)
-	}
-}
-
 func TestLogoutRemovesAPIKeyFromContext(t *testing.T) {
-	const sessionID = "HERE_IS_A_ID"
-
-	server := newTestServer(logoutURI, func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	defer server.Close()
-
+	
 	// set context to the test server host
-	_ = saveContextAndHostData(server.URL, sessionID)
+	_ = saveContextAndSessionData(&sessionData{greenlakeDefaultHost, "token", "tenantID"})
 
 	_ = runLogout("")
 
 	// verify the data is gone
 	var token string
 
-	c := context.New(ovContextKey)
+	c := context.New(glContextKey)
 
-	err := c.HostData(dataKey(server.URL), &token)
+	err := c.HostData(dataKey(greenlakeDefaultHost), &token)
 	if !errors.Is(err, context.ErrorKeyNotFound) {
 		t.Fatal("expected ErrorKeyNotFound error")
 	}
 }
 
 func TestLogoutRemovesAPIKeyFromParameter(t *testing.T) {
-	const sessionID = "HERE_IS_A_ID"
+	const testHost = "https://yetanothertesthost.net"
+	
+	
+	// set context to the test server host
+	_ = saveContextAndSessionData(&sessionData{testHost, "token", "tenantID"})
 
-	server := newTestServer(logoutURI, func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	defer server.Close()
-
-	_ = saveContextAndHostData(server.URL, sessionID)
 	// erase the context .. just to make sure that it doesn't pickup the host from the context
 	_ = setContext("")
 
 	// specify the param like it was passed on the command line
-	_ = runLogout(server.URL)
+	_ = runLogout(testHost)
 
 	// verify the data is gone
 	var token string
 
-	c := context.New(ovContextKey)
+	c := context.New(glContextKey)
 
-	err := c.HostData(dataKey(server.URL), &token)
+	err := c.HostData(dataKey(testHost), &token)
 	if !errors.Is(err, context.ErrorKeyNotFound) {
 		t.Fatal("expected ErrorKeyNotFound error")
 	}

@@ -30,32 +30,22 @@ func newLogoutCommand() *cobra.Command {
 	return cmd
 }
 
-func runLogout(hostParam string) error {
-	host, _, err := hostToLogout(hostParam)
+func runLogout(host string) error {
+
+	sessionData, err := sessionDataToLogout(host)
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake. " +
-			"Please login to OneView using: hpe greenlake login")
+			"Please login to HPE GreenLake using: hpe greenlake login")
 	}
 
 
-	sd, err := defaultSessionData()
-	if err != nil {
-		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
-		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake. " +
-			"Please login to GreenLake using: hpe greenlake login")
-	}
 
-	logrus.Debugf("Attempting get greenlake users at: %v", sd.Host)
-
-
-	
 	// No method to logout yet
-
-	logrus.Infof("Successfully logged out of HPE GreenLake: %s", host)
+	logrus.Infof("Successfully logged out of HPE GreenLake: %s", sessionData.Host)
 
 	// Cleanup context
-	err = deleteSavedHostData(host)
+	err = deleteSavedHostData(sessionData.Host)
 	if err != nil {
 		logrus.Warning("Unable to cleanup the session data")
 		return err
@@ -67,14 +57,15 @@ func runLogout(hostParam string) error {
 func hostToLogout(hostParam string) (host, token string, err error) {
 	if hostParam == "" {
 		// they didn't specify a host.. so use the context to find one
-		h, t, e := hostAndToken()
+		//h, t, e := hostAndToken()
+		sd, e := defaultSessionData()
 		if e != nil {
 			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
 			return "", "", fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
 				"Please login to OneView using: hpe greenlake login")
 		}
 
-		return h, t, nil
+		return sd.Host, sd.Token, nil
 	}
 
 	token, err = hostData(hostParam)
@@ -83,4 +74,27 @@ func hostToLogout(hostParam string) (host, token string, err error) {
 	}
 
 	return hostParam, token, nil
+}
+
+func sessionDataToLogout(host string) (data *sessionData, err error) {
+	data = &sessionData{}
+
+	if host == "" {
+		// they didn't specify a host.. so use the context to find one
+		d, e := defaultSessionData()
+		if e != nil {
+			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
+			return data, fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
+				"Please login to HPE GreenLake using: hpe greenlake login")
+		}
+
+		return d, nil
+	}
+
+	d, err := getSessionData(host)
+	if err != nil {
+		return data, err
+	}
+
+	return d, nil
 }

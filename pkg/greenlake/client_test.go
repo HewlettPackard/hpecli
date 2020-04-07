@@ -153,7 +153,7 @@ func TestGetUsers(t *testing.T) {
 
 func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
 	mux := http.NewServeMux()
-	server := httptest.NewServer(mux)
+	server := httptest.NewTLSServer(mux)
 	mux.HandleFunc(path, h)
 
 	return server

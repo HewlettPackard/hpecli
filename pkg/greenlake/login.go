@@ -47,7 +47,7 @@ func newLoginCommand() *cobra.Command {
 
 func validateArgs(opts *glLoginOptions) error {
 	if opts.host != "" && !strings.HasPrefix(opts.host, "http") {
-		opts.host = fmt.Sprintf("http://%s", opts.host)
+		opts.host = fmt.Sprintf("https://%s", opts.host)
 	}
 
 	if opts.secretKey != "" {
@@ -62,7 +62,7 @@ func validateArgs(opts *glLoginOptions) error {
 }
 
 func runLogin(opts *glLoginOptions) error {
-	if err := password.Read(&opts.secretKey, opts.secretKeyStdin, "greenlake secretKey: "); err != nil {
+	if err := password.Read(&opts.secretKey, opts.secretKeyStdin, "HPE GreenLake secretKey: "); err != nil {
 		return err
 	}
 
@@ -79,7 +79,7 @@ func runLogin(opts *glLoginOptions) error {
 	// change context to current host and save the access token as the API key
 	// for subsequent requests
 	if err = saveContextAndSessionData(sd); err != nil {
-		logrus.Debug("Successfully logged into GreenLake, but was unable to save the session data")
+		logrus.Debug("Successfully logged into HPE GreenLake, but was unable to save the session data")
 	} else {
 		logrus.Infof("Successfully logged into HPE GreenLake")
 	}
