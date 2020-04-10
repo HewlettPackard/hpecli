@@ -26,6 +26,7 @@ const (
 
 const (
 	ClientIDKey = "someClientIDKey"
+	dbOpenErr   = "Unable to open DB to get client ID"
 )
 
 func TestNewAnalyticsClient(t *testing.T) {
@@ -120,7 +121,7 @@ func TestClientIDDBError(t *testing.T) {
 			if c.addDB == true {
 				d, err := db.Open()
 				if err != nil {
-					logrus.Debug("Unit Test - Unable to open DB to get client ID")
+					logrus.Debug(dbOpenErr)
 				}
 				defer d.Close()
 			}
@@ -192,7 +193,7 @@ func TestEnableGoogleAnalyticsDBError(t *testing.T) {
 			if c.addDB == true {
 				d, err := db.Open()
 				if err != nil {
-					logrus.Debug("Unit Test - Unable to open DB to get client ID")
+					logrus.Debug(dbOpenErr)
 				}
 				defer d.Close()
 			}
@@ -262,21 +263,7 @@ func TestEnableGA(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			if c.flag == true {
-				d, err := db.Open()
-				if err != nil {
-					logrus.Debug("Unable to open DB to TestEnableGA test case")
-				}
-
-				if c.put == true {
-					if err := d.Put(c.key, c.value); err != nil {
-						logrus.Debugf("Unable to put the key %s in to DB for TestEnableGA test case", c.key)
-					}
-				} else {
-					if err := d.Delete(c.key); err != nil {
-						logrus.Debugf("Unable to delete the key %s in DB for TestEnableGA test case", c.key)
-					}
-				}
-				d.Close()
+				DBCheck(c.put, c.key, c.value)
 			}
 			if got := enableGoogleAnalytics(); got != c.want {
 				t.Errorf("TestEnableGA() = %v, want %v", got, c.want)
@@ -303,7 +290,7 @@ func TestDisableGoogleAnalyticsDBError(t *testing.T) {
 			if c.addDB == true {
 				d, err := db.Open()
 				if err != nil {
-					logrus.Debug("Unit Test - Unable to open DB to get client ID")
+					logrus.Debug(dbOpenErr)
 				}
 				defer d.Close()
 			}
@@ -373,27 +360,32 @@ func TestDisableGA(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			if c.flag == true {
-				d, err := db.Open()
-				if err != nil {
-					logrus.Debug("Unable to open DB to TestEnableTestDisableGoogleAnalyticsGoogleAnalytics test case")
-				}
-
-				if c.put == true {
-					if err := d.Put(c.key, c.value); err != nil {
-						logrus.Debugf("Unable to put the key %s in to DB for TestDisableGA test case", c.key)
-					}
-				} else {
-					if err := d.Delete(c.key); err != nil {
-						logrus.Debugf("Unable to delete the key %s in DB for TestDisableGA test case", c.key)
-					}
-				}
-				d.Close()
+				DBCheck(c.put, c.key, c.value)
 			}
 			if got := disableGoogleAnalytics(); got != c.want {
 				t.Errorf("TestDisableGA() = %v, want %v", got, c.want)
 			}
 		})
 	}
+}
+
+func DBCheck(put bool, key, value string) {
+	d, err := db.Open()
+	if err != nil {
+		logrus.Debug(dbOpenErr)
+	}
+
+	if put == true {
+		if err := d.Put(key, value); err != nil {
+			logrus.Debugf("Unable to put the key %s in to DB for TestDisableGA test case", key)
+		}
+	} else {
+		if err := d.Delete(key); err != nil {
+			logrus.Debugf("Unable to delete the key %s in DB for TestDisableGA test case", key)
+		}
+	}
+	d.Close()
+
 }
 
 func TestCheckGA(t *testing.T) {

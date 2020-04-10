@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Test_newOffCommand(t *testing.T) {
+func TestNewOffCommand(t *testing.T) {
 	cases := []struct {
 		name string
 		want string
@@ -38,7 +38,7 @@ func TestNewOffCommandRunE(t *testing.T) {
 	}
 }
 
-func Test_offAnalytics(t *testing.T) {
+func TestOffAnalytics(t *testing.T) {
 	cases := []struct {
 		cmd           *cobra.Command
 		disable       bool

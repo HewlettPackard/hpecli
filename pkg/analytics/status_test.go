@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Test_newStatusCommand(t *testing.T) {
+func TestNewStatusCommand(t *testing.T) {
 	cases := []struct {
 		name string
 		want string
@@ -38,7 +38,7 @@ func TestNewStatusCommandRunE(t *testing.T) {
 	}
 }
 
-func Test_checkStatus(t *testing.T) {
+func TestCheckStatus(t *testing.T) {
 	cases := []struct {
 		cmd            *cobra.Command
 		wantErr        bool
