@@ -103,36 +103,6 @@ func newTestServer(path string, h func(w http.ResponseWriter, r *http.Request)) 
 	return server
 }
 
-func TestClientIDDBError(t *testing.T) {
-	cases := []struct {
-		name    string
-		addDB   bool
-		wantErr bool
-	}{
-		{
-			name:    "open db to receive error",
-			addDB:   true,
-			wantErr: true,
-		},
-	}
-	for _, c := range cases {
-		c := c
-		t.Run(c.name, func(t *testing.T) {
-			if c.addDB == true {
-				d, err := db.Open()
-				if err != nil {
-					logrus.Debug(dbOpenErr)
-				}
-				defer d.Close()
-			}
-
-			if _, err := clientID(); err == nil {
-				t.Errorf("got no error, want error as %v", c.wantErr)
-			}
-		})
-	}
-}
-
 func TestNewClientID(t *testing.T) {
 	cases := []struct {
 		name string
@@ -384,8 +354,8 @@ func DBCheck(put bool, key, value string) {
 			logrus.Debugf("Unable to delete the key %s in DB for TestDisableGA test case", key)
 		}
 	}
-	d.Close()
 
+	d.Close()
 }
 
 func TestCheckGA(t *testing.T) {
