@@ -58,6 +58,12 @@ func run() error {
 	// add all of the commands get added to this root one
 	addSubCommands(rootCmd)
 
+	// Are we are been called with no args at all?
+	if len(os.Args) == 1 {
+		// Then let's return the command usage as in: hpe --help
+		os.Args = []string{os.Args[0], "--help"} 
+	}  
+
 	// execute the root command
 	if err := rootCmd.Execute(); err != nil {
 		return err
