@@ -9,10 +9,12 @@ import (
 func newGetCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "get",
-		Short: "Get data from HPE Composable Fabric Manager",
+		Short: "Get Fabrics from HPE Composable Fabric Manager",
 	}
 
-	cmd.AddCommand()
+	cmd.AddCommand(
+		getFabricsCommand(),
+	)
 
 	return cmd
 }

@@ -1,11 +1,10 @@
 package cfm
 
 import (
-	"github.com/HewlettPackard/hpecli/cfm/cfmutils"
 	"encoding/json"
 	"net/http"
 
-	log "github.com/HewlettPackard/hpecli/cfm/logging"
+	"github.com/HewlettPackard/hpecli/cfm/cfmutils"
 )
 
 // Authorization Unmarshals the response of session request
@@ -65,7 +64,6 @@ func GetAuthToken(host, username, password string) (*CFMClient, *cfmutils.Respon
 		err = json.Unmarshal(byteResponse, &auth)
 		cfmutils.CheckError(err)
 		cfmClient := &CFMClient{host, username, password, auth.Result}
-		log.Info(username + " logged in successfully to " + host)
 		return cfmClient, nil
 	}
 
@@ -84,7 +82,6 @@ func (cfmClient *CFMClient) GetPasswordPolicy() (*PasswordPolicy, *cfmutils.Resp
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &passwordPolicy)
 		cfmutils.CheckError(err)
-		log.Info("Successfully fetched the password policy")
 		return &passwordPolicy, nil
 	}
 
@@ -104,7 +101,6 @@ func (cfmClient *CFMClient) DeleteAuthToken() (*cfmutils.ResponseObject, *cfmuti
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &auth)
 		cfmutils.CheckError(err)
-		log.Info("Successfully deleted the authentication token")
 		return &auth, nil
 	}
 

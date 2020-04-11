@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	"github.com/HewlettPackard/hpecli/cfm/cfmutils"
-
-	log "github.com/HewlettPackard/hpecli/cfm/logging"
 )
 
 // RestCall makes the REST Call for SDK
@@ -19,10 +17,8 @@ func (cfmClient *CFMClient) RestCall(method string, url string, payload string) 
 	)
 
 	if cfmClient.Host == "" {
-		log.Error("Host not found. Host: " + cfmClient.Host)
 		responseBody := `{"result": "Host is empty or not found"}`
 		body, _ := json.Marshal(responseBody)
-		log.Error("Host " + cfmClient.Host + " not found or is empty")
 		return body, 404
 	}
 
@@ -34,6 +30,5 @@ func (cfmClient *CFMClient) RestCall(method string, url string, payload string) 
 	}
 	cfmutils.SetAuthHeader(request, cfmClient.Token)
 	cfmutils.CheckError(err)
-	log.Info("Making a " + method + " call on " + url + " to the CFM " + cfmClient.Host)
 	return cfmutils.GetResponse(request)
 }

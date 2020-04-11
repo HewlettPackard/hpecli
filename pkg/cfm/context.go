@@ -12,7 +12,7 @@ func newContextCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "context",
-		Short: "Chagne context to different OneView host",
+		Short: "Change context to different CFM host",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return runSetContext(host)
 		},

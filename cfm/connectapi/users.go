@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/cfm/cfmutils"
-
-	log "github.com/HewlettPackard/hpecli/cfm/logging"
 )
 
 // UserSchema marshals and unmarshals the user schema associated with the CFM
@@ -53,7 +51,6 @@ func (cfmClient *CFMClient) GetUsers(args ...string) (*Users, *cfmutils.Response
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &users)
 		cfmutils.CheckError(err)
-		log.Info("GetUsers successfully fetched the user information from CFM " + cfmClient.Host)
 		return &users, nil
 	}
 
@@ -72,7 +69,6 @@ func (cfmClient *CFMClient) GetCurrentUser() (*User, *cfmutils.ResponseObject) {
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &user)
 		cfmutils.CheckError(err)
-		log.Info("GetCurrentUser successfully fetched the current user information")
 		return &user, nil
 	}
 
@@ -92,7 +88,6 @@ func (cfmClient *CFMClient) GetUserByUUID(uuid string) (*User, *cfmutils.Respons
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &user)
 		cfmutils.CheckError(err)
-		log.Info("GetUserByUUID successfully fetched the user information of user " + uuid + " from CFM " + cfmClient.Host)
 		return &user, nil
 	}
 
@@ -113,7 +108,6 @@ func (cfmClient *CFMClient) AddUser(userData UserSchema) (*cfmutils.ResponseObje
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &user)
 		cfmutils.CheckError(err)
-		log.Info("Successfully added new user " + userData.Username + " to CFM " + cfmClient.Host)
 		return &user, nil
 	}
 
@@ -133,7 +127,6 @@ func (cfmClient *CFMClient) DeleteUser(uuid string) (*cfmutils.ResponseObject, *
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &result)
 		cfmutils.CheckError(err)
-		log.Info("Successfully deleted the user " + uuid + " from the CFM " + cfmClient.Host)
 		return &result, nil
 	}
 
@@ -154,7 +147,6 @@ func (cfmClient *CFMClient) UpdateUser(uuid string, userData UserSchema) (*cfmut
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &user)
 		cfmutils.CheckError(err)
-		log.Info("Successfully updated the user " + uuid + " in the CFM " + cfmClient.Host)
 		return &user, nil
 	}
 
@@ -180,7 +172,6 @@ func (cfmClient *CFMClient) ChangePassword(currentPassword string, newPassword s
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &updatedPassword)
 		cfmutils.CheckError(err)
-		log.Info("Password successfully updated for the current user " + cfmClient.Username + " in the CFM " + cfmClient.Host)
 		return &updatedPassword, nil
 	}
 

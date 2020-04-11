@@ -5,7 +5,7 @@ import (
 
 	"github.com/HewlettPackard/hpecli/cfm/cfmutils"
 
-	log "github.com/HewlettPackard/hpecli/cfm/logging"
+	"github.com/sirupsen/logrus"
 )
 
 // Health unmarshals and marshals the fabric health
@@ -52,11 +52,11 @@ func (cfmClient *CFMClient) GetFabrics() (*Fabrics, *cfmutils.ResponseObject) {
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &fabrics)
 		cfmutils.CheckError(err)
-		log.Info("GetFabrics successfully fetched Fabrics resource from CFM " + cfmClient.Host)
 		return &fabrics, nil
 	}
 
 	errorObject := cfmutils.SetErrorObject(byteResponse, statusCode)
+	logrus.Warnf("%s", errorObject.Result)
 	return nil, errorObject
 }
 
@@ -72,7 +72,6 @@ func (cfmClient *CFMClient) GetFabricByUUID(uuid string) (*Fabric, *cfmutils.Res
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &fabric)
 		cfmutils.CheckError(err)
-		log.Info("GetFabricByUUID successfully fetched the Fabric information from CFM " + cfmClient.Host)
 		return &fabric, nil
 	}
 

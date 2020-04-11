@@ -1,10 +1,9 @@
 package cfm
 
 import (
-	"github.com/HewlettPackard/hpecli/cfm/cfmutils"
 	"encoding/json"
 
-	log "github.com/HewlettPackard/hpecli/cfm/logging"
+	"github.com/HewlettPackard/hpecli/cfm/cfmutils"
 )
 
 // IntegrationsSchema marshals and unmarshals CFM integration
@@ -56,7 +55,6 @@ func (cfmClient *CFMClient) GetIntegrations() (*Integrations, *cfmutils.Response
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &integrations)
 		cfmutils.CheckError(err)
-		log.Info("GetIntegrations successfully fetched Integrations information from CFM " + cfmClient.Host)
 		return &integrations, nil
 	}
 
@@ -75,7 +73,6 @@ func (cfmClient *CFMClient) GetIntegrationSets() (*IntegrationSets, *cfmutils.Re
 	if statusCode == 200 {
 		err := json.Unmarshal(byteResponse, &integrationSets)
 		cfmutils.CheckError(err)
-		log.Info("GetIntegrationSet successfully fetched IntegrationSet information from CFM " + cfmClient.Host)
 		return &integrationSets, nil
 	}
 

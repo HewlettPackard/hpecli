@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-
-	log "github.com/HewlettPackard/hpecli/cfm/logging"
 )
 
 // ResponseObject is the type for the error object sent if there is an error in API call
@@ -37,7 +35,6 @@ func SetErrorObject(byteResponse []byte, statusCode int) *ResponseObject {
 	err := json.Unmarshal(byteResponse, &errorObject)
 	CheckError(err)
 	errorObject.StatusCode = statusCode
-	log.Error(errorObject.Result)
 	return &errorObject
 }
 
@@ -64,6 +61,6 @@ func GetResponse(request *http.Request) ([]byte, int) {
 
 	byteResponse, err := ioutil.ReadAll(response.Body)
 	CheckError(err)
-	log.Info("Request executed successfully")
+
 	return byteResponse, response.StatusCode
 }

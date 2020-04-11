@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/HewlettPackard/oneview-golang v1.2.0
 	github.com/boltdb/bolt v1.3.1 // indirect
-	github.com/docker/machine v0.16.2 // indirect
+	github.com/docker/machine v0.16.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/mattn/go-colorable v0.1.6
