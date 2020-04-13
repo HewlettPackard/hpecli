@@ -5,7 +5,7 @@ package cfm
 import (
 	"fmt"
 
-	connectapi "github.com/HewlettPackard/hpecli/cfm/connectapi"
+	connectapi "github.com/axiomsamarth/cfm/src/connectapi"
 )
 
 const apiDefault = 800

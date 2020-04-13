@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/HewlettPackard/oneview-golang v1.2.0
+	github.com/axiomsamarth/cfm v0.0.0-20200413175207-54ea6232216a
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/docker/machine v0.16.2
 	github.com/hashicorp/go-version v1.2.0
