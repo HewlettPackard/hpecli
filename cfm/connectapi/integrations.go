@@ -23,7 +23,7 @@ type IntegrationSetSchema struct {
 	IsSelected   bool                 `json:"is_selected,omitempty"`
 	Integrations []IntegrationsSchema `json:"integrations,omitempty"`
 	UUID         string               `json:"uuid,omitempty"`
-	Name         string               `json:"name",omitempty`
+	Name         string               `json:"name,omitempty"`
 }
 
 // Integrations marshals and unmarshals the CFM integrations
