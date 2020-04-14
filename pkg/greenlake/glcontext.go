@@ -82,18 +82,3 @@ func deleteSavedHostData(host string) error {
 	return c.DeleteHostData(dataKey(host))
 }
 
-
-func hostAndToken() (host, token string, err error) {
-	c := context.New(glContextKey)
-
-	host, err = c.ModuleContext()
-	if err != nil {
-		return "", "", err
-	}
-
-	if err = c.HostData(dataKey(host), &token); err != nil {
-		return "", "", err
-	}
-
-	return host, token, nil
-}
