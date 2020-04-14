@@ -83,3 +83,4 @@ func TestLogoutFailsWhenItCantGetContext(t *testing.T) {
 		t.Fatal(expectedErrMsg)
 	}
 }
+

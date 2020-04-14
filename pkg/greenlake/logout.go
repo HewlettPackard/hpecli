@@ -51,28 +51,6 @@ func runLogout(host string) error {
 	return nil
 }
 
-func hostToLogout(hostParam string) (host, token string, err error) {
-	if hostParam == "" {
-		// they didn't specify a host.. so use the context to find one
-		//h, t, e := hostAndToken()
-		sd, e := defaultSessionData()
-		if e != nil {
-			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
-			return "", "", fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
-				"Please login to OneView using: hpe greenlake login")
-		}
-
-		return sd.Host, sd.Token, nil
-	}
-
-	token, err = hostData(hostParam)
-	if err != nil {
-		return "", "", err
-	}
-
-	return hostParam, token, nil
-}
-
 func sessionDataToLogout(host string) (data *sessionData, err error) {
 	data = &sessionData{}
 
