@@ -31,15 +31,12 @@ func newLogoutCommand() *cobra.Command {
 }
 
 func runLogout(host string) error {
-
 	sessionData, err := sessionDataToLogout(host)
 	if err != nil {
 		logrus.Debugf("unable to retrieve apiKey because of: %v", err)
 		return fmt.Errorf("unable to retrieve the last login for HPE GreenLake. " +
 			"Please login to HPE GreenLake using: hpe greenlake login")
 	}
-
-
 
 	// No method to logout yet
 	logrus.Infof("Successfully logged out of HPE GreenLake: %s", sessionData.Host)

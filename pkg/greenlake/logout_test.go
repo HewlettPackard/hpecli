@@ -21,7 +21,6 @@ func TestHostPrefixAddedForLogout(t *testing.T) {
 	// // clear everything from the mock store
 	context.MockClear()
 
-
 	saveContextAndSessionData(&sessionData{testHost, "token", "tenantID"})
 
 	cmd := newLogoutCommand()
@@ -36,7 +35,6 @@ func TestHostPrefixAddedForLogout(t *testing.T) {
 }
 
 func TestLogoutRemovesAPIKeyFromContext(t *testing.T) {
-	
 	// set context to the test server host
 	_ = saveContextAndSessionData(&sessionData{greenlakeDefaultHost, "token", "tenantID"})
 
@@ -55,7 +53,6 @@ func TestLogoutRemovesAPIKeyFromContext(t *testing.T) {
 
 func TestLogoutRemovesAPIKeyFromParameter(t *testing.T) {
 	const testHost = "https://yetanothertesthost.net"
-	
 	
 	// set context to the test server host
 	_ = saveContextAndSessionData(&sessionData{testHost, "token", "tenantID"})
