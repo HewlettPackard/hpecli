@@ -14,11 +14,18 @@ func newOnCommand() *cobra.Command {
 		Use:   "on",
 		Short: "Turn on Google Analytics",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			enable := enableGoogleAnalytics()
+			enable, enableerr := enableGoogleAnalytics()
+			if enableerr != nil {
+				logrus.Debugf("Error enabling Google analytics and the error is %s", enableerr)
+			}
 			eventCategory := analytics
 			eventAction := cmd.Name()
 			err := onAnalytics(cmd, enable, eventCategory, eventAction)
-			return err
+			if err != nil {
+				logrus.Debugf("Unable to turn on the Google Analytics and the error is %s", err)
+				return err
+			}
+			return nil
 		},
 	}
 
@@ -29,7 +36,7 @@ func onAnalytics(cmd *cobra.Command, enable bool, eventCategory, eventAction str
 	if enable {
 		analyticsClient := NewAnalyticsClient("1", "event", eventCategory,
 			eventAction, "200", "", "hpecli/0.0.1", "0.0.1", "hpecli")
-		_, err := analyticsClient.TrackEvent()
+		err := analyticsClient.TrackEvent()
 
 		if err != nil {
 			logrus.Warning("Unable to send the GA info with supplied event details")

@@ -12,11 +12,18 @@ func newOffCommand() *cobra.Command {
 		Use:   "off",
 		Short: "Turn off Google Analytics",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			disable := disableGoogleAnalytics()
+			disable, disableerr := disableGoogleAnalytics()
+			if disableerr != nil {
+				logrus.Debugf("Error disabling Google analytics and the error is %s", disableerr)
+			}
 			eventCategory := "analytics"
 			eventAction := cmd.Name()
 			err := offAnalytics(cmd, disable, eventCategory, eventAction)
-			return err
+			if err != nil {
+				logrus.Debugf("Unable to turn off the Google Analytics and the error is %s", err)
+				return err
+			}
+			return nil
 		},
 	}
 
@@ -27,7 +34,7 @@ func offAnalytics(cmd *cobra.Command, disable bool, eventCategory, eventAction s
 	if disable {
 		analyticsClient := NewAnalyticsClient("1", "event", eventCategory,
 			eventAction, "200", "", "hpecli/0.0.1", "0.0.1", "hpecli")
-		_, err := analyticsClient.TrackEvent()
+		err := analyticsClient.TrackEvent()
 
 		if err != nil {
 			logrus.Warningf("Unable to send the GA info with supplied event details")

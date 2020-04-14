@@ -74,8 +74,6 @@ func TestNewAnalyticsClient(t *testing.T) {
 }
 
 func TestTrackEvent(t *testing.T) {
-	const want = "success"
-
 	ts := newTestServer("/collect", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -85,13 +83,9 @@ func TestTrackEvent(t *testing.T) {
 	c := NewAnalyticsClient(version, eventHitType, eventCategory,
 		eventAction, eventValue, eventLabel, userAgent, applicationVersion, applicationName)
 
-	got, err := c.TrackEvent()
+	err := c.TrackEvent()
 	if err != nil {
 		t.Fatalf("unexpected error in sending GA data")
-	}
-
-	if got != want {
-		t.Fatalf(errTempl, got, want)
 	}
 }
 
@@ -109,7 +103,7 @@ func TestNewClientID(t *testing.T) {
 		want string
 	}{
 		{
-			name: "check client id not present",
+			name: "generate new client id",
 			want: "someRandonID",
 		},
 	}
@@ -125,19 +119,30 @@ func TestNewClientID(t *testing.T) {
 
 func TestClientID(t *testing.T) {
 	cases := []struct {
-		addDB bool
-		name  string
-		want  string
+		delete bool
+		value  bool
+		key    string
+		name   string
+		want   string
 	}{
+		{
+			name:   "delete the key GA",
+			delete: true,
+			key:    "GA_CLIENT_ID",
+			value:  true,
+			want:   "someRandonID",
+		},
 		{
 			name: "check client id not present",
 			want: "someRandonID",
-			//addDB: false,
 		},
 	}
 	for _, c := range cases {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
+			if c.delete {
+				DBCheck(false, c.key, c.value)
+			}
 			if got, err := clientID(); got == "" || err != nil {
 				t.Errorf("clientID() = %v, want %v", got, c.want)
 			}
@@ -147,29 +152,51 @@ func TestClientID(t *testing.T) {
 
 func TestEnableGoogleAnalyticsDBError(t *testing.T) {
 	cases := []struct {
-		addDB bool
-		want  bool
-		name  string
+		wantErr  bool
+		name     string
+		funcName string
 	}{
 		{
-			name:  "error opening DB",
-			addDB: true,
-			want:  false,
+			name:     "error opening DB for EnableGoogleAnalytics",
+			funcName: "enableGA",
+			wantErr:  true,
+		},
+		{
+			name:     "error opening DB DisableGoogleAnalytics",
+			funcName: "disableGA",
+			wantErr:  true,
+		},
+		{
+			name:     "error opening DB CheckGoogleAnalytics",
+			funcName: "checkGA",
+			wantErr:  true,
+		},
+		{
+			name:     "error opening DB CLientID",
+			funcName: "clientID",
+			wantErr:  true,
 		},
 	}
 	for _, c := range cases {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
-			if c.addDB == true {
-				d, err := db.Open()
-				if err != nil {
-					logrus.Debug(dbOpenErr)
-				}
-				defer d.Close()
+			var got bool
+			var err error
+			d, err := db.Open()
+			if err != nil {
+				logrus.Debug(dbOpenErr)
 			}
-
-			if got := enableGoogleAnalytics(); got != c.want {
-				t.Errorf("got %v, want error as %v", got, c.want)
+			defer d.Close()
+			switch c.funcName {
+			case "enableGA":
+				got, err = enableGoogleAnalytics()
+			case "disableGA":
+				got, err = disableGoogleAnalytics()
+			default:
+				got, err = CheckGoogleAnalytics()
+			}
+			if err == nil {
+				t.Errorf("got %v, want error as %v", got, c.wantErr)
 			}
 		})
 	}
@@ -179,10 +206,10 @@ func TestEnableGA(t *testing.T) {
 	cases := []struct {
 		put   bool
 		flag  bool
+		value bool
 		want  bool
 		name  string
 		key   string
-		value string
 	}{
 		{
 			name: "enable GA, if key not exist, then generate",
@@ -193,7 +220,7 @@ func TestEnableGA(t *testing.T) {
 			name:  "put the key value as true GA",
 			put:   true,
 			key:   "GA_DISABLE",
-			value: "true",
+			value: true,
 			flag:  true,
 			want:  true,
 		},
@@ -206,7 +233,7 @@ func TestEnableGA(t *testing.T) {
 			name:  "put the key value as false GA",
 			put:   true,
 			key:   "GA_DISABLE",
-			value: "false",
+			value: false,
 			flag:  true,
 			want:  true,
 		},
@@ -219,7 +246,7 @@ func TestEnableGA(t *testing.T) {
 			name:  "delete the key GA",
 			put:   false,
 			key:   "GA_DISABLE",
-			value: "true",
+			value: true,
 			flag:  true,
 			want:  true,
 		},
@@ -235,38 +262,38 @@ func TestEnableGA(t *testing.T) {
 			if c.flag == true {
 				DBCheck(c.put, c.key, c.value)
 			}
-			if got := enableGoogleAnalytics(); got != c.want {
+			got, err := enableGoogleAnalytics()
+			if err != nil {
+				t.Fatalf("unexpected error in enabling google analytics")
+			}
+			if got != c.want {
 				t.Errorf("TestEnableGA() = %v, want %v", got, c.want)
 			}
 		})
 	}
 }
 
-func TestDisableGoogleAnalyticsDBError(t *testing.T) {
+func TestClientIDDBError(t *testing.T) {
 	cases := []struct {
-		addDB bool
-		want  bool
-		name  string
+		wantErr bool
+		name    string
 	}{
 		{
-			name:  "DB open error",
-			addDB: true,
-			want:  false,
+			name:    "DB open error",
+			wantErr: true,
 		},
 	}
 	for _, c := range cases {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
-			if c.addDB == true {
-				d, err := db.Open()
-				if err != nil {
-					logrus.Debug(dbOpenErr)
-				}
-				defer d.Close()
+			d, err := db.Open()
+			if err != nil {
+				logrus.Debug(dbOpenErr)
 			}
-
-			if got := disableGoogleAnalytics(); got != c.want {
-				t.Errorf("got %v, want error as %v", got, c.want)
+			defer d.Close()
+			got, err := clientID()
+			if err == nil {
+				t.Errorf("got %v, want error as %v", got, c.wantErr)
 			}
 		})
 	}
@@ -276,10 +303,10 @@ func TestDisableGA(t *testing.T) {
 	cases := []struct {
 		put   bool
 		flag  bool
+		value bool
 		want  bool
 		name  string
 		key   string
-		value string
 	}{
 		{
 			name: "disable GA, if key not exist, then generate",
@@ -290,7 +317,7 @@ func TestDisableGA(t *testing.T) {
 			name:  "put the key value as true for disable GA",
 			put:   true,
 			key:   "GA_DISABLE",
-			value: "true",
+			value: true,
 			flag:  true,
 			want:  true,
 		},
@@ -303,7 +330,7 @@ func TestDisableGA(t *testing.T) {
 			name:  "put the key value as false for disable GA",
 			put:   true,
 			key:   "GA_DISABLE",
-			value: "false",
+			value: false,
 			flag:  true,
 			want:  true,
 		},
@@ -316,7 +343,7 @@ func TestDisableGA(t *testing.T) {
 			name:  "delete the key GA",
 			put:   false,
 			key:   "GA_DISABLE",
-			value: "true",
+			value: true,
 			flag:  true,
 			want:  true,
 		},
@@ -332,20 +359,24 @@ func TestDisableGA(t *testing.T) {
 			if c.flag == true {
 				DBCheck(c.put, c.key, c.value)
 			}
-			if got := disableGoogleAnalytics(); got != c.want {
+			got, err := disableGoogleAnalytics()
+			if err != nil {
+				t.Fatalf("unexpected error in disabling google analytics")
+			}
+			if got != c.want {
 				t.Errorf("TestDisableGA() = %v, want %v", got, c.want)
 			}
 		})
 	}
 }
 
-func DBCheck(put bool, key, value string) {
+func DBCheck(put bool, key string, value bool) {
 	d, err := db.Open()
 	if err != nil {
 		logrus.Debug(dbOpenErr)
 	}
 
-	if put == true {
+	if put {
 		if err := d.Put(key, value); err != nil {
 			logrus.Debugf("Unable to put the key %s in to DB for TestDisableGA test case", key)
 		}
@@ -378,14 +409,22 @@ func TestCheckGA(t *testing.T) {
 	for _, c := range cases {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
-			if c.enable == true {
-				e := enableGoogleAnalytics()
-				print(e)
+			if c.enable {
+				_, err := enableGoogleAnalytics()
+				if err != nil {
+					t.Fatalf("unexpected error in enabling google analytics")
+				}
 			} else {
-				e := disableGoogleAnalytics()
-				print(e)
+				_, err := disableGoogleAnalytics()
+				if err != nil {
+					t.Fatalf("unexpected error in disabling google analytics")
+				}
 			}
-			if got := CheckGoogleAnalytics(); got != c.want {
+			got, err := CheckGoogleAnalytics()
+			if err != nil {
+				t.Fatalf("unexpected error in checking google analytics enabled or disabled")
+			}
+			if got != c.want {
 				t.Errorf("TestCheckGA() = %v, want %v", got, c.want)
 			}
 		})

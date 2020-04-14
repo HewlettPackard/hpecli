@@ -12,11 +12,18 @@ func newStatusCommand() *cobra.Command {
 		Use:   "status",
 		Short: "Check whether google analytics is on or off",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			checkAnalytics := CheckGoogleAnalytics()
+			checkAnalytics, checkerr := CheckGoogleAnalytics()
+			if checkerr != nil {
+				logrus.Debugf("Error checking status of Google analytics and the error is %s", checkerr)
+			}
 			eventCategory := "analytics"
 			eventAction := cmd.Name()
 			err := checkStatus(cmd, checkAnalytics, eventCategory, eventAction)
-			return err
+			if err != nil {
+				logrus.Debugf("Unable to check the status of Google Analytics and the error is %s", err)
+				return err
+			}
+			return nil
 		},
 	}
 
@@ -26,7 +33,7 @@ func newStatusCommand() *cobra.Command {
 func checkStatus(cmd *cobra.Command, checkAnalytics bool, eventCategory, eventAction string) error {
 	analyticsClient := NewAnalyticsClient("1", "event", eventCategory,
 		eventAction, "200", "", "hpecli/0.0.1", "0.0.1", "hpecli")
-	_, err := analyticsClient.TrackEvent()
+	err := analyticsClient.TrackEvent()
 
 	if err != nil {
 		logrus.Warningf("Unable to send the analytics info with supplied event details")
