@@ -51,15 +51,15 @@ func runLogout(host string) error {
 	return nil
 }
 
-func sessionDataToLogout(host string) (data *sessionData, err error) {
-	data = &sessionData{}
+func sessionDataToLogout(host string) (sd *sessionData, err error) {
+	sd = &sessionData{}
 
 	if host == "" {
 		// they didn't specify a host.. so use the context to find one
 		d, e := defaultSessionData()
 		if e != nil {
 			logrus.Debugf("unable to retrieve apiKey because of: %v", e)
-			return data, fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
+			return sd, fmt.Errorf("unable to retrieve the last login for HPE GreenLake.  " +
 				"Please login to HPE GreenLake using: hpe greenlake login")
 		}
 
@@ -68,7 +68,7 @@ func sessionDataToLogout(host string) (data *sessionData, err error) {
 
 	d, err := getSessionData(host)
 	if err != nil {
-		return data, err
+		return sd, err
 	}
 
 	return d, nil
