@@ -126,7 +126,7 @@ func TestClientID(t *testing.T) {
 		want   string
 	}{
 		{
-			name:   "delete the key GA",
+			name:   "delete the key",
 			delete: true,
 			key:    "GA_CLIENT_ID",
 			value:  true,
@@ -243,7 +243,7 @@ func TestEnableGA(t *testing.T) {
 			want: true,
 		},
 		{
-			name:  "delete the key GA",
+			name:  "delete the key GA_DISABLE GA",
 			put:   false,
 			key:   "GA_DISABLE",
 			value: true,
@@ -340,7 +340,7 @@ func TestDisableGA(t *testing.T) {
 			want: true,
 		},
 		{
-			name:  "delete the key GA",
+			name:  "delete key GA_DISABLE GA",
 			put:   false,
 			key:   "GA_DISABLE",
 			value: true,
@@ -410,13 +410,11 @@ func TestCheckGA(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			if c.enable {
-				_, err := enableGoogleAnalytics()
-				if err != nil {
+				if _, err := enableGoogleAnalytics(); err != nil {
 					t.Fatalf("unexpected error in enabling google analytics")
 				}
 			} else {
-				_, err := disableGoogleAnalytics()
-				if err != nil {
+				if _, err := disableGoogleAnalytics(); err != nil {
 					t.Fatalf("unexpected error in disabling google analytics")
 				}
 			}

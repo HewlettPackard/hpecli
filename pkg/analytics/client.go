@@ -22,6 +22,8 @@ const GAClientIDKey = "GA_CLIENT_ID"
 // DisableAnalyticsKey - maintain Google Analytics enable/disable status
 const DisableAnalyticsKey = "GA_DISABLE"
 
+const dbPutErr = "Unable to put the key %s in to DB"
+
 // Client - wrapper class for Google Analytics Measurement Protocol api's
 type Client struct {
 	Version            string
@@ -106,7 +108,7 @@ func enableGoogleAnalytics() (bool, error) {
 
 		err := d.Put(DisableAnalyticsKey, false)
 		if err != nil {
-			logrus.Debugf("Unable to put the key %s in to DB", DisableAnalyticsKey)
+			logrus.Debugf(dbPutErr, DisableAnalyticsKey)
 			return false, err
 		}
 
@@ -133,7 +135,7 @@ func disableGoogleAnalytics() (bool, error) {
 
 		err := d.Put(DisableAnalyticsKey, true)
 		if err != nil {
-			logrus.Debugf("Unable to put the key %s in to DB", DisableAnalyticsKey)
+			logrus.Debugf(dbPutErr, DisableAnalyticsKey)
 			return false, err
 		}
 
@@ -145,7 +147,7 @@ func disableGoogleAnalytics() (bool, error) {
 
 		err := d.Put(DisableAnalyticsKey, true)
 		if err != nil {
-			logrus.Debugf("Unable to put the key %s in to DB", DisableAnalyticsKey)
+			logrus.Debugf(dbPutErr, DisableAnalyticsKey)
 			return false, err
 		}
 
@@ -170,7 +172,7 @@ func CheckGoogleAnalytics() (bool, error) {
 	if err := d.Get(DisableAnalyticsKey, &disableGA); err != nil {
 		logrus.Debugf("Didn't found existing DisableAnalyticsKey key %t", disableGA)
 
-		return true, err
+		return true, nil
 	}
 
 	if disableGA {

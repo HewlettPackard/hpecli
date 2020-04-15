@@ -31,12 +31,8 @@ func newLoginCommand() *cobra.Command {
 			return validateArgs(&opts)
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := runLogin(&opts)
-			errAnalytics := runAnalytics()
-			if errAnalytics != nil {
-				logrus.Debugf("Unable to post the data to Google Analytics and the error is %s", err)
-			}
-			if err != nil {
+			runAnalytics()
+			if err := runLogin(&opts); err != nil {
 				return err
 			}
 			return nil
@@ -97,17 +93,14 @@ func runLogin(opts *glLoginOptions) error {
 	return nil
 }
 
-func runAnalytics() error {
+func runAnalytics() {
 	if got, err := analytics.CheckGoogleAnalytics(); got && err == nil {
 		analyticsClient := analytics.NewAnalyticsClient("1", "event", "greenlake", "login",
 			"200", "", "hpe/0.0.1", "0.0.1", "hpecli")
 
 		err := analyticsClient.TrackEvent()
 		if err != nil {
-			logrus.Warning("Unable to send the greenlake analytics info to Google Analytics with supplied event details")
-			return err
+			logrus.Debug("Unable to send the greenlake analytics info to Google Analytics with supplied event details")
 		}
 	}
-
-	return nil
 }
