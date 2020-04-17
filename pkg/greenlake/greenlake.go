@@ -9,13 +9,13 @@ import (
 func NewGreenlakeCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use: "greenlake",
-		Short: "Access to HPE Greenlake commands",
+		Short: "Access to HPE GreenLake commands",
 	}
 
 	cmd.AddCommand(
-		newContextCommand(),
 		newGetCommand(),
 		newLoginCommand(),
+		newLogoutCommand(),
 	)
 
 	return cmd

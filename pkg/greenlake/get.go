@@ -9,7 +9,7 @@ import (
 func newGetCommand() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "get",
-		Short: "Get details from HPE Green Lake",
+		Short: "Get details from HPE GreenLake",
 	}
 
 	cmd.AddCommand(
