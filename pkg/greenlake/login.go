@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/password"
+	"github.com/HewlettPackard/hpecli/pkg/analytics"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,11 @@ func newLoginCommand() *cobra.Command {
 			return validateArgs(&opts)
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
-			return runLogin(&opts)
+			runAnalytics()
+			if err := runLogin(&opts); err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 
@@ -85,4 +90,16 @@ func runLogin(opts *glLoginOptions) error {
 	}
 
 	return nil
+}
+
+func runAnalytics() {
+	if got, err := analytics.CheckGoogleAnalytics(); got && err == nil {
+		analyticsClient := analytics.NewAnalyticsClient("1", "event", "greenlake", "login",
+			"200", "", "hpe/0.0.1", "0.0.1", "hpecli")
+
+		err := analyticsClient.TrackEvent()
+		if err != nil {
+			logrus.Debug("Unable to send the greenlake analytics info to Google Analytics with supplied event details")
+		}
+	}
 }
