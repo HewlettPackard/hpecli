@@ -30,7 +30,7 @@ const (
 )
 
 func TestNewAnalyticsClient(t *testing.T) {
-	c := NewAnalyticsClient(version, eventHitType, eventCategory, eventAction,
+	c := newAnalyticsClient(version, eventHitType, eventCategory, eventAction,
 		eventValue, eventLabel, userAgent, applicationVersion, applicationName)
 	if c == nil {
 		t.Fatal("expected AnalyticsClient to not be nil")
@@ -80,10 +80,10 @@ func TestTrackEvent(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewAnalyticsClient(version, eventHitType, eventCategory,
+	c := newAnalyticsClient(version, eventHitType, eventCategory,
 		eventAction, eventValue, eventLabel, userAgent, applicationVersion, applicationName)
 
-	err := c.TrackEvent()
+	err := c.trackEvent()
 	if err != nil {
 		t.Fatalf("unexpected error in sending GA data")
 	}
@@ -152,29 +152,29 @@ func TestClientID(t *testing.T) {
 
 func TestEnableGoogleAnalyticsDBError(t *testing.T) {
 	cases := []struct {
-		wantErr  bool
+		want     bool
 		name     string
 		funcName string
 	}{
 		{
 			name:     "error opening DB for EnableGoogleAnalytics",
 			funcName: "enableGA",
-			wantErr:  true,
+			want:     false,
 		},
 		{
 			name:     "error opening DB DisableGoogleAnalytics",
 			funcName: "disableGA",
-			wantErr:  true,
+			want:     false,
 		},
 		{
-			name:     "error opening DB CheckGoogleAnalytics",
+			name:     "error opening DB analyticsEnabled",
 			funcName: "checkGA",
-			wantErr:  true,
+			want:     false,
 		},
 		{
 			name:     "error opening DB CLientID",
 			funcName: "clientID",
-			wantErr:  true,
+			want:     false,
 		},
 	}
 	for _, c := range cases {
@@ -189,20 +189,26 @@ func TestEnableGoogleAnalyticsDBError(t *testing.T) {
 			defer d.Close()
 			switch c.funcName {
 			case "enableGA":
-				got, err = enableGoogleAnalytics()
+				err = enableAnalytics()
+				if err == nil {
+					t.Error("expected error")
+				}
 			case "disableGA":
-				got, err = disableGoogleAnalytics()
+				err = disableAnalytics()
+				if err == nil {
+					t.Error("expected error")
+				}
 			default:
-				got, err = CheckGoogleAnalytics()
-			}
-			if err == nil {
-				t.Errorf("got %v, want error as %v", got, c.wantErr)
+				got = analyticsEnabled()
+				if got != c.want {
+					t.Errorf("got %v, want %v", got, c.want)
+				}
 			}
 		})
 	}
 }
 
-func TestEnableGA(t *testing.T) {
+func TestEnableGA(t *testing.T) { //nolint:funlen // long test methods ok
 	cases := []struct {
 		put   bool
 		flag  bool
@@ -262,12 +268,9 @@ func TestEnableGA(t *testing.T) {
 			if c.flag == true {
 				DBCheck(c.put, c.key, c.value)
 			}
-			got, err := enableGoogleAnalytics()
+			err := enableAnalytics()
 			if err != nil {
 				t.Fatalf("unexpected error in enabling google analytics")
-			}
-			if got != c.want {
-				t.Errorf("TestEnableGA() = %v, want %v", got, c.want)
 			}
 		})
 	}
@@ -299,7 +302,7 @@ func TestClientIDDBError(t *testing.T) {
 	}
 }
 
-func TestDisableGA(t *testing.T) {
+func TestDisableGA(t *testing.T) { //nolint:funlen // long test methods ok
 	cases := []struct {
 		put   bool
 		flag  bool
@@ -359,12 +362,9 @@ func TestDisableGA(t *testing.T) {
 			if c.flag == true {
 				DBCheck(c.put, c.key, c.value)
 			}
-			got, err := disableGoogleAnalytics()
+			err := disableAnalytics()
 			if err != nil {
 				t.Fatalf("unexpected error in disabling google analytics")
-			}
-			if got != c.want {
-				t.Errorf("TestDisableGA() = %v, want %v", got, c.want)
 			}
 		})
 	}
@@ -410,18 +410,15 @@ func TestCheckGA(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			if c.enable {
-				if _, err := enableGoogleAnalytics(); err != nil {
+				if err := enableAnalytics(); err != nil {
 					t.Fatalf("unexpected error in enabling google analytics")
 				}
 			} else {
-				if _, err := disableGoogleAnalytics(); err != nil {
+				if err := disableAnalytics(); err != nil {
 					t.Fatalf("unexpected error in disabling google analytics")
 				}
 			}
-			got, err := CheckGoogleAnalytics()
-			if err != nil {
-				t.Fatalf("unexpected error in checking google analytics enabled or disabled")
-			}
+			got := analyticsEnabled()
 			if got != c.want {
 				t.Errorf("TestCheckGA() = %v, want %v", got, c.want)
 			}

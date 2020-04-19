@@ -5,8 +5,6 @@ package analytics
 import (
 	"reflect"
 	"testing"
-
-	"github.com/spf13/cobra"
 )
 
 func TestNewOffCommand(t *testing.T) {
@@ -35,39 +33,5 @@ func TestNewOffCommandRunE(t *testing.T) {
 	err := cmd.Execute()
 	if err != nil {
 		t.Fatal(err)
-	}
-}
-
-func TestOffAnalytics(t *testing.T) {
-	cases := []struct {
-		cmd           *cobra.Command
-		disable       bool
-		wantErr       bool
-		name          string
-		eventCategory string
-		eventAction   string
-	}{
-		{
-			name:          "check analytics off",
-			eventCategory: "someEC",
-			eventAction:   "someEA",
-			wantErr:       false,
-			disable:       true,
-		},
-		{
-			name:          "check analytics on",
-			eventCategory: "someEC",
-			eventAction:   "someEA",
-			wantErr:       false,
-			disable:       false,
-		},
-	}
-	for _, c := range cases {
-		c := c
-		t.Run(c.name, func(t *testing.T) {
-			if err := offAnalytics(c.cmd, c.disable, c.eventCategory, c.eventAction); (err != nil) != c.wantErr {
-				t.Errorf("offAnalytics() error = %v, wantErr %v", err, c.wantErr)
-			}
-		})
 	}
 }

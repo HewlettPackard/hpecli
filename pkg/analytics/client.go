@@ -16,16 +16,17 @@ import (
 // TrackingID - Google Analytics tracking ID
 const TrackingID = "UA-159515478-1"
 
-// GAClientIDKey - Google Analytics Client ID Key
+// GAClientIDKey - Analytics Client ID Key
 const GAClientIDKey = "GA_CLIENT_ID"
 
-// DisableAnalyticsKey - maintain Google Analytics enable/disable status
-const DisableAnalyticsKey = "GA_DISABLE"
+// analyticsStateKey - maintain Analytics enable/disable status
+// true is enabled.  false is disabled
+const analyticsStateKey = "ANALYTICS_STATE"
 
-const dbPutErr = "Unable to put the key %s in to DB"
+var onOff = map[bool]string{true: "enabled", false: "disabled"}
 
-// Client - wrapper class for Google Analytics Measurement Protocol api's
-type Client struct {
+// client - wrapper class for Google Analytics Measurement Protocol api's
+type client struct {
 	Version            string
 	EventHitType       string
 	Eventcategory      string
@@ -38,11 +39,11 @@ type Client struct {
 	*rest.Request
 }
 
-// NewAnalyticsClient create
-func NewAnalyticsClient(version, eventHitType, eventCategory, eventAction,
+// newAnalyticsClient create
+func newAnalyticsClient(version, eventHitType, eventCategory, eventAction,
 	eventValue, eventLabel, userAgent, applicationVersion,
-	applicationName string) *Client {
-	return &Client{
+	applicationName string) *client {
+	return &client{
 		Version:            version,
 		EventHitType:       eventHitType,
 		Eventcategory:      eventCategory,
@@ -52,6 +53,20 @@ func NewAnalyticsClient(version, eventHitType, eventCategory, eventAction,
 		UserAgent:          userAgent,
 		ApplicationVersion: applicationVersion,
 		ApplicationName:    applicationName,
+	}
+}
+
+func SendEvent(module, command, subcommand string) {
+	if !analyticsEnabled() {
+		logrus.Debugf("Analytics disabled .. skipping sending event.")
+	}
+
+	client := newAnalyticsClient("1", "event", module, command,
+		"200", subcommand, "hpe/0.0.1", "0.0.1", "hpecli")
+
+	err := client.trackEvent()
+	if err != nil {
+		logrus.Debugf("Failure to send analytics event. Error: %+v", err)
 	}
 }
 
@@ -86,104 +101,73 @@ func newClientID() string {
 	return uuid.New().String()
 }
 
-// enableGoogleAnalytics enable google analytics for HPE CLI
-func enableGoogleAnalytics() (bool, error) {
-	var disableGA bool
-
+// enableAnalytics enable google analytics for HPE CLI
+func enableAnalytics() error {
 	d, err := db.Open()
-
 	if err != nil {
-		logrus.Debug("Unable to open DB to get DisableAnalyticsKey")
+		logrus.Debug("Unable to open DB to get analyticsStateKey")
 
-		return false, err
+		return err
 	}
+
 	defer d.Close()
 
-	if err := d.Get(DisableAnalyticsKey, &disableGA); err != nil {
-		return true, nil
+	err = d.Put(analyticsStateKey, true)
+	if err != nil {
+		logrus.Debug("Unable to enable analytics in DB")
 	}
 
-	if disableGA {
-		logrus.Debugf("Found existing DisableAnalyticsKey, updating it's value to : %t", disableGA)
-
-		err := d.Put(DisableAnalyticsKey, false)
-		if err != nil {
-			logrus.Debugf(dbPutErr, DisableAnalyticsKey)
-			return false, err
-		}
-
-		return true, nil
-	}
-
-	return true, nil
+	return err
 }
 
-// disableGoogleAnalytics disable google analytics for HPE CLI
-func disableGoogleAnalytics() (bool, error) {
-	var disableGA bool
-
+// disableAnalytics disable google analytics for HPE CLI
+func disableAnalytics() error {
 	d, err := db.Open()
-
 	if err != nil {
-		logrus.Debug("Unable to open DB to get GAClientIDKey ")
-		return false, err
+		logrus.Debug("Unable to open DB to get analyticsStateKey")
+		return err
 	}
+
 	defer d.Close()
 
-	if err := d.Get(DisableAnalyticsKey, &disableGA); err != nil {
-		logrus.Debugf("Didn't find existing DisableAnalyticsKey, creating a new one: %s", DisableAnalyticsKey)
-
-		err := d.Put(DisableAnalyticsKey, true)
-		if err != nil {
-			logrus.Debugf(dbPutErr, DisableAnalyticsKey)
-			return false, err
-		}
-
-		return true, nil
+	err = d.Put(analyticsStateKey, false)
+	if err != nil {
+		logrus.Debug("Unable to enable analytics in DB")
 	}
 
-	if !disableGA {
-		logrus.Debugf("Didn't find existing enableAnalytics, creating a new one: %s", DisableAnalyticsKey)
-
-		err := d.Put(DisableAnalyticsKey, true)
-		if err != nil {
-			logrus.Debugf(dbPutErr, DisableAnalyticsKey)
-			return false, err
-		}
-
-		return true, nil
-	}
-
-	return true, nil
+	return err
 }
 
-// CheckGoogleAnalytics Check whether google analytics is enabled or disabled in db
-func CheckGoogleAnalytics() (bool, error) {
-	var disableGA bool
-
+// analyticsEnabled Check whether analytics is enabled or disabled in db
+func analyticsEnabled() bool {
 	d, err := db.Open()
-
 	if err != nil {
-		logrus.Debug("Unable to open DB to get GAClientIDKey ")
-		return false, err
+		logrus.Debug("Unable to open DB to get analyticsStateKey")
+		return false
 	}
+
 	defer d.Close()
 
-	if err := d.Get(DisableAnalyticsKey, &disableGA); err != nil {
-		logrus.Debugf("Didn't found existing DisableAnalyticsKey key %t", disableGA)
+	var enabled bool
 
-		return true, nil
+	err = d.Get(analyticsStateKey, &enabled)
+	if err != nil {
+		enabled = false
+
+		if errors.Is(err, db.ErrNotFound) {
+			logrus.Debug("analyticsStateKey is not set in the DB. Defaulting to disabled")
+		} else {
+			logrus.Debug("Unable to determine analytics state in DB.  Defaulting to disabled.")
+		}
 	}
 
-	if disableGA {
-		return false, nil
-	}
+	logrus.Debugf("Analytics state: %s", onOff[enabled])
 
-	return true, nil
+	return enabled
 }
 
-// TrackEvent Measurement Protocol api to track user events
-func (c *Client) TrackEvent() error {
+// trackEvent Measurement Protocol api to track user events
+func (c *client) trackEvent() error {
 	id, err := clientID()
 	if err != nil {
 		logrus.Debug("error generating client ID")
