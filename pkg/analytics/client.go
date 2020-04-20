@@ -16,22 +16,22 @@ import (
 // TrackingID - Google Analytics tracking ID
 const TrackingID = "UA-159515478-1"
 
-// GAClientIDKey - Analytics Client ID Key
-const GAClientIDKey = "GA_CLIENT_ID"
+// clientIDKey - key for unique value for the cli to send analytics data
+const clientIDKey = "CLIENT_ID"
 
 // analyticsStateKey - maintain Analytics enable/disable status
 // true is enabled.  false is disabled
 const analyticsStateKey = "ANALYTICS_STATE"
 
-var onOff = map[bool]string{true: "enabled", false: "disabled"}
+// used to translate from true/false to enabled/disabled for text output
+var stateMap = map[bool]string{true: "enabled", false: "disabled"}
+
+const openDBErrorMsg = "Unable to open DB to get analyticsStateKey"
 
 // client - wrapper class for Google Analytics Measurement Protocol api's
 type client struct {
-	Version            string
-	EventHitType       string
 	Eventcategory      string
 	EventAction        string
-	EventValue         string
 	EventLabel         string
 	UserAgent          string
 	ApplicationName    string
@@ -40,16 +40,12 @@ type client struct {
 }
 
 // newAnalyticsClient create
-func newAnalyticsClient(version, eventHitType, eventCategory, eventAction,
-	eventValue, eventLabel, userAgent, applicationVersion,
-	applicationName string) *client {
+func newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent,
+	applicationVersion, applicationName string) *client {
 	return &client{
-		Version:            version,
-		EventHitType:       eventHitType,
 		Eventcategory:      eventCategory,
 		EventAction:        eventAction,
 		EventLabel:         eventLabel,
-		EventValue:         eventValue,
 		UserAgent:          userAgent,
 		ApplicationVersion: applicationVersion,
 		ApplicationName:    applicationName,
@@ -61,8 +57,7 @@ func SendEvent(module, command, subcommand string) {
 		logrus.Debugf("Analytics disabled .. skipping sending event.")
 	}
 
-	client := newAnalyticsClient("1", "event", module, command,
-		"200", subcommand, "hpe/0.0.1", "0.0.1", "hpecli")
+	client := newAnalyticsClient(module, command, subcommand, "hpe/0.0.1", "0.0.1", "hpecli")
 
 	err := client.trackEvent()
 	if err != nil {
@@ -80,12 +75,12 @@ func clientID() (string, error) {
 	defer d.Close()
 
 	var ID string
-	if err := d.Get(GAClientIDKey, &ID); err != nil {
+	if err := d.Get(clientIDKey, &ID); err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			// couldn't find existing Id, so generate one and store it
 			ID = newClientID()
 			logrus.Debugf("Didn't find existing clientID, generating a new one: %s", ID)
-			_ = d.Put(GAClientIDKey, ID)
+			_ = d.Put(clientIDKey, ID)
 
 			return ID, nil
 		}
@@ -105,7 +100,7 @@ func newClientID() string {
 func enableAnalytics() error {
 	d, err := db.Open()
 	if err != nil {
-		logrus.Debug("Unable to open DB to get analyticsStateKey")
+		logrus.Debug(openDBErrorMsg)
 
 		return err
 	}
@@ -124,7 +119,7 @@ func enableAnalytics() error {
 func disableAnalytics() error {
 	d, err := db.Open()
 	if err != nil {
-		logrus.Debug("Unable to open DB to get analyticsStateKey")
+		logrus.Debug(openDBErrorMsg)
 		return err
 	}
 
@@ -142,7 +137,7 @@ func disableAnalytics() error {
 func analyticsEnabled() bool {
 	d, err := db.Open()
 	if err != nil {
-		logrus.Debug("Unable to open DB to get analyticsStateKey")
+		logrus.Debug(openDBErrorMsg)
 		return false
 	}
 
@@ -161,7 +156,7 @@ func analyticsEnabled() bool {
 		}
 	}
 
-	logrus.Debugf("Analytics state: %s", onOff[enabled])
+	logrus.Debugf("Analytics state: %s", stateMap[enabled])
 
 	return enabled
 }
@@ -182,9 +177,8 @@ func (c *client) trackEvent() error {
 	q := u.Query()
 	q.Set("v", "1")
 	q.Set("tid", TrackingID)
-	q.Set("t", c.EventHitType)
+	q.Set("t", "event")
 	q.Set("ea", c.EventAction)
-	q.Set("ev", c.EventValue)
 	q.Set("ec", c.Eventcategory)
 	q.Set("ua", c.UserAgent)
 	q.Set("an", c.ApplicationName)

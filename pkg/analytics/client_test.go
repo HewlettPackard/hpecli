@@ -12,12 +12,9 @@ import (
 )
 
 const (
-	version            = "1"
-	eventHitType       = "eventHitType"
 	eventCategory      = "eventCategory"
 	eventAction        = "eventAction"
 	eventLabel         = "eventLabel"
-	eventValue         = "eventValue"
 	userAgent          = "hpecli/0.0.1"
 	applicationVersion = "0.0.1"
 	applicationName    = "hpecli"
@@ -25,23 +22,13 @@ const (
 )
 
 const (
-	ClientIDKey = "someClientIDKey"
-	dbOpenErr   = "Unable to open DB to get client ID"
+	dbOpenErr = "Unable to open DB to get client ID"
 )
 
 func TestNewAnalyticsClient(t *testing.T) {
-	c := newAnalyticsClient(version, eventHitType, eventCategory, eventAction,
-		eventValue, eventLabel, userAgent, applicationVersion, applicationName)
+	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent, applicationVersion, applicationName)
 	if c == nil {
 		t.Fatal("expected AnalyticsClient to not be nil")
-	}
-
-	if version != c.Version {
-		t.Fatal("version doesn't match")
-	}
-
-	if eventHitType != c.EventHitType {
-		t.Fatal("eventHitType doesn't match")
 	}
 
 	if eventCategory != c.Eventcategory {
@@ -54,10 +41,6 @@ func TestNewAnalyticsClient(t *testing.T) {
 
 	if eventLabel != c.EventLabel {
 		t.Fatal("eventLabel doesn't match")
-	}
-
-	if eventValue != c.EventValue {
-		t.Fatal("eventValue doesn't match")
 	}
 
 	if userAgent != c.UserAgent {
@@ -80,8 +63,7 @@ func TestTrackEvent(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newAnalyticsClient(version, eventHitType, eventCategory,
-		eventAction, eventValue, eventLabel, userAgent, applicationVersion, applicationName)
+	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent, applicationVersion, applicationName)
 
 	err := c.trackEvent()
 	if err != nil {
@@ -150,7 +132,7 @@ func TestClientID(t *testing.T) {
 	}
 }
 
-func TestEnableGoogleAnalyticsDBError(t *testing.T) {
+func TestEnableGoogleAnalyticsDBError(t *testing.T) { //nolint // long test method ok
 	cases := []struct {
 		want     bool
 		name     string
@@ -423,5 +405,43 @@ func TestCheckGA(t *testing.T) {
 				t.Errorf("TestCheckGA() = %v, want %v", got, c.want)
 			}
 		})
+	}
+}
+
+func TestAnalyticsEnabled(t *testing.T) {
+	// delete the key to start from known point
+	d, _ := db.Open()
+	_ = d.Delete(analyticsStateKey)
+	d.Close()
+
+	got := analyticsEnabled()
+
+	if got != false {
+		t.Error("didn't get expected false result when key not present in DB")
+	}
+}
+
+func TestClientIDMissing(t *testing.T) {
+	// delete the key to start from known point
+	d, _ := db.Open()
+	_ = d.Delete(clientIDKey)
+	d.Close()
+
+	// this should create a new ID and store it in the DB
+	id1, err := clientID()
+	if err != nil {
+		t.Fatalf("unexpected error: %+v", err)
+	}
+
+	// make sure if we call the 2nd time, we get the same ID
+	// because it just retrieves from the DB rather than generating
+	// a new ID
+	id2, err := clientID()
+	if err != nil {
+		t.Fatalf("unexpected error: %+v", err)
+	}
+
+	if id1 != id2 {
+		t.Fatalf("second call didn't get the same values as the first call.  1=%s, 2=%s", id1, id2)
 	}
 }
