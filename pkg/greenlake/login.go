@@ -1,4 +1,4 @@
-// (C) Copyright 2019 Hewlett Packard Enterprise Development LP.
+// (C) Copyright 2019,2020 Hewlett Packard Enterprise Development LP.
 
 package greenlake
 
@@ -30,12 +30,10 @@ func newLoginCommand() *cobra.Command {
 		PreRunE: func(_ *cobra.Command, _ []string) error {
 			return validateArgs(&opts)
 		},
-		RunE: func(_ *cobra.Command, _ []string) error {
-			runAnalytics()
-			if err := runLogin(&opts); err != nil {
-				return err
-			}
-			return nil
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			err := runLogin(&opts)
+			analytics.SendEvent("greenlake", cmd.Name(), "")
+			return err
 		},
 	}
 
@@ -90,16 +88,4 @@ func runLogin(opts *glLoginOptions) error {
 	}
 
 	return nil
-}
-
-func runAnalytics() {
-	if got, err := analytics.CheckGoogleAnalytics(); got && err == nil {
-		analyticsClient := analytics.NewAnalyticsClient("1", "event", "greenlake", "login",
-			"200", "", "hpe/0.0.1", "0.0.1", "hpecli")
-
-		err := analyticsClient.TrackEvent()
-		if err != nil {
-			logrus.Debug("Unable to send the greenlake analytics info to Google Analytics with supplied event details")
-		}
-	}
 }

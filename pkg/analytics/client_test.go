@@ -12,12 +12,9 @@ import (
 )
 
 const (
-	version            = "1"
-	eventHitType       = "eventHitType"
 	eventCategory      = "eventCategory"
 	eventAction        = "eventAction"
 	eventLabel         = "eventLabel"
-	eventValue         = "eventValue"
 	userAgent          = "hpecli/0.0.1"
 	applicationVersion = "0.0.1"
 	applicationName    = "hpecli"
@@ -25,23 +22,13 @@ const (
 )
 
 const (
-	ClientIDKey = "someClientIDKey"
-	dbOpenErr   = "Unable to open DB to get client ID"
+	dbOpenErr = "Unable to open DB to get client ID"
 )
 
 func TestNewAnalyticsClient(t *testing.T) {
-	c := NewAnalyticsClient(version, eventHitType, eventCategory, eventAction,
-		eventValue, eventLabel, userAgent, applicationVersion, applicationName)
+	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent, applicationVersion, applicationName)
 	if c == nil {
 		t.Fatal("expected AnalyticsClient to not be nil")
-	}
-
-	if version != c.Version {
-		t.Fatal("version doesn't match")
-	}
-
-	if eventHitType != c.EventHitType {
-		t.Fatal("eventHitType doesn't match")
 	}
 
 	if eventCategory != c.Eventcategory {
@@ -54,10 +41,6 @@ func TestNewAnalyticsClient(t *testing.T) {
 
 	if eventLabel != c.EventLabel {
 		t.Fatal("eventLabel doesn't match")
-	}
-
-	if eventValue != c.EventValue {
-		t.Fatal("eventValue doesn't match")
 	}
 
 	if userAgent != c.UserAgent {
@@ -80,10 +63,9 @@ func TestTrackEvent(t *testing.T) {
 
 	defer ts.Close()
 
-	c := NewAnalyticsClient(version, eventHitType, eventCategory,
-		eventAction, eventValue, eventLabel, userAgent, applicationVersion, applicationName)
+	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent, applicationVersion, applicationName)
 
-	err := c.TrackEvent()
+	err := c.trackEvent()
 	if err != nil {
 		t.Fatalf("unexpected error in sending GA data")
 	}
@@ -150,31 +132,31 @@ func TestClientID(t *testing.T) {
 	}
 }
 
-func TestEnableGoogleAnalyticsDBError(t *testing.T) {
+func TestEnableGoogleAnalyticsDBError(t *testing.T) { //nolint // long test method ok
 	cases := []struct {
-		wantErr  bool
+		want     bool
 		name     string
 		funcName string
 	}{
 		{
 			name:     "error opening DB for EnableGoogleAnalytics",
 			funcName: "enableGA",
-			wantErr:  true,
+			want:     false,
 		},
 		{
 			name:     "error opening DB DisableGoogleAnalytics",
 			funcName: "disableGA",
-			wantErr:  true,
+			want:     false,
 		},
 		{
-			name:     "error opening DB CheckGoogleAnalytics",
+			name:     "error opening DB analyticsEnabled",
 			funcName: "checkGA",
-			wantErr:  true,
+			want:     false,
 		},
 		{
 			name:     "error opening DB CLientID",
 			funcName: "clientID",
-			wantErr:  true,
+			want:     false,
 		},
 	}
 	for _, c := range cases {
@@ -189,20 +171,26 @@ func TestEnableGoogleAnalyticsDBError(t *testing.T) {
 			defer d.Close()
 			switch c.funcName {
 			case "enableGA":
-				got, err = enableGoogleAnalytics()
+				err = enableAnalytics()
+				if err == nil {
+					t.Error("expected error")
+				}
 			case "disableGA":
-				got, err = disableGoogleAnalytics()
+				err = disableAnalytics()
+				if err == nil {
+					t.Error("expected error")
+				}
 			default:
-				got, err = CheckGoogleAnalytics()
-			}
-			if err == nil {
-				t.Errorf("got %v, want error as %v", got, c.wantErr)
+				got = analyticsEnabled()
+				if got != c.want {
+					t.Errorf("got %v, want %v", got, c.want)
+				}
 			}
 		})
 	}
 }
 
-func TestEnableGA(t *testing.T) {
+func TestEnableGA(t *testing.T) { //nolint:funlen // long test methods ok
 	cases := []struct {
 		put   bool
 		flag  bool
@@ -262,12 +250,9 @@ func TestEnableGA(t *testing.T) {
 			if c.flag == true {
 				DBCheck(c.put, c.key, c.value)
 			}
-			got, err := enableGoogleAnalytics()
+			err := enableAnalytics()
 			if err != nil {
 				t.Fatalf("unexpected error in enabling google analytics")
-			}
-			if got != c.want {
-				t.Errorf("TestEnableGA() = %v, want %v", got, c.want)
 			}
 		})
 	}
@@ -299,7 +284,7 @@ func TestClientIDDBError(t *testing.T) {
 	}
 }
 
-func TestDisableGA(t *testing.T) {
+func TestDisableGA(t *testing.T) { //nolint:funlen // long test methods ok
 	cases := []struct {
 		put   bool
 		flag  bool
@@ -359,12 +344,9 @@ func TestDisableGA(t *testing.T) {
 			if c.flag == true {
 				DBCheck(c.put, c.key, c.value)
 			}
-			got, err := disableGoogleAnalytics()
+			err := disableAnalytics()
 			if err != nil {
 				t.Fatalf("unexpected error in disabling google analytics")
-			}
-			if got != c.want {
-				t.Errorf("TestDisableGA() = %v, want %v", got, c.want)
 			}
 		})
 	}
@@ -410,21 +392,56 @@ func TestCheckGA(t *testing.T) {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			if c.enable {
-				if _, err := enableGoogleAnalytics(); err != nil {
+				if err := enableAnalytics(); err != nil {
 					t.Fatalf("unexpected error in enabling google analytics")
 				}
 			} else {
-				if _, err := disableGoogleAnalytics(); err != nil {
+				if err := disableAnalytics(); err != nil {
 					t.Fatalf("unexpected error in disabling google analytics")
 				}
 			}
-			got, err := CheckGoogleAnalytics()
-			if err != nil {
-				t.Fatalf("unexpected error in checking google analytics enabled or disabled")
-			}
+			got := analyticsEnabled()
 			if got != c.want {
 				t.Errorf("TestCheckGA() = %v, want %v", got, c.want)
 			}
 		})
+	}
+}
+
+func TestAnalyticsEnabled(t *testing.T) {
+	// delete the key to start from known point
+	d, _ := db.Open()
+	_ = d.Delete(analyticsStateKey)
+	d.Close()
+
+	got := analyticsEnabled()
+
+	if got != false {
+		t.Error("didn't get expected false result when key not present in DB")
+	}
+}
+
+func TestClientIDMissing(t *testing.T) {
+	// delete the key to start from known point
+	d, _ := db.Open()
+	_ = d.Delete(clientIDKey)
+	d.Close()
+
+	// this should create a new ID and store it in the DB
+	id1, err := clientID()
+	if err != nil {
+		t.Fatalf("unexpected error: %+v", err)
+	}
+
+	// make sure if we call the 2nd time, we get the same ID
+	// because it just retrieves from the DB rather than generating
+	// a new ID
+	id2, err := clientID()
+	if err != nil {
+		t.Fatalf("unexpected error: %+v", err)
+	}
+
+	if id1 != id2 {
+		t.Fatalf("second call didn't get the same values as the first call.  1=%s, 2=%s", id1, id2)
 	}
 }
