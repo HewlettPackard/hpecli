@@ -26,7 +26,7 @@ const (
 )
 
 func TestNewAnalyticsClient(t *testing.T) {
-	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent, applicationVersion, applicationName)
+	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, "0", userAgent, applicationVersion, applicationName)
 	if c == nil {
 		t.Fatal("expected AnalyticsClient to not be nil")
 	}
@@ -63,7 +63,7 @@ func TestTrackEvent(t *testing.T) {
 
 	defer ts.Close()
 
-	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent, applicationVersion, applicationName)
+	c := newAnalyticsClient(eventCategory, eventAction, eventLabel, "0", userAgent, applicationVersion, applicationName)
 
 	err := c.trackEvent()
 	if err != nil {
