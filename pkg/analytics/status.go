@@ -24,7 +24,7 @@ func newStatusCommand() *cobra.Command {
 func runAnalyticsStatus() error {
 	enabled := analyticsEnabled()
 
-	logrus.Infof("Anonymouns analytics reporting is %s", stateMap[enabled])
+	logrus.Infof("Anonymous analytics reporting is %s", stateMap[enabled])
 
 	return nil
 }
