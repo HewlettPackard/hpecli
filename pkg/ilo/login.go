@@ -24,7 +24,7 @@ func newLoginCommand() *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "login",
-		Short: "Login to iLO: hpecli ilo login",
+		Short: "Login to iLO",
 		PreRunE: func(_ *cobra.Command, _ []string) error {
 			return validateArgs(&opts)
 		},
@@ -33,9 +33,9 @@ func newLoginCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.host, "host", "", "ilo ip address")
-	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "ilo username")
-	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "ilo password")
+	cmd.Flags().StringVar(&opts.host, "host", "", "iLO ip address")
+	cmd.Flags().StringVarP(&opts.username, "username", "u", "", "iLO username")
+	cmd.Flags().StringVarP(&opts.password, "password", "p", "", "iLO password")
 	cmd.Flags().BoolVarP(&opts.passwordStdin, "password-stdin", "", false, "read password from stdin")
 	_ = cmd.MarkFlagRequired("host")
 	_ = cmd.MarkFlagRequired("username")
@@ -48,15 +48,19 @@ func validateArgs(opts *iloLoginOptions) error {
 		opts.host = fmt.Sprintf("https://%s", opts.host)
 	}
 
-	if opts.password != "" && opts.passwordStdin {
-		return errors.New("--password and --password-stdin are mutually exclusive")
+	if opts.password != "" {
+		logrus.Warning("WARNING! Using --password via the CLI is insecure. Use --password-stdin.")
+
+		if opts.passwordStdin {
+			return errors.New("--password and --password-stdin are mutually exclusive")
+		}
 	}
 
 	return nil
 }
 
 func runLogin(opts *iloLoginOptions) error {
-	if err := password.Read(&opts.password, opts.passwordStdin, "ilo password: "); err != nil {
+	if err := password.Read(&opts.password, opts.passwordStdin, "iLO password: "); err != nil {
 		return err
 	}
 
@@ -66,16 +70,16 @@ func runLogin(opts *iloLoginOptions) error {
 
 	sd, err := cl.login()
 	if err != nil {
-		logrus.Warningf("Unable to login with supplied credentials to ilo at: %s", opts.host)
+		logrus.Warningf("Unable to login with supplied credentials to iLO at: %s", opts.host)
 		return err
 	}
 
 	// change context to current host and save the session ID as the API key
 	// for subsequent requests
 	if err = saveContextAndSessionData(sd); err != nil {
-		logrus.Warning("Successfully logged into ilo, but was unable to save the session data")
+		logrus.Warning("Successfully logged into iLO, but was unable to save the session data")
 	} else {
-		logrus.Infof("Successfully logged into ilo: %s", opts.host)
+		logrus.Infof("Successfully logged into iLO: %s", opts.host)
 	}
 
 	return nil

@@ -21,11 +21,11 @@ func NewAutoCompleteCommand() *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "autocompletion",
-		Short: "Generates a shell completion scripts for hpecli",
+		Short: "Generates a shell completion scripts for hpe CLI",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runAutoComplete(cmd, &opts)
 		},
-		Long: `Generates a shell completion scripts for hpecli.
+		Long: `Generates a shell completion scripts for hpe CLI.
 
 	NOTE: The current version supports Bash, ZShell, and PowerShell.
 
@@ -77,8 +77,8 @@ func runAutoComplete(cmd *cobra.Command, opts *autocompleteOptions) error {
 		return fmt.Errorf("unsupported shell type %s", opts.acType)
 	}
 
-	logrus.Debugf("%s completion file for hpecli saved to %s", opts.acType, opts.targetFile)
-	logrus.Printf(`%s completion file for hpecli saved in current folder as %s
+	logrus.Debugf("%s completion file for hpe CLI saved to %s", opts.acType, opts.targetFile)
+	logrus.Printf(`%s completion file for hpe CLI saved in current folder as %s
 	Add the generated file content to user ~/bash_profile file and reload the terminal or 
 	just source the file directly`, opts.acType, opts.targetFile)
 

@@ -28,7 +28,7 @@ func TestGLHostPrefixAddedForLogin(t *testing.T) {
 
 	defer server.Close()
 
-	host := strings.Replace(server.URL, "http://", "", 1)
+	host := strings.Replace(server.URL, "https://", "", 1)
 
 	cmd := newLoginCommand()
 	cmd.SetArgs([]string{"--host", host, "--tenantid", "id", "--userid", "user", "--secretkey", "key"})
@@ -36,8 +36,8 @@ func TestGLHostPrefixAddedForLogin(t *testing.T) {
 
 	// check to ensure context value gets the http scheme added
 	got, _ := getContext()
-	if got != "http://"+host {
-		t.Error("context value didn't get http scheme prefix")
+	if got != "https://"+host {
+		t.Error("context value didn't get https scheme prefix")
 	}
 }
 

@@ -30,7 +30,7 @@ func NewVersionCommand(vInfo *Info) *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "version",
-		Short: "Displays version of hpecli",
+		Short: "Displays version of hpe CLI",
 		Run: func(_ *cobra.Command, _ []string) {
 			vInfo.Verbose = vInfo.Verbose || verbose
 			runVersion(vInfo)
@@ -44,7 +44,7 @@ func NewVersionCommand(vInfo *Info) *cobra.Command {
 
 func runVersion(vInfo *Info) {
 	logrus.Debugln("update : starting check to see if an update is available")
-	logrus.Infof("Local CLI version: %s", vInfo.String())
+	logrus.Infof("Local hpe CLI version: %s", vInfo.String())
 
 	resp, err := update.CheckForUpdate(vInfo.Sematic)
 	if err != nil {
@@ -55,10 +55,10 @@ func runVersion(vInfo *Info) {
 	}
 
 	if !resp.UpdateAvailable {
-		logrus.Infoln("You are currently running the latest version of the CLI.")
+		logrus.Infoln("You are currently running the latest version of the hpe CLI.")
 		return
 	}
 
-	logrus.Infof("Updated CLI is available.  Remote version: %s.  You can update by running \"hpecli update\"",
+	logrus.Infof("Updated hpe CLI is available.  Remote version: %s.  You can update by running \"hpe update\"",
 		resp.RemoteVersion)
 }

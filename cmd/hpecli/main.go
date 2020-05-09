@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/log"
+	"github.com/HewlettPackard/hpecli/pkg/analytics"
 	"github.com/HewlettPackard/hpecli/pkg/autocomplete"
 	"github.com/HewlettPackard/hpecli/pkg/cloudvolume"
 	"github.com/HewlettPackard/hpecli/pkg/greenlake"
@@ -43,8 +44,8 @@ func run() error {
 	// create the root command.  It doesn't do anything, but used to hold
 	// all of the other top level commands
 	rootCmd := &cobra.Command{
-		Use:           "hpecli",
-		Short:         "hpe cli for accessing various services",
+		Use:           "hpe",
+		Short:         "HPE Command Line Interface for accessing various services",
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
@@ -56,6 +57,12 @@ func run() error {
 
 	// add all of the commands get added to this root one
 	addSubCommands(rootCmd)
+
+	// Are we are been called with no args at all?
+	if len(os.Args) == 1 {
+		// Then let's return the command usage as in: hpe --help
+		os.Args = []string{os.Args[0], "--help"} 
+	}  
 
 	// execute the root command
 	if err := rootCmd.Execute(); err != nil {
@@ -74,6 +81,7 @@ func addSubCommands(rootCmd *cobra.Command) {
 	}
 
 	rootCmd.AddCommand(
+		analytics.NewAnalyticsCommand(),
 		autocomplete.NewAutoCompleteCommand(),
 		cloudvolume.NewCloudVolumeCommand(),
 		greenlake.NewGreenlakeCommand(),

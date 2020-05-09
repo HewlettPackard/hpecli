@@ -17,7 +17,10 @@ import (
 type StorageEngine int
 
 const (
-	filename = "hpecli_store.db"
+	// store.db will get stored in a directory called .hpe in the
+	// users home directory
+	filename = "store.db"
+	hpeDir   = ".hpe"
 	// SKV is Simple Key Value store from: github.com/rapidloop/skv
 	SKV StorageEngine = iota
 )
@@ -88,6 +91,8 @@ func Open() (Store, error) {
 // NewStore returns a handle to a store.  Currently there is a single
 // backend - so you can use DefautlStore instead of this method
 func NewStore(se StorageEngine) (Store, error) {
+	ensureDirExists(keystore)
+
 	if se == SKV {
 		return openSKV(keystore)
 	}
@@ -95,17 +100,27 @@ func NewStore(se StorageEngine) (Store, error) {
 	return nil, errors.New("unknown StorageEngine type specified")
 }
 
-// return the filename in the users home directory
+// KeystoreLocation returns the file path to store the DB for individual
+// users.  This will be ~/.hpe/store.db
 func KeystoreLocation() string {
 	// in case we can't get userhomedir - we will use just the filename
 	// which will then use the system default path
 	result := filename
 
-	if dir, err := os.UserHomeDir(); err != nil {
+	if userDir, err := os.UserHomeDir(); err != nil {
 		logrus.Warningf("Unable to retrieve users home directory: %v", err)
 	} else {
-		result = filepath.ToSlash(path.Join(dir, filename))
+		result = filepath.ToSlash(path.Join(userDir, hpeDir, filename))
 	}
 
 	return result
+}
+
+func ensureDirExists(keystore string) {
+	dir := path.Dir(keystore)
+
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		logrus.Warningf("Unable to persist data in \"%s\" because of error: %v", dir, err)
+	}
 }
