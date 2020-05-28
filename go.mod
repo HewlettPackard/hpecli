@@ -3,7 +3,7 @@ module github.com/HewlettPackard/hpecli
 go 1.13
 
 require (
-	github.com/HewlettPackard/oneview-golang v1.3.0
+	github.com/HewlettPackard/oneview-golang v1.4.0
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/docker/machine v0.16.2 // indirect
 	github.com/google/uuid v1.1.1

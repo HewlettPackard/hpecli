@@ -4,6 +4,8 @@ github.com/HewlettPackard/oneview-golang v1.2.0 h1:qfrncnC6dYeJPdUg9fmEGgooa+CN/
 github.com/HewlettPackard/oneview-golang v1.2.0/go.mod h1:GJcjWgNHrKtt2lUl4xcaV3NRiuBlG138DNrFygXj4JE=
 github.com/HewlettPackard/oneview-golang v1.3.0 h1:rgncWHEU6HbE3J6nq+Cig1L7PkUogqaRj6OjOtzWBMw=
 github.com/HewlettPackard/oneview-golang v1.3.0/go.mod h1:GJcjWgNHrKtt2lUl4xcaV3NRiuBlG138DNrFygXj4JE=
+github.com/HewlettPackard/oneview-golang v1.4.0 h1:5+v0BeNe5Chy1uESXYUK+d6iRrLETelijcQsmFfZU2Y=
+github.com/HewlettPackard/oneview-golang v1.4.0/go.mod h1:GJcjWgNHrKtt2lUl4xcaV3NRiuBlG138DNrFygXj4JE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
