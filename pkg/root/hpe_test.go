@@ -4,16 +4,22 @@ package root
 
 import (
 	"testing"
+	"github.com/HewlettPackard/hpecli/pkg/version"
 )
 
-const incorrectValueError = "incorrect value: got=%v, want=%v"
 
-func TestIsDebugOn(t *testing.T) {
-	
+
+func TestNewRoot(t *testing.T) {
+
+	vInfo := &version.Info{
+		Sematic:     "",
+		GitCommitID: "",
+		BuildDate:   "",
+		Verbose:     false,
 	}
 
+	root := NewRootCommand(vInfo)
 
-func TestIsDebugHTTPOn(t *testing.T) {
-
+	
+	root.Commands()
 }
-
