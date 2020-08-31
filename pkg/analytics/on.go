@@ -15,7 +15,7 @@ func newOnCommand() *cobra.Command {
 		Short: "Turn on Analytics",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			err := runEnableAnalytics()
-			SendEvent("analytics", "analytics", cmd.Name())
+			SendEvent("analytics", "analytics", cmd.Name(), err)
 			return err
 		},
 	}

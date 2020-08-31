@@ -13,7 +13,7 @@ func newStatusCommand() *cobra.Command {
 		Short: "Show analytics state.  Enabled or Disabled",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			err := runAnalyticsStatus()
-			SendEvent("analytics", "analytics", cmd.Name())
+			SendEvent("analytics", "analytics", cmd.Name(), err)
 			return err
 		},
 	}
