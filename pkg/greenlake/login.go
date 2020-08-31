@@ -32,7 +32,7 @@ func newLoginCommand() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			err := runLogin(&opts)
-			analytics.SendEvent("greenlake", cmd.Name(), "")
+			analytics.SendEvent("greenlake", cmd.Name(), "", err)
 			return err
 		},
 	}

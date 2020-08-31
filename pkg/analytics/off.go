@@ -13,7 +13,7 @@ func newOffCommand() *cobra.Command {
 		Short: "Turn off Analytics",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			err := runDisableAnalytics()
-			SendEvent("analytics", "analytics", cmd.Name())
+			SendEvent("analytics", "analytics", cmd.Name(), err)
 			return err
 		},
 	}

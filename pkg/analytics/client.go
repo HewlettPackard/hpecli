@@ -4,7 +4,6 @@ package analytics
 
 import (
 	"errors"
-	"log"
 	"net/url"
 
 	"github.com/HewlettPackard/hpecli/internal/platform/db"
@@ -32,6 +31,7 @@ const openDBErrorMsg = "Unable to open DB to get analyticsStateKey"
 type client struct {
 	Eventcategory      string
 	EventAction        string
+	EventValue         string
 	EventLabel         string
 	UserAgent          string
 	ApplicationName    string
@@ -40,11 +40,12 @@ type client struct {
 }
 
 // newAnalyticsClient create
-func newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent,
+func newAnalyticsClient(eventCategory, eventAction, eventLabel, eventValue, userAgent,
 	applicationVersion, applicationName string) *client {
 	return &client{
 		Eventcategory:      eventCategory,
 		EventAction:        eventAction,
+		EventValue:         eventValue,
 		EventLabel:         eventLabel,
 		UserAgent:          userAgent,
 		ApplicationVersion: applicationVersion,
@@ -52,12 +53,22 @@ func newAnalyticsClient(eventCategory, eventAction, eventLabel, userAgent,
 	}
 }
 
-func SendEvent(module, command, subcommand string) {
+// SendEvent is used to send an event to the analytics engine.
+//	module is the service name (e.g. ilo/oneview/greenlake)
+//	command is the action being performed (e.g. login, get, logout)
+//	subcommand is the additional command if present (e.g. servers)
+//	cmdErr - resulting error of the command run
+func SendEvent(module, command, subcommand string, cmdErr error) {
 	if !analyticsEnabled() {
 		logrus.Debugf("Analytics disabled .. skipping sending event.")
 	}
 
-	client := newAnalyticsClient(module, command, subcommand, "hpe/0.0.1", "0.0.1", "hpecli")
+	value := "0"
+	if cmdErr != nil {
+		value = "-1"
+	}
+
+	client := newAnalyticsClient(module, command, subcommand, value, "hpe/0.0.1", "0.0.1", "hpecli")
 
 	err := client.trackEvent()
 	if err != nil {
@@ -171,7 +182,7 @@ func (c *client) trackEvent() error {
 
 	u, err := url.Parse("https://www.google-analytics.com/collect")
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 
 	q := u.Query()
@@ -179,12 +190,15 @@ func (c *client) trackEvent() error {
 	q.Set("tid", TrackingID)
 	q.Set("t", "event")
 	q.Set("ea", c.EventAction)
+	q.Set("ev", c.EventValue)
 	q.Set("ec", c.Eventcategory)
 	q.Set("ua", c.UserAgent)
 	q.Set("an", c.ApplicationName)
 	q.Set("av", c.ApplicationVersion)
 	q.Set("cid", id)
 	u.RawQuery = q.Encode()
+
+	logrus.Debugf("POSTing analytics event: %v", u)
 
 	_, err = rest.Post(u.String(), nil)
 	if err != nil {
