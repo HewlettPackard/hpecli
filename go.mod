@@ -7,7 +7,7 @@ require (
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/docker/machine v0.16.2 // indirect
 	github.com/google/uuid v1.1.2
-	github.com/hashicorp/go-version v1.2.0
+	github.com/hashicorp/go-version v1.3.0
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/mattn/go-colorable v0.1.6
 	github.com/rapidloop/skv v0.0.0-20180909015525-9def2caac4cc
